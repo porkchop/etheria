@@ -11,8 +11,7 @@ contract Etheria {
     bool[17] elevationrowsinitialized;
     
     // TODO: 
-    // 2. 33x33
-    // 1. Elevations + owners -> Tile structs
+    // 2. 17x17
     // 3. Mouseover
     // 4. Block locations & colors
     
