@@ -1,23 +1,23 @@
 contract Etheria {
 
     address creator;
-    uint8 mapsize = 17;
-    //uint8[17][17] elevations;
-   // address[17][17] owners;
-    Tile[17][17] tiles;
+    uint8 mapsize = 33;
+    //uint8[33][33] elevations;
+   // address[33][33] owners;
+    Tile[33][33] tiles;
     bool ownersinitialized = false;
     bool elevationsinitialized = false;
-    bool[17] ownerrowsinitialized;
-    bool[17] elevationrowsinitialized;
+    bool[33] ownerrowsinitialized;
+    bool[33] elevationrowsinitialized;
     
     // TODO: 
-    // 2. 17x17
     // 3. Mouseover
     // 4. Block locations & colors
     
     struct Tile {
     	uint8 elevation;
     	address owner;
+    	int144 saleprice; // 0 = not for sale. 0-4700000000000000000000 wei (approx) (0-4700 ether)
     }
     
     function Etheria() 
@@ -25,9 +25,9 @@ contract Etheria {
         creator = msg.sender;
         for(uint8 x = 0; x < mapsize; x++)
         {
-            ownerrowsinitialized[x] = false;
-            elevationrowsinitialized[x] = false;
-        }
+        	ownerrowsinitialized[x] = false;
+        	elevationrowsinitialized[x] = false;
+        }	
     }
     
     function initializeOwners(uint8[] rows)
@@ -59,7 +59,7 @@ contract Etheria {
     	ownersinitialized = true;
     }
     
-    function setElevations(uint8 row, uint8[17] _elevations)
+    function setElevations(uint8 row, uint8[33] _elevations)
     {
     	if(elevationsinitialized == true)
     		return;
@@ -85,9 +85,9 @@ contract Etheria {
     		tiles[x][y].owner == newowner;
     }
     
-    function getElevations() constant returns (uint8[17][17])
+    function getElevations() constant returns (uint8[33][33])
     {
-        uint8[17][17] elevations;
+        uint8[33][33] memory elevations;
         for(uint8 y = 0; y < mapsize; y++)
         {
         	for(uint8 x = 0; x < mapsize; x++)
@@ -98,9 +98,9 @@ contract Etheria {
     	return elevations;
     }
     
-    function getOwners() constant returns(address[17][17])
+    function getOwners() constant returns(address[33][33])
     {
-        address[17][17] owners;
+        address[33][33] memory owners;
         for(uint8 y = 0; y < mapsize; y++)
         {
         	for(uint8 x = 0; x < mapsize; x++)
@@ -109,6 +109,19 @@ contract Etheria {
         	}	
         }	
     	return owners;
+    }
+    
+    function getSalePrices() constant returns(int144[33][33])
+    {
+        int144[33][33] memory prices;
+        for(uint8 y = 0; y < mapsize; y++)
+        {
+        	for(uint8 x = 0; x < mapsize; x++)
+        	{
+        		prices[x][y] = tiles[x][y].saleprice; 
+        	}	
+        }	
+    	return prices;
     }
 
     /**********
