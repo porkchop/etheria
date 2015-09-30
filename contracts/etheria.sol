@@ -23,11 +23,14 @@ contract Etheria {
     
     struct Block 
     {
-    	uint8 which;
+    	int8 which;
     	int8 x;
     	int8 y;
-    	uint8 z;
-    	bytes3 color;
+    	int8 z; // Note: We'll add 127 (*NOT 128*) on client. If z=-1 after that, block has not yet been placed.
+    	
+    	int8 r;	// NOTE: 
+    	int8 g; // We'll add 128 to each of these values on the client side to get 0-255 values
+    	int8 b; // That way, we can return an array of int8s to describe all blocks in a tile all at once
     }
     
     function Etheria() 
@@ -90,62 +93,19 @@ contract Etheria {
     	elevationsinitialized = true;
     }
     
-    function getByteFromByte32(bytes32 _b32, uint8 byteindex) public constant returns(byte) {
-    	if(byteindex > 31)
-    		return 0x0;
-    	uint numdigits = 64;
-    	uint buint = uint(_b32);
-    	uint upperpowervar = 16 ** (numdigits - (byteindex*2)); 		// @i=0 upperpowervar=16**64 (SEE EXCEPTION BELOW), @i=1 upperpowervar=16**62, @i upperpowervar=16**60
-    	uint lowerpowervar = 16 ** (numdigits - 2 - (byteindex*2));		// @i=0 upperpowervar=16**62, @i=1 upperpowervar=16**60, @i upperpowervar=16**58
-    	uint postheadchop;
-    	if(byteindex == 0)
-    		postheadchop = buint; 								//for byteindex 0, buint is just the input number. 16^64 is out of uint range, so this exception has to be made.
-    	else
-    		postheadchop = buint % upperpowervar; 				// @i=0 _b32=a1b2c3d4... postheadchop=a1b2c3d4, @i=1 postheadchop=b2c3d4, @i=2 postheadchop=c3d4
-    	uint remainder = postheadchop % lowerpowervar; 			// @i=0 remainder=b2c3d4, @i=1 remainder=c3d4, @i=2 remainder=d4
-    	uint evenedout = postheadchop - remainder; 				// @i=0 evenedout=a1000000, @i=1 remainder=b20000, @i=2 remainder=c300
-    	uint b = evenedout / lowerpowervar; 					// @i=0 b=a1, @i=1 b=b2, @i=2 b=c3
-    	return byte(b);
-    }
-    
-    function getByte3FromByte32(bytes32 _b32, uint8 byteindex) public constant returns(bytes3) {
-    	if(byteindex > 29)
-    		return 0x0;
-    	uint numdigits = 64;
-    	uint buint = uint(_b32);
-    	uint upperpowervar = 16 ** (numdigits - (byteindex*2)); 		// @i=0 upperpowervar=16**64 (SEE EXCEPTION BELOW), @i=1 upperpowervar=16**62, @i upperpowervar=16**60
-    	uint lowerpowervar = 16 ** (numdigits - 6 - (byteindex*2));		// @i=0 upperpowervar=16**62, @i=1 upperpowervar=16**60, @i upperpowervar=16**58
-    	uint postheadchop;
-    	if(byteindex == 0)
-    		postheadchop = buint; 								//for byteindex 0, buint is just the input number. 16^64 is out of uint range, so this exception has to be made.
-    	else
-    		postheadchop = buint % upperpowervar; 				// @i=0 _b32=a1b2c3d4... postheadchop=a1b2c3d4, @i=1 postheadchop=b2c3d4, @i=2 postheadchop=c3d4
-    	uint remainder = postheadchop % lowerpowervar; 			// @i=0 remainder=b2c3d4, @i=1 remainder=c3d4, @i=2 remainder=d4
-    	uint evenedout = postheadchop - remainder; 				// @i=0 evenedout=a1000000, @i=1 remainder=b20000, @i=2 remainder=c300
-    	uint b = evenedout / lowerpowervar; 					// @i=0 b=a1, @i=1 b=b2, @i=2 b=c3
-    	return bytes3(b);
-    }
-    
-    function addSomeRandomBlocks()
+    function addBlock(uint8 x, uint8 y, int8[7] block)
     {
-    	uint previousblock = block.number - 1 ; // previous block is the block when the transaction was mined  (current is previousblock + 1)
-    	bytes32 previousblockhash = block.blockhash(previousblock);
-    	
-    	// which, x, y, (z=0), color, tilex, tiley --> 6 variables
-    	byte b0 = getByteFromByte32(previousblockhash, 0);
-    	byte b1 = getByteFromByte32(previousblockhash, 1);
-    	byte b2 = getByteFromByte32(previousblockhash, 2);
-    	uint8 which = uint8(b0) % 16; // gets second digit (out of 64)
-    	int8 x = int8(b1) % 16; // gets 4th digit (out of 64)
-    	int8 y = int8(b2) % 16; // gets 6th digit (out of 64)
-    	//uint8 z;
-    	bytes3 color = getByte3FromByte32(previousblockhash, 3);
-    	
-    	byte b3 = getByteFromByte32(previousblockhash, 3);
-    	byte b4 = getByteFromByte32(previousblockhash, 4);
-    	int8 tilex = int8(b3) % 16;
-    	int8 tiley = int8(b4) % 16;
-    	Block memory newblock = Block(which, x, y, 0, color);
+    	Tile current = tiles[x][y];
+    	Block newblock;
+    	newblock.which = 1;
+    	newblock.x = 2;
+    	newblock.y = 3;
+    	newblock.z = 0;
+    	newblock.r = 100;
+    	newblock.g = 101;
+    	newblock.b = 102;
+    	current.blocks.length+=1;
+    	current.blocks[current.blocks.length-1] = newblock;
     }
     
     function setOwner(uint8 x, uint8 y, address newowner)
@@ -180,14 +140,34 @@ contract Etheria {
     	return owners;
     }
     
-    function getPrices() constant returns(int144[33][33])
+    function getBlocksForTile(uint8 x, uint8 y) constant returns (int8[])
     {
-        int144[33][33] memory prices;
+    	Tile memory currenttile = tiles[x][y];
+    	int8[] blockarray;
+    	uint i = 0;
+    	while(i < currenttile.blocks.length * 7)
+    	{
+    	    blockarray.length += 7;
+    		blockarray[i] = currenttile.blocks[i].which;
+    		blockarray[i+1] = currenttile.blocks[i].x;
+    		blockarray[i+2] = currenttile.blocks[i].y;
+    		blockarray[i+3] = currenttile.blocks[i].z;
+    		blockarray[i+4] = currenttile.blocks[i].r;
+    		blockarray[i+5] = currenttile.blocks[i].g;
+    		blockarray[i+6] = currenttile.blocks[i].b;
+    		i = i + 1;
+    	}	
+    	return blockarray;
+    }
+    
+    function getPrices() constant returns(uint[33][33])
+    {
+        uint[33][33] memory prices;
         for(uint8 y = 0; y < mapsize; y++)
         {
         	for(uint8 x = 0; x < mapsize; x++)
         	{
-        		prices[x][y] = tiles[x][y].saleprice; 
+        		prices[x][y] = tiles[x][y].price; 
         	}	
         }	
     	return prices;
