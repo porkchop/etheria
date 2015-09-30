@@ -1,14 +1,5 @@
+import "mortal";
 contract Etheria {
-
-//	Clear objective
-//	Rules
-//	Interaction
-//	Catch-up
-//	Inertia -- the game must move towards completion
-//	Surprise
-//	Strategy -- the ability to get better with time, improved skill
-//	Fun
-//	Flavor
 	
     address creator;
     uint8 mapsize = 33;
@@ -26,7 +17,7 @@ contract Etheria {
     {
     	uint8 elevation;
     	address owner;
-    	int144 saleprice; // 0 = not for sale. 0-4700000000000000000000 wei (approx) (0-4700 ether)
+    	uint price; // 0 = not for sale. 0-4700000000000000000000 wei (approx) (0-4700 ether)
     	Block[] blocks;
     }
     
@@ -66,6 +57,7 @@ contract Etheria {
     		for(uint8 x = 0; x < mapsize; x++)
     		{
     			tiles[x][row].owner = creator;
+    			tiles[x][row].price = 250000000000000000; //.25 eth
     		}
     		ownerrowsinitialized[row] = true;
     	}
@@ -188,7 +180,7 @@ contract Etheria {
     	return owners;
     }
     
-    function getSalePrices() constant returns(int144[33][33])
+    function getPrices() constant returns(int144[33][33])
     {
         int144[33][33] memory prices;
         for(uint8 y = 0; y < mapsize; y++)
@@ -199,17 +191,5 @@ contract Etheria {
         	}	
         }	
     	return prices;
-    }
-
-    /**********
-     Standard kill() function to recover funds 
-     **********/
-    
-    function kill()
-    { 
-        if (msg.sender == creator)
-        {
-            suicide(creator);  // kills this contract and sends remaining funds back to creator
-        }
     }
 }
