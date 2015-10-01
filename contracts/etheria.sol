@@ -1,5 +1,6 @@
 import "mortal";
-contract Etheria {
+
+contract Etheria is mortal {
 	
     address creator;
     uint8 mapsize = 33;
@@ -18,19 +19,8 @@ contract Etheria {
     	uint8 elevation;
     	address owner;
     	uint price; // 0 = not for sale. 0-4700000000000000000000 wei (approx) (0-4700 ether)
-    	Block[] blocks;
-    }
-    
-    struct Block 
-    {
-    	int8 which;
-    	int8 x;
-    	int8 y;
-    	int8 z; // Note: We'll add 127 (*NOT 128*) on client. If z=-1 after that, block has not yet been placed.
-    	
-    	int8 r;	// NOTE: 
-    	int8 g; // We'll add 128 to each of these values on the client side to get 0-255 values
-    	int8 b; // That way, we can return an array of int8s to describe all blocks in a tile all at once
+    	int8[] blocks; // index 0 = which, index 1 = blockx, index 2 = blocky, index 3 = blockz
+    	               // index 4 = r, index 5 = g, index 6 = b
     }
     
     function Etheria() 
@@ -96,16 +86,15 @@ contract Etheria {
     function addBlock(uint8 x, uint8 y, int8[7] block)
     {
     	Tile current = tiles[x][y];
-    	Block newblock;
-    	newblock.which = 1;
-    	newblock.x = 2;
-    	newblock.y = 3;
-    	newblock.z = 0;
-    	newblock.r = 100;
-    	newblock.g = 101;
-    	newblock.b = 102;
-    	current.blocks.length+=1;
-    	current.blocks[current.blocks.length-1] = newblock;
+    	current.blocks.length+=7;
+    	current.blocks[current.blocks.length - 7] = block[0];
+    	current.blocks[current.blocks.length - 6] = block[1];
+    	current.blocks[current.blocks.length - 5] = block[2];
+    	current.blocks[current.blocks.length - 4] = block[3];
+    	current.blocks[current.blocks.length - 3] = block[4];
+    	current.blocks[current.blocks.length - 2] = block[5];
+    	current.blocks[current.blocks.length - 1] = block[6];
+    	return;
     }
     
     function setOwner(uint8 x, uint8 y, address newowner)
@@ -143,21 +132,21 @@ contract Etheria {
     function getBlocksForTile(uint8 x, uint8 y) constant returns (int8[])
     {
     	Tile memory currenttile = tiles[x][y];
-    	int8[] blockarray;
-    	uint i = 0;
-    	while(i < currenttile.blocks.length * 7)
-    	{
-    	    blockarray.length += 7;
-    		blockarray[i] = currenttile.blocks[i].which;
-    		blockarray[i+1] = currenttile.blocks[i].x;
-    		blockarray[i+2] = currenttile.blocks[i].y;
-    		blockarray[i+3] = currenttile.blocks[i].z;
-    		blockarray[i+4] = currenttile.blocks[i].r;
-    		blockarray[i+5] = currenttile.blocks[i].g;
-    		blockarray[i+6] = currenttile.blocks[i].b;
-    		i = i + 1;
-    	}	
-    	return blockarray;
+    // 	int8[] blockarray;
+    // 	uint i = 0;
+    // 	while(i < currenttile.blocks.length * 7)
+    // 	{
+    // 	    blockarray.length += 7;
+    // 		blockarray[i] = currenttile.blocks[i].which;
+    // 		blockarray[i+1] = currenttile.blocks[i].x;
+    // 		blockarray[i+2] = currenttile.blocks[i].y;
+    // 		blockarray[i+3] = currenttile.blocks[i].z;
+    // 		blockarray[i+4] = currenttile.blocks[i].r;
+    // 		blockarray[i+5] = currenttile.blocks[i].g;
+    // 		blockarray[i+6] = currenttile.blocks[i].b;
+    // 		i = i + 7;
+    // 	}	
+    	return currenttile.blocks;
     }
     
     function getPrices() constant returns(uint[33][33])
