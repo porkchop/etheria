@@ -3,12 +3,14 @@ import "mortal";
 contract Etheria is mortal {
 	
     address creator;
-    uint8 mapsize = 33;
-    Tile[33][33] tiles;
+    uint8 mapsize = 17;
+    Tile[17][17] tiles;
     bool ownersinitialized = false;
+    bool pricesinitialized = false;
     bool elevationsinitialized = false;
-    bool[33] ownerrowsinitialized;
-    bool[33] elevationrowsinitialized;
+    bool[17] ownerrowsinitialized;
+    bool[17] elevationrowsinitialized;
+    bool[17] pricerowsinitialized;
     
     // TODO: 
     // 3. Mouseover
@@ -18,7 +20,7 @@ contract Etheria is mortal {
     {
     	uint8 elevation;
     	address owner;
-    	uint price; // 0 = not for sale. 0-4700000000000000000000 wei (approx) (0-4700 ether)
+    	uint80 price; // 0 = not for sale. 0-4700000000000000000000 wei (approx) (0-4700 ether)
     	int8[] blocks; // index 0 = which, index 1 = blockx, index 2 = blocky, index 3 = blockz
     	               // index 4 = r, index 5 = g, index 6 = b
     }
@@ -33,37 +35,47 @@ contract Etheria is mortal {
         }	
     }
     
-    function initializeOwners(uint8[] rows)
+    function initializeOwners(uint8 row)
     {
-    	if(ownersinitialized == true) // can only initialize map ownership once
+    	if(ownersinitialized == true)
     		return;
     	
-    	uint8 row = 0;
-        for(uint8 a = 0; a < rows.length; a++)
-    	{	
-    		if(rows[a] > (mapsize-1))
-    			return; // error. None of the provided row indexes should be > mapsize-1
-    	}
-    	for(uint8 y = 0; y < rows.length; y++)
-    	{	
-    		row = rows[y];
-    		for(uint8 x = 0; x < mapsize; x++)
-    		{
-    			tiles[x][row].owner = creator;
-    			tiles[x][row].price = 250000000000000000; //.25 eth
-    		}
-    		ownerrowsinitialized[row] = true;
-    	}
+    	if(row >= mapsize) // this row index is out of bounds.
+    		return; 
+    	
+    	for(uint8 x = 0; x < mapsize; x++)
+    		tiles[x][row].owner = creator; 
+    	ownerrowsinitialized[row] = true;
     	
     	for(uint r = 0; r < mapsize; r++)
     	{
     		if(ownerrowsinitialized[r] == false) // at least one row is not yet initialized. Return.
     			return;
     	}	
-    	ownersinitialized = true;
+        ownersinitialized = true;
     }
     
-    function setElevations(uint8 row, uint8[33] _elevations)
+    function initializePrices(uint8 row)
+    {
+    	if(pricesinitialized == true)
+    		return;
+    	
+    	if(row >= mapsize) // this row index is out of bounds.
+    		return; 
+    	
+    	for(uint8 x = 0; x < mapsize; x++)
+    		tiles[x][row].price = 250000000000000000; //.25 eth
+    	pricerowsinitialized[row] = true;
+    	
+    	for(uint r = 0; r < mapsize; r++)
+    	{
+    		if(pricerowsinitialized[r] == false) // at least one row is not yet initialized. Return.
+    			return;
+    	}	
+    	pricesinitialized = true;
+    }
+    
+    function initializeElevations(uint8 row, uint8[17] _elevations)
     {
     	if(elevationsinitialized == true)
     		return;
@@ -103,9 +115,9 @@ contract Etheria is mortal {
     		tiles[x][y].owner == newowner;
     }
     
-    function getElevations() constant returns (uint8[33][33])
+    function getElevations() constant returns (uint8[17][17])
     {
-        uint8[33][33] memory elevations;
+        uint8[17][17] memory elevations;
         for(uint8 y = 0; y < mapsize; y++)
         {
         	for(uint8 x = 0; x < mapsize; x++)
@@ -116,9 +128,9 @@ contract Etheria is mortal {
     	return elevations;
     }
     
-    function getOwners() constant returns(address[33][33])
+    function getOwners() constant returns(address[17][17])
     {
-        address[33][33] memory owners;
+        address[17][17] memory owners;
         for(uint8 y = 0; y < mapsize; y++)
         {
         	for(uint8 x = 0; x < mapsize; x++)
@@ -132,26 +144,12 @@ contract Etheria is mortal {
     function getBlocksForTile(uint8 x, uint8 y) constant returns (int8[])
     {
     	Tile memory currenttile = tiles[x][y];
-    // 	int8[] blockarray;
-    // 	uint i = 0;
-    // 	while(i < currenttile.blocks.length * 7)
-    // 	{
-    // 	    blockarray.length += 7;
-    // 		blockarray[i] = currenttile.blocks[i].which;
-    // 		blockarray[i+1] = currenttile.blocks[i].x;
-    // 		blockarray[i+2] = currenttile.blocks[i].y;
-    // 		blockarray[i+3] = currenttile.blocks[i].z;
-    // 		blockarray[i+4] = currenttile.blocks[i].r;
-    // 		blockarray[i+5] = currenttile.blocks[i].g;
-    // 		blockarray[i+6] = currenttile.blocks[i].b;
-    // 		i = i + 7;
-    // 	}	
     	return currenttile.blocks;
     }
     
-    function getPrices() constant returns(uint[33][33])
+    function getPrices() constant returns(uint80[17][17])
     {
-        uint[33][33] memory prices;
+        uint80[17][17] memory prices;
         for(uint8 y = 0; y < mapsize; y++)
         {
         	for(uint8 x = 0; x < mapsize; x++)
