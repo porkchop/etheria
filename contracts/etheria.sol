@@ -2,16 +2,22 @@ import "mortal";
 
 contract Etheria is mortal {
 	
-    address creator;
     uint8 mapsize = 17;
     Tile[17][17] tiles;
     bool allrowsinitialized;
     bool[17] rowsinitialized;
     
     // TODO: 
-    // Mine tile
+    // mine tile, 10 blocks
+    // edit block at i > 0
+    // display blocks on frontend
+    // block edit validation (coordinate limits, connections, etc)
+    // tile trading
+    // block trading (blocks must be z=-1 before trade)
     // Fitness vote
     // Cast threat
+    // withdrawal
+    // register name for tile
     
     struct Tile 
     {
@@ -22,9 +28,8 @@ contract Etheria is mortal {
     	               // index 4 = r, index 5 = g, index 6 = b
     }
     
-    function Etheria() 
-    {
-        creator = msg.sender;
+    function Etheria(){
+    	
     }
     
     function initializeRow(uint8 row, uint8[17] _elevations)
@@ -37,7 +42,7 @@ contract Etheria is mortal {
     	
     	for(uint8 x = 0; x < mapsize; x++)
     	{
-    	    tiles[x][row].owner = creator;
+    	    tiles[x][row].owner = owner;
     	    tiles[x][row].price = 250000000000000000; //.25 eth
     	    tiles[x][row].elevation = _elevations[x];
     	}
@@ -57,30 +62,37 @@ contract Etheria is mortal {
             return;
         uint lastblocknumberused = block.number - 1 ;
     	uint128 lastblockhashused_uint128 = uint128(block.blockhash(lastblocknumberused));
-    	uint128 remainder256 = lastblockhashused_uint128 % 256;
+    	uint128 remainder256; 
     	// index 0 = which, index 1 = blockx, index 2 = blocky, index 3 = blockz, index 4 = r, index 5 = g, index 6 = b
-    	Tile current = tiles[x][y];
-    	current.blocks.length+=7;
-    	if(remainder256 == 0)
+    	Tile current;
+    	uint16 i = 0;
+    	while(i < 10)
     	{
-    	    // ACTION BLOCK!
-    	    current.blocks[current.blocks.length - 7] = 14;
-    	    current.blocks[current.blocks.length - 6] = 3;
-    	    current.blocks[current.blocks.length - 5] = 3;
-    	    current.blocks[current.blocks.length - 4] = -1;
-    	    current.blocks[current.blocks.length - 3] = -128;
-    	    current.blocks[current.blocks.length - 2] = 0;
-    	    current.blocks[current.blocks.length - 1] = -128;
-    	}
-    	else // normal block
-    	{
-    	    current.blocks[current.blocks.length - 7] = 0;
-    	    current.blocks[current.blocks.length - 6] = -3;
-    	    current.blocks[current.blocks.length - 5] = -3;
-    	    current.blocks[current.blocks.length - 4] = -1;
-    	    current.blocks[current.blocks.length - 3] = 0;
-    	    current.blocks[current.blocks.length - 2] = -128;
-    	    current.blocks[current.blocks.length - 1] = -128;
+    	    remainder256 = lastblockhashused_uint128 % (256 - i);
+        	current = tiles[x][y];
+        	current.blocks.length+=7;
+        	if(remainder256 == 0)
+        	{
+        	    // ACTION BLOCK!
+        	    current.blocks[current.blocks.length - 7] = 14;
+        	    current.blocks[current.blocks.length - 6] = 3;
+        	    current.blocks[current.blocks.length - 5] = 3;
+        	    current.blocks[current.blocks.length - 4] = -1;
+        	    current.blocks[current.blocks.length - 3] = -128;
+        	    current.blocks[current.blocks.length - 2] = 0;
+        	    current.blocks[current.blocks.length - 1] = -128;
+        	}
+        	else // normal block
+        	{
+        	    current.blocks[current.blocks.length - 7] = 0;
+        	    current.blocks[current.blocks.length - 6] = -3;
+        	    current.blocks[current.blocks.length - 5] = -3;
+        	    current.blocks[current.blocks.length - 4] = -1;
+        	    current.blocks[current.blocks.length - 3] = 0;
+        	    current.blocks[current.blocks.length - 2] = -128;
+        	    current.blocks[current.blocks.length - 1] = -128;
+        	}
+    	    i++;
     	}
     }
     
