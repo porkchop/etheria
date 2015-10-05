@@ -8,8 +8,9 @@ contract Etheria is mortal {
     bool[17] rowsinitialized;
     
     // TODO: 
-    // mine tile, 10 blocks
-    // edit block at i > 0
+    // display tile type in tile info div
+    // display map from the blockchain, not a generated one
+    // display for-sale amount in tile info div
     // display blocks on frontend
     // block edit validation (coordinate limits, connections, etc)
     // tile trading
@@ -26,10 +27,6 @@ contract Etheria is mortal {
     	uint80 price; // 0 = not for sale. 0-4700000000000000000000 wei (approx) (0-4700 ether)
     	int8[] blocks; // index 0 = which, index 1 = blockx, index 2 = blocky, index 3 = blockz (< 0 = not yet placed)
     	               // index 4 = r, index 5 = g, index 6 = b
-    }
-    
-    function Etheria(){
-    	
     }
     
     function initializeRow(uint8 row, uint8[17] _elevations)
