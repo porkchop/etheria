@@ -2,14 +2,13 @@ import "mortal";
 
 contract Etheria is mortal {
 	
-    uint8 mapsize = 17;
-    Tile[17][17] tiles;
+    uint8 mapsize = 33;
+    Tile[33][33] tiles;
     bool allrowsinitialized;
-    bool[17] rowsinitialized;
+    bool[33] rowsinitialized;
     
     // TODO: 
     // display tile type in tile info div
-    // display map from the blockchain, not a generated one
     // display for-sale amount in tile info div
     // display blocks on frontend
     // block edit validation (coordinate limits, connections, etc)
@@ -18,7 +17,7 @@ contract Etheria is mortal {
     // Fitness vote
     // Cast threat
     // withdrawal
-    // register name for tile
+    // register name for owner
     
     struct Tile 
     {
@@ -29,7 +28,7 @@ contract Etheria is mortal {
     	               // index 4 = r, index 5 = g, index 6 = b
     }
     
-    function initializeRow(uint8 row, uint8[17] _elevations)
+    function initializeTiles(uint8 row, uint8[33] _elevations)
     {
     	if(allrowsinitialized == true)
     		return;
@@ -122,9 +121,9 @@ contract Etheria is mortal {
     	return currenttile.blocks;
     }
     
-    function getElevations() constant returns (uint8[17][17])
+    function getElevations() constant returns (uint8[33][33])
     {
-        uint8[17][17] memory elevations;
+        uint8[33][33] memory elevations;
         for(uint8 y = 0; y < mapsize; y++)
         {
         	for(uint8 x = 0; x < mapsize; x++)
@@ -135,9 +134,9 @@ contract Etheria is mortal {
     	return elevations;
     }
     
-    function getOwners() constant returns(address[17][17])
+    function getOwners() constant returns(address[33][33])
     {
-        address[17][17] memory owners;
+        address[33][33] memory owners;
         for(uint8 y = 0; y < mapsize; y++)
         {
         	for(uint8 x = 0; x < mapsize; x++)
@@ -148,9 +147,9 @@ contract Etheria is mortal {
     	return owners;
     }
     
-    function getPrices() constant returns(uint80[17][17])
+    function getPrices() constant returns(uint80[33][33])
     {
-        uint80[17][17] memory prices;
+        uint80[33][33] memory prices;
         for(uint8 y = 0; y < mapsize; y++)
         {
         	for(uint8 x = 0; x < mapsize; x++)
