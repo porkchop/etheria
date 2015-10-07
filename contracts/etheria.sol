@@ -1,6 +1,4 @@
-import "mortal";
-
-contract Etheria is mortal {
+contract Etheria  {
 	
 	/***
 	 *     _____             _                  _     _       _ _   
@@ -12,7 +10,7 @@ contract Etheria is mortal {
 	 *                                                              
 	 *                                                              
 	 */
-	
+	address owner;
     uint8 mapsize = 17;
     Tile[17][17] tiles;
     bool allrowsinitialized;
@@ -29,6 +27,10 @@ contract Etheria is mortal {
     	int8[] blocks; // index 0 = which, index 1 = blockx, index 2 = blocky, index 3 = blockz (< 0 = not yet placed)
     	               // index 4 = r, index 5 = g, index 6 = b
     	uint lastfarm;
+    }
+    
+    function Etheria() {
+    	owner = msg.sender;
     }
     
     /***
@@ -238,9 +240,9 @@ contract Etheria is mortal {
     {
     	if(msg.value == 0)
     		return;
-    	else if(msg.value < 10000000000000000) 	// .01 ether is the lowest amount one can bid
+    	else if(msg.value < 10000000000000000 || msg.value > 1208925819614629174706175) // .01 ether up to (2^80 - 1) wei is the valid range
     	{
-    		msg.sender.send(msg.value); 		// return their piddly amount of money
+    		msg.sender.send(msg.value); 		// return their money
     		return;
     	}
     	else
@@ -260,7 +262,8 @@ contract Etheria is mortal {
     			}	
     			tiles[x][y].offers.length+=2; // make room for 2 more.
     			tiles[x][y].offers[tiles[x][y].offers.length - 2] = bytes20(msg.sender); // record who is making the offer
-    			tiles[x][y].offers[tiles[x][y].offers.length - 1] = bytes20(msg.value);      // and what their offer is
+    			uint80 offer_uint80 = uint80(msg.value);
+    			tiles[x][y].offers[tiles[x][y].offers.length - 1] = bytes20(offer_uint80);      // and what their offer is
     			illiquidBalance+=msg.value;
     		}	
     	}
@@ -273,38 +276,47 @@ contract Etheria is mortal {
     	while(i < tiles[x][y].offers.length)
     	{
     		if(tiles[x][y].offers[i] == msg_sender_b20) // this user has an offer on file. Remove it.
-    		{
     			removeOffer(x,y,i);
-    			return;
-    		}	
     		i+=2;
     	}	
     }
     
-    function rejectOffer(uint8 x, uint8 y, uint8 index) // index 1-10
+    function rejectOffer(uint8 x, uint8 y, uint8 i) // index 0-20, can't be odd
     {
     	if(tiles[x][y].owner != msg.sender) // only the owner can reject offers
     		return;
-    	removeOffer(x,y,index);
-    }
-
-    function removeOffer(uint8 x, uint8 y, uint8 index) private // index 1-10
-    {
-		if((index*2) > tiles[x][y].offers.length) // index beyond end of array
-			return; 
-
-    	uint8 i = index*2 + 2; // go to the index of the offer, then shift everything back by 2
-		while(i < tiles[x][y].offers.length)
-		{
-			tiles[x][y].offers[i-2] = tiles[x][y].offers[i];   // readjust array 
-			tiles[x][y].offers[i-1] = tiles[x][y].offers[i+1]; // readjust array
-			i+=2;
-		}	
-		tiles[x][y].offers.length-=2; // shorten offer array by 2
-		uint80 amount = uint80(tiles[x][y].offers[i+1]);
-		address(tiles[x][y].offers[i]).send(amount); // return money to offerer
-		illiquidBalance-=amount;
+    	removeOffer(x,y,i);
 		return;
+    }
+    
+    function removeOffer(uint8 x, uint8 y, uint8 i)  // index 0-20, can't be odd
+    {
+        // save the offerer and amount 	
+        uint offer = uint(tiles[x][y].offers[i+1]);
+	    address offerer = address(tiles[x][y].offers[i]);
+    			
+    	// delete user and offer and reshape the array
+    	delete tiles[x][y].offers[i];   // zero out user
+    	delete tiles[x][y].offers[i+1]; // zero out offer
+    	uint8 validspot = 0;              // this is the spot to put the next valid value
+    	uint8 howmanytohackoff = 0;
+    	for(uint8 j = 0; j < tiles[x][y].offers.length; j++) // loop through every cell of offers
+    	{
+    		if(tiles[x][y].offers[j] != 0)  // found a valid value. Put it at position = counter;
+    		{
+    		    if(j != validspot) // only need to move it if it's not already in the right spot
+    		        tiles[x][y].offers[validspot] = tiles[x][y].offers[j]; // move it from position j to position counter
+    		    validspot++; // increment validspot
+    		}
+    		else // found a zero value
+    		    howmanytohackoff++;
+    	}	
+    	tiles[x][y].offers.length-=howmanytohackoff; // should always be 2, since we're only removing 1 offer 
+    			
+    	// return the money
+		offerer.send(offer);
+		illiquidBalance-=offer;
+    	return;
     }
     
     function acceptOffer(uint8 x, uint8 y, uint8 index) // accepts the offer at index (1-10)
@@ -312,7 +324,7 @@ contract Etheria is mortal {
     	uint80 amount = uint80(tiles[x][y].offers[index*2+1]);
     	tiles[x][y].owner.send(amount); // send offer money to oldowner
     	tiles[x][y].owner = address(tiles[x][y].offers[index*2]); // new owner is the offerer
-    	tiles[x][y].offers.length = 0; // delete all offers
+    	delete tiles[x][y].offers; // delete all offers
     	illiquidBalance-=amount;
     	return;
     }
@@ -342,8 +354,19 @@ contract Etheria is mortal {
     	return illiquidBalance;
     }
     
-    function retrieveLiquidBalance() onlyowner
+    function retrieveLiquidBalance()
     {
-    	owner.send(liquidBalance);
+    	if(msg.sender == owner)
+    		owner.send(liquidBalance);
+    }
+    
+    /**********
+    Standard kill() function to recover funds 
+    **********/
+   
+    function kill()
+    { 
+       if (msg.sender == owner)
+           suicide(owner);  // kills this contract and sends remaining funds back to creator
     }
 }

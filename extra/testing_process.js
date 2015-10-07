@@ -43,12 +43,33 @@ etheria.getBlocksForTile(8,8); // should be an array of length 7 * 10 = 70
 etheria.farmTile.sendTransaction(8,8,{from:eth.coinbase,gas:3000000}); // should fail if it's been less than 4320 blocks.
 etheria.getBlocksForTile(8,8); // should be an array of length 7 * 10 = 70
 
-// EDIT A BLOCK
-etheria.editBlock(8,8,2, [9,5,5,0,10,10,10],{from:eth.coinbase,gas:3000000}); // NOTE: the attempted change to "which" type 9 should fail
+// EDIT blocks
+etheria.editBlock(8,8,0,[9,-20,-20,0,127,0,0],{from:eth.coinbase,gas:3000000}); // NOTE: the attempted change to "which" type 9 should fail
+etheria.editBlock(8,8,1,[9,-15,-15,0,127,0,0],{from:eth.coinbase,gas:3000000}); 
+etheria.editBlock(8,8,2,[9,-10,-10,0,0,127,0],{from:eth.coinbase,gas:3000000}); 
+etheria.editBlock(8,8,3,[9,-5,-5,0,0,127,0],{from:eth.coinbase,gas:3000000}); 
+etheria.editBlock(8,8,4,[9,0,0,0,0,0,127],{from:eth.coinbase,gas:3000000}); 
+etheria.editBlock(8,8,5,[9,5,5,0,0,0,127],{from:eth.coinbase,gas:3000000}); 
+etheria.editBlock(8,8,6,[9,10,10,0,127,0,127],{from:eth.coinbase,gas:3000000}); 
+etheria.editBlock(8,8,7,[9,15,15,0,127,0,127],{from:eth.coinbase,gas:3000000}); 
+etheria.editBlock(8,8,8,[9,20,20,0,127,127,0],{from:eth.coinbase,gas:3000000}); 
+etheria.editBlock(8,8,9,[9,5,-5,0,127,127,0],{from:eth.coinbase,gas:3000000}); 
 etheria.getBlocksForTile(8,8); // should show the edited block
 
 // MAKE A VALID OFFER ON AN OWNED TILE
 etheria.makeOffer.sendTransaction(8,8, {from:eth.accounts[1],gas:3000000,value:10000000000000000});
+etheria.getOffers(8,8);
+etheria.makeOffer.sendTransaction(8,8, {from:eth.accounts[1],gas:3000000,value:web3.toBigNumber(10000000000000000)}); // second offer on same tile should fail. Must retract first.
+
+// RETRACT OFFER
+etheria.retractOffer.sendTransaction(8,8, {from:eth.accounts[1],gas:3000000});
+
+// REJECT OFFER
+etheria.rejectOffer.sendTransaction(8,8,0, {from:eth.coinbase,gas:3000000});
+
+// MAKE SOME INVALID OFFERS
+etheria.makeOffer.sendTransaction(8,8, {from:eth.accounts[1],gas:3000000,value:3000000}); // too low 
+etheria.makeOffer.sendTransaction(8,8, {from:eth.accounts[1],gas:3000000,value:12089258196146291747061750}); // too high 
 
 // GET OFFERS FOR THAT TILE
 etheria.getOffers(8,8);
@@ -58,18 +79,12 @@ etheria.getOffers(8,8);
 //GET OFFERS FOR THAT TILE
 
 // MAKE AN OFFER ON AN UNOWNED TILE (SHOULD FAIL AND RETURN MONEY)
-etheria.makeOffer(2,2, 200000000000000000, {from:eth.coinbase,gas:3000000});
+etheria.makeOffer.sendTransaction(2,2, 200000000000000000, {from:eth.coinbase,gas:3000000});
 
 //GET OFFERS FOR THAT TILE
 etheria.getOffers(2,2);
 
 // GET OFFERS FOR A TILE
-
-// RETRACT OFFER
-
-// DELETE OFFER
-
-// ACCEPT OFFER
 
 // KILL CONTRACT. DOES IT RETURN VALUE?
 
