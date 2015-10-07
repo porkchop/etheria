@@ -6,31 +6,7 @@ Etheria testing
 etheria.getElevations(); // should be zeros
 etheria.getOwners(); // should be all 0x0000000000000000000000000000000000000000 (40 zeros)
 
-// INITIALIZE A ROW
-etheria.initializeTiles.sendTransaction(8,[116,125,134,143,153,162,171,180,190,180,171,162,153,143,134,125,116],{from:eth.coinbase,gas:3000000});
-etheria.getElevations(); // should be zeros except for middle row
-
-// BUY A TILE
-etheria.getOwners(); // should be all 0x0000000000000000000000000000000000000000
-etheria.buyTile.sendTransaction(8,8,{from:eth.coinbase,value:250000000000000000});
-etheria.getOwners(); // should be all 0x0000000000000000000000000000000000000000 except 8,8 which should be 250000000000000000
-etheria.getLiquidBalance(); // should be 250000000000000000
-etheria.getIlliquidBalance(); // should be 0
-
-
-
-// FARM A TILE
-etheria.getBlocksForTile(8,8); // should be empty array
-etheria.farmTile.sendTransaction(8,8,{from:eth.coinbase,gas:3000000});
-etheria.getBlocksForTile(8,8); // should be an array of length 7 * 10 = 70
-
-// EDIT A BLOCK
-etheria.editBlock(8,8,2, [0,5,5,0,10,10,10],{from:eth.coinbase,gas:3000000});
-etheria.getBlocksForTile(8,8); // should show the edited block
-
-
-
-// INITIALIZE WHOLE MAP AND TEST THAT IT CAN'T BE CHANGED AFTERWARDS
+//INITIALIZE WHOLE MAP AND TEST THAT IT CAN'T BE CHANGED AFTERWARDS
 etheria.initializeTiles.sendTransaction(0,[116,116,116,116,116,116,116,116,116,116,116,116,116,116,116,116,116],{from:eth.coinbase,gas:3000000});
 etheria.initializeTiles.sendTransaction(1,[116,156,130,102,131,96,128,103,125,145,141,105,118,103,136,119,116],{from:eth.coinbase,gas:3000000});
 etheria.initializeTiles.sendTransaction(2,[116,130,145,145,146,143,140,137,134,150,166,143,121,138,156,136,116],{from:eth.coinbase,gas:3000000});
@@ -53,3 +29,47 @@ etheria.initializeTiles.sendTransaction(16,[116,116,116,116,116,116,116,116,116,
 etheria.getElevations(); // are they all properly initialized?
 etheria.initializeTiles.sendTransaction(8,[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],{from:eth.coinbase,gas:3000000}); // try to set middle row to 1 elevation
 etheria.getElevations(); // make sure it didn't work
+
+// BUY A TILE
+etheria.getOwners(); // should be all 0x0000000000000000000000000000000000000000
+etheria.buyTile.sendTransaction(8,8,{from:eth.coinbase,value:250000000000000000});
+etheria.getOwners(); // should be all 0x0000000000000000000000000000000000000000 except 8,8 which should be 250000000000000000
+etheria.getLiquidBalance(); // should be 250000000000000000
+
+// FARM A TILE
+etheria.getBlocksForTile(8,8); // should be empty array
+etheria.farmTile.sendTransaction(8,8,{from:eth.coinbase,gas:3000000}); // should generate some random blocks
+etheria.getBlocksForTile(8,8); // should be an array of length 7 * 10 = 70
+etheria.farmTile.sendTransaction(8,8,{from:eth.coinbase,gas:3000000}); // should fail if it's been less than 4320 blocks.
+etheria.getBlocksForTile(8,8); // should be an array of length 7 * 10 = 70
+
+// EDIT A BLOCK
+etheria.editBlock(8,8,2, [9,5,5,0,10,10,10],{from:eth.coinbase,gas:3000000}); // NOTE: the attempted change to "which" type 9 should fail
+etheria.getBlocksForTile(8,8); // should show the edited block
+
+// MAKE A VALID OFFER ON AN OWNED TILE
+etheria.makeOffer.sendTransaction(8,8, {from:eth.accounts[1],gas:3000000,value:10000000000000000});
+
+// GET OFFERS FOR THAT TILE
+etheria.getOffers(8,8);
+
+// MAKE MORE OFFERS
+
+//GET OFFERS FOR THAT TILE
+
+// MAKE AN OFFER ON AN UNOWNED TILE (SHOULD FAIL AND RETURN MONEY)
+etheria.makeOffer(2,2, 200000000000000000, {from:eth.coinbase,gas:3000000});
+
+//GET OFFERS FOR THAT TILE
+etheria.getOffers(2,2);
+
+// GET OFFERS FOR A TILE
+
+// RETRACT OFFER
+
+// DELETE OFFER
+
+// ACCEPT OFFER
+
+// KILL CONTRACT. DOES IT RETURN VALUE?
+
