@@ -205,25 +205,26 @@ contract Etheria is mortal{
     	return;
     }
     
-    function getBlocksForTile(uint8 x, uint8 y) constant returns (int8[])
+    function getBlocks(uint8 x, uint8 y) constant returns (int8[])
     {
     	return tiles[x][y].blocks;
     }
     
     // TODO:
-    // BLOCK EDITING
-    // block edit validation (coordinate limits, connections, etc)
-    
-    // BLOCK TRADING
-    // sendBlock
-    
-    // MISC
+    // DONE block texturing
+    // angle camera
+    // block edit validation coordinate constraints
+    // block edit validation must touch, no overlap
+    // block lookup caching 
+    // block trading
     // register name for owner
+    // reclamation
+    // price modifier
+   
     
     // FULL GAME TODO:
     // Fitness vote
     // Cast threat
-    // reclamation
     // chat
     // messaging
     

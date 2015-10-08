@@ -37,11 +37,11 @@ etheria.getOwners(); // should be all 0x0000000000000000000000000000000000000000
 etheria.getLiquidBalance(); // should be 250000000000000000
 
 // FARM A TILE
-etheria.getBlocksForTile(8,8); // should be empty array
+etheria.getBlocks(8,8); // should be empty array
 etheria.farmTile.sendTransaction(8,8,{from:eth.coinbase,gas:3000000}); // should generate some random blocks
-etheria.getBlocksForTile(8,8); // should be an array of length 7 * 10 = 70
+etheria.getBlocks(8,8); // should be an array of length 7 * 10 = 70
 etheria.farmTile.sendTransaction(8,8,{from:eth.coinbase,gas:3000000}); // should fail if it's been less than 4320 blocks.
-etheria.getBlocksForTile(8,8); // should be an array of length 7 * 10 = 70
+etheria.getBlocks(8,8); // should be an array of length 7 * 10 = 70
 
 // EDIT blocks
 etheria.editBlock(8,8,0,[9,-20,-20,0,127,0,0],{from:eth.coinbase,gas:3000000}); // NOTE: the attempted change to "which" type 9 should fail
@@ -54,7 +54,7 @@ etheria.editBlock(8,8,6,[9,10,10,0,127,0,127],{from:eth.coinbase,gas:3000000});
 etheria.editBlock(8,8,7,[9,15,15,0,127,0,127],{from:eth.coinbase,gas:3000000}); 
 etheria.editBlock(8,8,8,[9,20,20,0,127,127,0],{from:eth.coinbase,gas:3000000}); 
 etheria.editBlock(8,8,9,[9,5,-5,0,127,127,0],{from:eth.coinbase,gas:3000000}); 
-etheria.getBlocksForTile(8,8); // should show the edited block
+etheria.getBlocks(8,8); // should show the edited block
 
 // MAKE A VALID OFFER ON AN OWNED TILE
 etheria.makeOffer.sendTransaction(8,8, {from:eth.accounts[1],gas:3000000,value:10000000000000000});
