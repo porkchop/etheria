@@ -1,4 +1,6 @@
-contract Etheria  {
+import "mortal";
+
+contract Etheria is mortal{
 	
 	/***
 	 *     _____             _                  _     _       _ _   
@@ -10,7 +12,6 @@ contract Etheria  {
 	 *                                                              
 	 *                                                              
 	 */
-	address owner;
     uint8 mapsize = 17;
     Tile[17][17] tiles;
     bool allrowsinitialized;
@@ -95,7 +96,7 @@ contract Etheria  {
     {
     	if(msg.value == 0) // must provide cash money to buy tiles
     		return;
-    	if(tiles[x][y].elevation >= SEA_LEVEL && tiles[x][y].owner == 0 && msg.value == 250000000000000000) // .25 eth
+    	if(tiles[x][y].elevation >= SEA_LEVEL && tiles[x][y].owner == 0 && msg.value == 1000000000000000000) // 1 eth
     	{
     		tiles[x][y].owner = msg.sender;
     		liquidBalance+=msg.value;
@@ -210,7 +211,7 @@ contract Etheria  {
     }
     
     // TODO:
-    // FRONTEND
+    // BLOCK EDITING
     // block edit validation (coordinate limits, connections, etc)
     
     // BLOCK TRADING
@@ -254,16 +255,20 @@ contract Etheria  {
     		{
     			for(uint8 i = 0; i < tiles[x][y].offerers.length; i++)
     			{
-    				if(tiles[x][y].offerers[i] == msg.sender) // user has already made an offer. They have to retract it before making another.
+    				if(tiles[x][y].offerers[i] == msg.sender) // user has already made an offer. Update it and return;
     				{
-    					msg.sender.send(msg.value); // return their money
+    					msg.sender.send(tiles[x][y].offers[i]); // return their previous money
+    					illiquidBalance-=tiles[x][y].offers[i];
+    					tiles[x][y].offers[i] = msg.value; // set the new offer
+    					illiquidBalance+=msg.value;
     					return;
     				}
     			}	
-    			tiles[x][y].offerers.length++; // make room for 1 more.
-    			tiles[x][y].offers.length++;
+    			// the user has not yet made an offer
+    			tiles[x][y].offerers.length++; // make room for 1 more
+    			tiles[x][y].offers.length++; // make room for 1 more
     			tiles[x][y].offerers[tiles[x][y].offerers.length - 1] = msg.sender; // record who is making the offer
-    			tiles[x][y].offers[tiles[x][y].offers.length - 1] = msg.value; // record who is making the offer
+    			tiles[x][y].offers[tiles[x][y].offers.length - 1] = msg.value; // record the offer
     			illiquidBalance+=msg.value;
     		}	
     	}
@@ -286,11 +291,11 @@ contract Etheria  {
 		return;
     }
     
-    function removeOffer(uint8 x, uint8 y, uint8 i)  // index 0-10, can't be odd
+    function removeOffer(uint8 x, uint8 y, uint8 i) private // index 0-10, can't be odd
     {
-        // save the offerer and amount 	
-        address offerer = address(tiles[x][y].offerers[i]);
-        uint offer = uint(tiles[x][y].offers[i]);
+    	// return the money
+        tiles[x][y].offerers[i].send(tiles[x][y].offers[i]);
+        illiquidBalance-=tiles[x][y].offers[i];
     			
     	// delete user and offer and reshape the array
     	delete tiles[x][y].offerers[i];   // zero out user
@@ -300,20 +305,18 @@ contract Etheria  {
     	    tiles[x][y].offerers[j-1] = tiles[x][y].offerers[j];
     	    tiles[x][y].offers[j-1] = tiles[x][y].offers[j];
     	}
-    			
-    	// return the money
-		offerer.send(offer);
-		illiquidBalance-=offer;
+    	tiles[x][y].offerers.length--;
+    	tiles[x][y].offers.length--;
     	return;
     }
     
-    function acceptOffer(uint8 x, uint8 y, uint8 index) // accepts the offer at index (1-10)
+    function acceptOffer(uint8 x, uint8 y, uint8 i) // accepts the offer at index (1-10)
     {
-    	uint80 amount = uint80(tiles[x][y].offers[index*2+1]);
-    	tiles[x][y].owner.send(amount); // send offer money to oldowner
-    	tiles[x][y].owner = address(tiles[x][y].offers[index*2]); // new owner is the offerer
+    	tiles[x][y].owner.send(tiles[x][y].offers[i]); // send offer money to oldowner
+    	illiquidBalance-=tiles[x][y].offers[i];
+    	tiles[x][y].owner = tiles[x][y].offerers[i]; // new owner is the offerer
+    	delete tiles[x][y].offerers; // delete all offerers
     	delete tiles[x][y].offers; // delete all offers
-    	illiquidBalance-=amount;
     	return;
     }
     
@@ -337,29 +340,19 @@ contract Etheria  {
      *                                                                                        
      */
     
-    function getLiquidBalance() constant returns(uint)
+    function getLiquidBalance() constant returns(uint) 
     {
     	return liquidBalance;
     }
     
-    function getIlliquidBalance() constant returns(uint)
+    function getIlliquidBalance() constant returns(uint) 
     {
     	return illiquidBalance;
     }
     
-    function retrieveLiquidBalance()
+    function retrieveLiquidBalance() onlyowner
     {
     	if(msg.sender == owner)
     		owner.send(liquidBalance);
-    }
-    
-    /**********
-    Standard kill() function to recover funds 
-    **********/
-   
-    function kill()
-    { 
-       if (msg.sender == owner)
-           suicide(owner);  // kills this contract and sends remaining funds back to creator
     }
 }

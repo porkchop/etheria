@@ -58,8 +58,9 @@ etheria.getBlocksForTile(8,8); // should show the edited block
 
 // MAKE A VALID OFFER ON AN OWNED TILE
 etheria.makeOffer.sendTransaction(8,8, {from:eth.accounts[1],gas:3000000,value:10000000000000000});
+etheria.getOfferers(8,8);
 etheria.getOffers(8,8);
-etheria.makeOffer.sendTransaction(8,8, {from:eth.accounts[1],gas:3000000,value:web3.toBigNumber(10000000000000000)}); // second offer on same tile should fail. Must retract first.
+etheria.makeOffer.sendTransaction(8,8, {from:eth.accounts[1],gas:3000000,value:20000000000000000}); // second offer should update the offer value
 
 // RETRACT OFFER
 etheria.retractOffer.sendTransaction(8,8, {from:eth.accounts[1],gas:3000000});
@@ -67,16 +68,15 @@ etheria.retractOffer.sendTransaction(8,8, {from:eth.accounts[1],gas:3000000});
 // REJECT OFFER
 etheria.rejectOffer.sendTransaction(8,8,0, {from:eth.coinbase,gas:3000000});
 
+// ACCEPT OFFER
+etheria.acceptOffer.sendTransaction(8,8,0, {from:eth.accounts[0],gas:3000000});
+
 // MAKE SOME INVALID OFFERS
 etheria.makeOffer.sendTransaction(8,8, {from:eth.accounts[1],gas:3000000,value:3000000}); // too low 
 etheria.makeOffer.sendTransaction(8,8, {from:eth.accounts[1],gas:3000000,value:12089258196146291747061750}); // too high 
 
 // GET OFFERS FOR THAT TILE
 etheria.getOffers(8,8);
-
-// MAKE MORE OFFERS
-
-//GET OFFERS FOR THAT TILE
 
 // MAKE AN OFFER ON AN UNOWNED TILE (SHOULD FAIL AND RETURN MONEY)
 etheria.makeOffer.sendTransaction(2,2, 200000000000000000, {from:eth.coinbase,gas:3000000});
