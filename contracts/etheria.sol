@@ -46,6 +46,11 @@ contract Etheria is mortal{
      *                 |_|                    
      */
     
+    function getMapsize() constant public returns (uint8)
+    {
+    	return mapsize;
+    }
+    
     function initializeTiles(uint8 row, uint8[17] _elevations)
     {
     	if(allrowsinitialized == true)
@@ -213,20 +218,21 @@ contract Etheria is mortal{
     // TODO:
     // DONE block texturing
     // angle camera
-    // block edit validation coordinate constraints
-    // block edit validation must touch, no overlap
-    // block lookup caching 
-    // block trading
+    // DONE block edit validation coordinate constraints in JS
+    // block edit validation must touch, no overlap in JS
+    // block edit validation coordinate constraints in solidity
+    // block edit validation must touch, no overlap in solidity
+    // MOSTLY DONE block lookup caching 
     // register name for owner
-    // reclamation
-    // price modifier
    
-    
     // FULL GAME TODO:
     // Fitness vote
     // Cast threat
     // chat
     // messaging
+    // block trading
+    // reclamation
+    // price modifier
     
     /***
      *     _____  __  __              
