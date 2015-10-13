@@ -1,6 +1,4 @@
-import "mortal";
-
-contract Etheria is mortal{
+contract Etheria {
 	
 	/***
 	 *     _____             _                  _     _       _ _   
@@ -10,18 +8,15 @@ contract Etheria is mortal{
 	 *    | \__/\ (_) | | | | |_| | | (_| | (__| |_  | | | | | | |_ 
 	 *     \____/\___/|_| |_|\__|_|  \__,_|\___|\__| |_|_| |_|_|\__|
 	 *                                                              
-	 *                                                              
 	 */
     uint8 mapsize = 17;
     Tile[17][17] tiles;
-    Block[20] blocks;
     bool allrowsinitialized;
     bool[17] rowsinitialized;
-    bool allblocksinitialized;
-    bool[20] blocksinitialized;
     uint liquidBalance = 0;
     uint illiquidBalance = 0;
     uint8 SEA_LEVEL = 125;
+    address owner;
     
     struct Tile 
     {
@@ -32,15 +27,6 @@ contract Etheria is mortal{
     	int8[] blocks; // index 0 = which, index 1 = blockx, index 2 = blocky, index 3 = blockz (< 0 = not yet placed)
     	               // index 4 = r, index 5 = g, index 6 = b
     	uint lastfarm;
-    }
-    
-    struct Block
-    {
-    	uint8 which;
-    	string description;	
-    	int8[3][8] occ; // [x,y,z] 8 times
-    	uint8 numsb; 
-    	int8[3][16] sb; // [x,y,z] 16 times
     }
     
     function Etheria() {
@@ -96,40 +82,6 @@ contract Etheria is mortal{
         	}	
         }	
     	return elevations;
-    }
-    
-    function initializeBlockDefinitions(uint8 which, string desc, int8[24] occupies, int8[] surroundedby) onlyowner
-    {
-    	if(allblocksinitialized)
-    		return;
-    	else
-    	{
-    		blocks[which].which = which;
-        	blocks[which].description = desc;
-        	for(uint8 o = 0; o < 8; o++)
-        	{	
-        		for(uint8 i = 0; i < 3; i++)
-        		{
-        			blocks[which].occ[o][i] = occupies[o*3+i]; // counts from 0-23
-        		
-        		}
-        	}
-        	for(uint8 oo = 0; oo < (surroundedby.length/3); oo++)
-        	{	
-        		for(uint8 ii = 0; ii < 3; ii++)
-        		{
-        			blocks[which].sb[oo][ii] = surroundedby[oo*3+ii]; // counts from 0-? (up to 16*3)
-        		}
-        	}
-        	
-        	blocksinitialized[which] = true;
-        	for(uint b = 0; b < 20; b++)
-        	{
-        		if(blocksinitialized[b] == false) // at least one row is not yet initialized. Return.
-        			return;
-        	}	
-        	allblocksinitialized = true;
-    	}	
     }
     
     /***
@@ -240,13 +192,13 @@ contract Etheria is mortal{
     	tiles[x][y].lastfarm = block.number;
     }
     
-    // NOTE: In this instance, block[0] is irrelevant. We can't change which type of block it is
+    // NOTE: In this instance, block[0] is irrelevant. We can't change "which" type of block it is
     function editBlock(uint8 x, uint8 y, uint indexOfBlockToEdit, int8[7] block)  
     {
         if(tiles[x][y].owner != msg.sender)
             return;
     	uint metaindex = indexOfBlockToEdit*7;
-        //current.blocks[metaindex] = error; // irrelevant. We can't change which type of block it is
+        //current.blocks[metaindex] = error; // irrelevant. We can't change "which" type of block it is
     	tiles[x][y].blocks[metaindex + 1] = block[1];
     	tiles[x][y].blocks[metaindex + 2] = block[2];
     	tiles[x][y].blocks[metaindex + 3] = block[3];
@@ -260,6 +212,10 @@ contract Etheria is mortal{
     {
     	return tiles[x][y].blocks;
     }
+    
+    // block edit validation
+    
+    
     
     // TODO:
     // DONE block texturing
@@ -403,9 +359,172 @@ contract Etheria is mortal{
     	return illiquidBalance;
     }
     
-    function retrieveLiquidBalance() onlyowner
+    function retrieveLiquidBalance()
     {
     	if(msg.sender == owner)
     		owner.send(liquidBalance);
+    }
+    
+    Block[20] blocks;
+    bool allblocksinitialized;
+    bool[20] blocksinitialized;
+    
+    struct Block
+    {
+    	uint8 which;
+    	string description;	
+    	int8[3][8] occ; // [x,y,z] 8 times
+    	uint8 numsb; 
+    	int8[3][16] sb; // [x,y,z] 16 times
+    }
+    
+    function initializeBlockDefinition(uint8 which, string desc, int8[24] occupies, int8[] surroundedby)
+    {
+    	if(allblocksinitialized)
+    		return;
+    	else
+    	{
+    		blocks[which].which = which;
+        	blocks[which].description = desc;
+        	for(uint8 o = 0; o < 8; o++)
+        	{	
+        		for(uint8 i = 0; i < 3; i++)
+        		{
+        			blocks[which].occ[o][i] = occupies[o*3+i]; // counts from 0-23
+        		
+        		}
+        	}
+        	for(uint8 oo = 0; oo < (surroundedby.length/3); oo++)
+        	{	
+        		for(uint8 ii = 0; ii < 3; ii++)
+        		{
+        			blocks[which].sb[oo][ii] = surroundedby[oo*3+ii]; // counts from 0-? (up to 16*3)
+        		}
+        	}
+        	
+        	blocksinitialized[which] = true;
+        	for(uint b = 0; b < 20; b++)
+        	{
+        		if(blocksinitialized[b] == false) // at least one row is not yet initialized. Return.
+        			return;
+        	}	
+        	allblocksinitialized = true;
+    	}	
+    }
+    
+    function getDescription(uint8 which) constant returns (string)
+    {
+    	return blocks[which].description;
+    }
+    
+    function getOccupies(uint8 which) constant returns (int8[3][8])
+    {
+    	return blocks[which].occ;
+    }
+    
+    function getSurroundedBy(uint8 which) constant returns (int8[3][16])
+    {
+    	return blocks[which].sb;
+    }
+    
+    int8[3][][17][17] occupado; 
+    
+    function initializeOccupado(uint col, uint row)
+    {
+    	int8 x;
+    	int8 y;
+    	for(y = -66; y <= 66; y++)
+		{
+			if(y % 2 != 0 ) // odd
+				x = -50;
+			else
+				x = -49;
+			
+			if(y >= -33 && y <= 33)
+			{
+				for(x; x <= 49; x++)
+				{
+					occupado[col][row].length++;// = occupado[col][row].length+1;
+					occupado[col][row][occupado[col][row].length-1][0] = x;
+					occupado[col][row][occupado[col][row].length-1][1] = y;
+					occupado[col][row][occupado[col][row].length-1][2] = -1;
+					//occupado[col][row][occupado[col][row].length-1] = [x,y,-1]);
+				}
+			}	
+			else
+			{	
+				int8 absx;
+				int8 absy;
+				for(x; x <= 49; x++)
+				{
+					absx = x;
+					if(absx < 0)
+						absx = absx*-1;
+					absy = y;
+					if(absy < 0)
+						absy = absy*-1;
+					if((y >= 0 && x >= 0) || (y < 0 && x > 0)) // first or 4th quadrants
+					{
+						if(y % 2 != 0 ) // odd
+						{
+							if (((absx/3) + (absy/2)) <= 33)
+							{
+								occupado[col][row].length++;
+								occupado[col][row][occupado[col][row].length-1][0] = x;
+					            occupado[col][row][occupado[col][row].length-1][1] = y;
+					            occupado[col][row][occupado[col][row].length-1][2] = -1;
+//								occupado[col][row].push([x,y,-1]);
+							}
+						}	
+						else	// even
+						{
+							if ((((absx+1)/3) + ((absy-1)/2)) <= 33)
+							{
+								occupado[col][row].length++;
+								occupado[col][row][occupado[col][row].length-1][0] = x;
+					            occupado[col][row][occupado[col][row].length-1][1] = y;
+					            occupado[col][row][occupado[col][row].length-1][2] = -1;
+								//occupado[col][row].push([x,y,-1]);
+							}
+						}
+					}
+					else
+					{	
+						if(y % 2 == 0 ) // even
+						{
+							if (((absx/3) + (absy/2)) <= 33)
+							{
+								occupado[col][row].length++;
+								occupado[col][row][occupado[col][row].length-1][0] = x;
+					            occupado[col][row][occupado[col][row].length-1][1] = y;
+					            occupado[col][row][occupado[col][row].length-1][2] = -1;
+								//occupado[col][row].push([x,y,-1]);
+							}
+						}	
+						else	// odd
+						{
+							if ((((absx+1)/3) + ((absy-1)/2)) <= 33)
+							{
+								occupado[col][row].length++;
+								occupado[col][row][occupado[col][row].length-1][0] = x;
+					            occupado[col][row][occupado[col][row].length-1][1] = y;
+					            occupado[col][row][occupado[col][row].length-1][2] = -1;
+								//occupado[col][row].push([x,y,-1]);
+							}
+						}
+					}
+				}
+			}
+		}	
+    }
+    
+    /**********
+    Standard kill() function to recover funds 
+    **********/
+   
+    function kill()
+    { 
+    	if (msg.sender == owner)
+    		suicide(owner);  // kills this contract and sends remaining funds back to creator
     }
 }
