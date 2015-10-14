@@ -133,19 +133,14 @@ contract Etheria {
      */
     
     function getUint8FromByte32(bytes32 _b32, uint8 byteindex) public constant returns(uint8) {
-    	uint numdigits = 64;
-    	uint buint = uint(_b32);
-    	uint upperpowervar = 16 ** (numdigits - (byteindex*2)); 		// @i=0 upperpowervar=16**64 (SEE EXCEPTION BELOW), @i=1 upperpowervar=16**62, @i upperpowervar=16**60
-    	uint lowerpowervar = 16 ** (numdigits - 2 - (byteindex*2));		// @i=0 upperpowervar=16**62, @i=1 upperpowervar=16**60, @i upperpowervar=16**58
     	uint postheadchop;
     	if(byteindex == 0)
-    		postheadchop = buint; 								//for byteindex 0, buint is just the input number. 16^64 is out of uint range, so this exception has to be made.
+    		postheadchop = uint(_b32); 								//for byteindex 0, buint is just the input number. 16^64 is out of uint range, so this exception has to be made.
     	else
-    		postheadchop = buint % upperpowervar; 				// @i=0 _b32=a1b2c3d4... postheadchop=a1b2c3d4, @i=1 postheadchop=b2c3d4, @i=2 postheadchop=c3d4
-    	uint remainder = postheadchop % lowerpowervar; 			// @i=0 remainder=b2c3d4, @i=1 remainder=c3d4, @i=2 remainder=d4
-    	uint evenedout = postheadchop - remainder; 				// @i=0 evenedout=a1000000, @i=1 remainder=b20000, @i=2 remainder=c300
-    	uint b = evenedout / lowerpowervar; 					// @i=0 b=a1 (to uint), @i=1 b=b2, @i=2 b=c3
-    	return uint8(b);
+    		postheadchop = uint(_b32) % (16 ** (64 - (byteindex*2))); 				// @i=0 _b32=a1b2c3d4... postheadchop=a1b2c3d4, @i=1 postheadchop=b2c3d4, @i=2 postheadchop=c3d4
+    	uint evenedout = postheadchop - (postheadchop % (16 ** (64 - 2 - (byteindex*2)))); 				// @i=0 evenedout=a1000000, @i=1 remainder=b20000, @i=2 remainder=c300
+    	uint8 b = uint8(evenedout / (16 ** (64 - 2 - (byteindex*2)))); 					// @i=0 b=a1 (to uint), @i=1 b=b2, @i=2 b=c3
+    	return b;
     }
     
     function farmTile(uint8 x, uint8 y)
@@ -155,38 +150,18 @@ contract Etheria {
         if((block.number - tiles[x][y].lastfarm) < 4320) // a day's worth of blocks hasn't passed yet. can only farm once a day. (Assumes block times of 20 seconds.)
         	return;
         bytes32 lastblockhash = block.blockhash(block.number - 1);
-        uint8 digit0to255;
     	// index 0 = which, index 1 = blockx, index 2 = blocky, index 3 = blockz, index 4 = r, index 5 = g, index 6 = b
     	uint8 i = 0;
     	while(i < 10)
     	{
-    	    digit0to255 = getUint8FromByte32(lastblockhash,i);
             tiles[x][y].blocks.length+=7;
-        	if(digit0to255 < 6) // 6 possibilities (of 256) , 0,1,2,3,4,5
-        	{
-        	    // ACTION BLOCK!
-        	    tiles[x][y].blocks[tiles[x][y].blocks.length - 7] = 14;
-        	    tiles[x][y].blocks[tiles[x][y].blocks.length - 6] = 3;
-        	    tiles[x][y].blocks[tiles[x][y].blocks.length - 5] = 3;
-        	    tiles[x][y].blocks[tiles[x][y].blocks.length - 4] = -1;
-        	    tiles[x][y].blocks[tiles[x][y].blocks.length - 3] = -128;
-        	    tiles[x][y].blocks[tiles[x][y].blocks.length - 2] = 0;
-        	    tiles[x][y].blocks[tiles[x][y].blocks.length - 1] = -128;
-        	}
-        	else // normal block
-        	{
-        	    if(digit0to255 % 16 > 13) // for 0xa7, get 7. Is it 0-13? If not, force it to zero. 
-        	        digit0to255 = 0;
-        	    else
-        	        digit0to255 = digit0to255 % 16;
-        	    tiles[x][y].blocks[tiles[x][y].blocks.length - 7] = int8(digit0to255); // guaranteed 0-13
-        	    tiles[x][y].blocks[tiles[x][y].blocks.length - 6] = -3;
-        	    tiles[x][y].blocks[tiles[x][y].blocks.length - 5] = -3;
-        	    tiles[x][y].blocks[tiles[x][y].blocks.length - 4] = -1;
-        	    tiles[x][y].blocks[tiles[x][y].blocks.length - 3] = 0;
-        	    tiles[x][y].blocks[tiles[x][y].blocks.length - 2] = -128;
-        	    tiles[x][y].blocks[tiles[x][y].blocks.length - 1] = -128;
-        	}
+    	    tiles[x][y].blocks[tiles[x][y].blocks.length - 7] = int8(getUint8FromByte32(lastblockhash,i) % 32); // guaranteed 0-31
+    	    tiles[x][y].blocks[tiles[x][y].blocks.length - 6] = -3;
+    	    tiles[x][y].blocks[tiles[x][y].blocks.length - 5] = -3;
+    	    tiles[x][y].blocks[tiles[x][y].blocks.length - 4] = -1;
+    	    tiles[x][y].blocks[tiles[x][y].blocks.length - 3] = 0;
+    	    tiles[x][y].blocks[tiles[x][y].blocks.length - 2] = -128;
+    	    tiles[x][y].blocks[tiles[x][y].blocks.length - 1] = -128;
     	    i++;
     	}
     	tiles[x][y].lastfarm = block.number;
@@ -349,16 +324,6 @@ contract Etheria {
      *                                                                                        
      */
     
-    function getLiquidBalance() constant returns(uint) 
-    {
-    	return liquidBalance;
-    }
-    
-    function getIlliquidBalance() constant returns(uint) 
-    {
-    	return illiquidBalance;
-    }
-    
     function retrieveLiquidBalance()
     {
     	if(msg.sender == owner)
@@ -372,20 +337,18 @@ contract Etheria {
     struct Block
     {
     	uint8 which;
-    	string description;	
     	int8[3][8] occ; // [x,y,z] 8 times
     	uint8 numsb; 
     	int8[3][16] sb; // [x,y,z] 16 times
     }
     
-    function initializeBlockDefinition(uint8 which, string desc, int8[24] occupies, int8[] surroundedby)
+    function initializeBlockDefinition(uint8 which, int8[24] occupies, int8[] surroundedby)
     {
     	if(allblocksinitialized)
     		return;
     	else
     	{
     		blocks[which].which = which;
-        	blocks[which].description = desc;
         	for(uint8 o = 0; o < 8; o++)
         	{	
         		for(uint8 i = 0; i < 3; i++)
@@ -410,11 +373,6 @@ contract Etheria {
         	}	
         	allblocksinitialized = true;
     	}	
-    }
-    
-    function getDescription(uint8 which) constant returns (string)
-    {
-    	return blocks[which].description;
     }
     
     function getOccupies(uint8 which) constant returns (int8[3][8])
