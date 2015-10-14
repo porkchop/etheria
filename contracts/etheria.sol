@@ -105,7 +105,7 @@ contract Etheria is EtheriaHelper {
      *                                                                                                    
      */
     // see EtheriaHelper for non-refucktored version of this algorithm.
-    function getUint8FromByte32(bytes32 _b32, uint8 byteindex) public constant returns(uint8) 
+    function getUint8FromByte32(bytes32 _b32, uint8 byteindex) private constant returns(uint8) 
     {
     	if(byteindex == 0)
     		return uint8((uint(_b32) - (uint(_b32) % (16 ** (64 - 2 - (byteindex*2))))) / (16 ** (64 - 2 - (byteindex*2)))); 	
@@ -402,7 +402,7 @@ contract Etheria is EtheriaHelper {
 		}	
     }
     
-    function wouldFallOutside(int8 which, int8 x, int8 y) constant returns (bool)
+    function wouldFallOutside(int8 which, int8 x, int8 y) private constant returns (bool)
     {
     	int8 occupiesx = 0;
     	int8 occupiesy = 0;
@@ -422,7 +422,7 @@ contract Etheria is EtheriaHelper {
     	return false;
     }
     
-    function touchesAndAvoidsOverlap(uint8 coordx, uint8 coordy, int8 which, int8 x, int8 y, int8 z) constant returns (bool)
+    function touchesAndAvoidsOverlap(uint8 coordx, uint8 coordy, int8 which, int8 x, int8 y, int8 z) private constant returns (bool)
     {
     	int8[3][8] wouldoccupy = blocks[uint(which)].occupies;
     	for(uint8 b = 0; b < 8; b++) // always 8 hexes
