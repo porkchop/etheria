@@ -2,8 +2,8 @@ contract EtheriaHelper
 {
 	function blockHexCoordsValid(int8 x, int8 y) constant returns (bool)
 	{}
-	function getUint8FromByte32(bytes32 _b32, uint8 byteindex) public constant returns(uint8) 
-	{}
+//	function getUint8FromByte32(bytes32 _b32, uint8 byteindex) public constant returns(uint8) 
+//	{}  // turns out it cost more data bytes/gas to break this out. Doh!
 }
 
 contract Etheria is EtheriaHelper {
@@ -104,6 +104,14 @@ contract Etheria is EtheriaHelper {
      *                                                |/                                                  
      *                                                                                                    
      */
+    // see EtheriaHelper for non-refucktored version of this algorithm.
+    function getUint8FromByte32(bytes32 _b32, uint8 byteindex) public constant returns(uint8) 
+    {
+    	if(byteindex == 0)
+    		return uint8((uint(_b32) - (uint(_b32) % (16 ** (64 - 2 - (byteindex*2))))) / (16 ** (64 - 2 - (byteindex*2)))); 	
+    	else
+    		return uint8(((uint(_b32) % (16 ** (64 - (byteindex*2)))) - ((uint(_b32) % (16 ** (64 - (byteindex*2)))) % (16 ** (64 - 2 - (byteindex*2))))) / (16 ** (64 - 2 - (byteindex*2)))); 	
+    }
     
     function farmTile(uint8 x, uint8 y)
     {
@@ -115,7 +123,7 @@ contract Etheria is EtheriaHelper {
     	for(uint8 i = 0; i < 10; i++)
     	{
             tiles[x][y].blocks.length+=5;
-    	    tiles[x][y].blocks[tiles[x][y].blocks.length - 1][0] = int8(eh.getUint8FromByte32(lastblockhash,i) % 32); // which, guaranteed 0-31
+    	    tiles[x][y].blocks[tiles[x][y].blocks.length - 1][0] = int8(getUint8FromByte32(lastblockhash,i) % 32); // which, guaranteed 0-31
     	    tiles[x][y].blocks[tiles[x][y].blocks.length - 1][1] = 0; // x
     	    tiles[x][y].blocks[tiles[x][y].blocks.length - 1][2] = 0; // y
     	    tiles[x][y].blocks[tiles[x][y].blocks.length - 1][3] = -1; // z
