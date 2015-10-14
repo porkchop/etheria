@@ -277,7 +277,6 @@ contract Etheria {
     }
     
     Block[20] blocks;
-    
     struct Block
     {
     	uint8 which;
@@ -285,7 +284,7 @@ contract Etheria {
     	int8[3][] surroundedby; // [x,y,z]
     }
     
-    function initializeBlockDefinition(uint8 which, int8[3][8] occupies, int8[3][] surroundedby)
+    function initBlockDef(uint8 which, int8[3][8] occupies, int8[3][] surroundedby)
     {
     		blocks[which].which = which;
         	for(uint8 o = 0; o < 8; o++)
@@ -307,7 +306,7 @@ contract Etheria {
         
     int8[3][][17][17] occupado; 
     
-    function initializeOccupado(uint col, uint row)
+    function initOccupado(uint col, uint row)
     {
     	int8 x;
     	int8 y;
@@ -394,6 +393,113 @@ contract Etheria {
 				}
 			}
 		}	
+    }
+    
+    // NEEDS NO INFORMATION FROM MAP... COULD BE PLACED IN ANOTHER CONTRACT
+    function blockHexCoordsValid(int8 x, int8 y) constant returns (bool)
+    {
+    	if(-33 <= y && y <= 33)
+    	{
+    		if(y % 2 != 0 ) // odd
+    		{
+    			if(-50 <= x && x <= 49)
+    				return true;
+    		}
+    		else // even
+    		{
+    			if(-49 <= x && x <= 49)
+    				return true;
+    		}	
+    	}	
+    	else
+    	{	
+    		int8 absx;
+			int8 absy;
+			absx = x;
+			if(absx < 0)
+				absx = absx*-1;
+			absy = y;
+			if(absy < 0)
+				absy = absy*-1;
+    		if((y >= 0 && x >= 0) || (y < 0 && x > 0)) // first or 4th quadrants
+    		{
+    			if(y % 2 != 0 ) // odd
+    			{
+    				if (((absx/3) + (absy/2)) <= 33)
+    					return true;
+    			}	
+    			else	// even
+    			{
+    				if ((((absx+1)/3) + ((absy-1)/2)) <= 33)
+    					return true;
+    			}
+    		}
+    		else
+    		{	
+    			if(y % 2 == 0 ) // even
+    			{
+    				if (((absx/3) + (absy/2)) <= 33)
+    					return true;
+    			}	
+    			else	// odd
+    			{
+    				if ((((absx+1)/3) + ((absy-1)/2)) <= 33)
+    					return true;
+    			}
+    		}
+    	}
+    	return false;
+    }
+    
+    function wouldFallOutside(int8 which, int8 x, int8 y) constant returns (bool)
+    {
+    	int8 occupiesx = 0;
+    	int8 occupiesy = 0;
+    	
+    	for(uint8 b = 0; b < 8; b++) // always 8 hexes
+    	{
+    		occupiesx = blocks[uint(which)].occupies[b][0];
+    		occupiesy = blocks[uint(which)].occupies[b][1];
+    		if(y % 2 != 0 && occupiesy%2 != 0) // if y is odd, offset the x by 1
+    		{
+    			occupiesx = occupiesx + 1;
+    		}
+    		if(!blockHexCoordsValid(occupiesx+x, occupiesy+y))
+    			return true;
+    	}
+    	return false;
+    }
+    
+    function wouldOverlap(uint8 coordx, uint8 coordy, int8 which, int8 x, int8 y, int8 z) constant returns (bool)
+    {
+    	int8 occupiesx = 0;
+    	int8 occupiesy = 0;
+    	int8 occupiesz = 0;
+    	
+    	int8[3][8] memory wouldoccupy;
+    	for(var b = 0; b < 8; b++) // always 8 hexes
+    	{
+    		occupiesx = blocks[uint(which)].occupies[b][0];
+    		occupiesy = blocks[uint(which)].occupies[b][1];
+    		occupiesz = blocks[uint(which)].occupies[b][2];
+    		if(y % 2 != 0 && occupiesy%2 != 0) // if y is odd, offset the x by 1
+    			occupiesx = occupiesx + 1;
+    		wouldoccupy[b][0] = occupiesx+x;
+    		wouldoccupy[b][1] = occupiesy+y;
+    		wouldoccupy[b][2] = occupiesz+z;
+    	}
+    	
+    	for(var w = 0; w < 8; w++) // do any of these 8 hexes appear in occupado?
+    	{
+    		for(var o = 0; o < occupado[coordx][coordy].length; o++)
+    		{
+    			if(wouldoccupy[w][0] == occupado[coordx][coordy][o][0] && wouldoccupy[w][1] == occupado[coordx][coordy][o][1] && wouldoccupy[w][2] == occupado[coordx][coordy][o][2]) // are the arrays equal?
+    			{
+    				return true;
+    			}
+    		}
+    	}
+    	return false;
     }
     
 }
