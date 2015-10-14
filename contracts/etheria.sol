@@ -1,10 +1,12 @@
-contract HexCoordValidator 
+contract EtheriaHelper 
 {
 	function blockHexCoordsValid(int8 x, int8 y) constant returns (bool)
 	{}
+	function getUint8FromByte32(bytes32 _b32, uint8 byteindex) public constant returns(uint8) 
+	{}
 }
 
-contract Etheria is HexCoordValidator{
+contract Etheria is EtheriaHelper {
 	
 	/***
 	 *     _____             _                  _     _       _ _   
@@ -31,11 +33,11 @@ contract Etheria is HexCoordValidator{
     	uint lastfarm;
     }
     
-    HexCoordValidator hcv;
+    EtheriaHelper eh;
 	
     function Etheria() {
     	creator = msg.sender;
-    	hcv = HexCoordValidator(0x18b84dfffa22fc3bf502cc46ac64d13306df4d41);
+    	eh = EtheriaHelper(0xf20c9fa34847f6bc42b2f60014268bec65676af7);
     }
     
     function setInitializer(address _i)
@@ -103,17 +105,6 @@ contract Etheria is HexCoordValidator{
      *                                                                                                    
      */
     
-    function getUint8FromByte32(bytes32 _b32, uint8 byteindex) public constant returns(uint8) {
-    	uint postheadchop;
-    	if(byteindex == 0)
-    		postheadchop = uint(_b32); 								//for byteindex 0, buint is just the input number. 16^64 is out of uint range, so this exception has to be made.
-    	else
-    		postheadchop = uint(_b32) % (16 ** (64 - (byteindex*2))); 				// @i=0 _b32=a1b2c3d4... postheadchop=a1b2c3d4, @i=1 postheadchop=b2c3d4, @i=2 postheadchop=c3d4
-    	uint evenedout = postheadchop - (postheadchop % (16 ** (64 - 2 - (byteindex*2)))); 				// @i=0 evenedout=a1000000, @i=1 remainder=b20000, @i=2 remainder=c300
-    	uint8 b = uint8(evenedout / (16 ** (64 - 2 - (byteindex*2)))); 					// @i=0 b=a1 (to uint), @i=1 b=b2, @i=2 b=c3
-    	return b;
-    }
-    
     function farmTile(uint8 x, uint8 y)
     {
         if(tiles[x][y].owner != msg.sender)
@@ -124,7 +115,7 @@ contract Etheria is HexCoordValidator{
     	for(uint8 i = 0; i < 10; i++)
     	{
             tiles[x][y].blocks.length+=5;
-    	    tiles[x][y].blocks[tiles[x][y].blocks.length - 1][0] = int8(getUint8FromByte32(lastblockhash,i) % 32); // which, guaranteed 0-31
+    	    tiles[x][y].blocks[tiles[x][y].blocks.length - 1][0] = int8(eh.getUint8FromByte32(lastblockhash,i) % 32); // which, guaranteed 0-31
     	    tiles[x][y].blocks[tiles[x][y].blocks.length - 1][1] = 0; // x
     	    tiles[x][y].blocks[tiles[x][y].blocks.length - 1][2] = 0; // y
     	    tiles[x][y].blocks[tiles[x][y].blocks.length - 1][3] = -1; // z
@@ -417,7 +408,7 @@ contract Etheria is HexCoordValidator{
     			occupiesx = occupiesx + 1;
     		}
     		address hexCoordValidator = 0x18b84dfffa22fc3bf502cc46ac64d13306df4d41;
-    		if(!hcv.blockHexCoordsValid(occupiesx+x, occupiesy+y))
+    		if(!eh.blockHexCoordsValid(occupiesx+x, occupiesy+y))
     			return true;
     	}
     	return false;
