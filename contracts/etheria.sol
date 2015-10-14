@@ -1,12 +1,13 @@
-contract EtheriaHelper 
-{
-	function blockHexCoordsValid(int8 x, int8 y) constant returns (bool)
-	{}
-//	function getUint8FromByte32(bytes32 _b32, uint8 byteindex) public constant returns(uint8) 
-//	{}  // turns out it cost more data bytes/gas to break this out. Doh!
-}
+//contract EtheriaHelper 
+//{
+//	function blockHexCoordsValid(int8 x, int8 y) constant returns (bool)
+//	{}
+////	function getUint8FromByte32(bytes32 _b32, uint8 byteindex) public constant returns(uint8) 
+////	{}  // turns out it cost more data bytes/gas to break this out. Doh!
+//}
 
-contract Etheria is EtheriaHelper {
+contract Etheria //is EtheriaHelper 
+{
 	
 	/***
 	 *     _____             _                  _     _       _ _   
@@ -33,11 +34,11 @@ contract Etheria is EtheriaHelper {
     	uint lastfarm;
     }
     
-    EtheriaHelper eh;
+   // EtheriaHelper eh;
 	
     function Etheria() {
     	creator = msg.sender;
-    	eh = EtheriaHelper(0xf20c9fa34847f6bc42b2f60014268bec65676af7);
+    	//eh = EtheriaHelper(0xf20c9fa34847f6bc42b2f60014268bec65676af7);
     }
     
     function setInitializer(address _i)
@@ -416,7 +417,7 @@ contract Etheria is EtheriaHelper {
     			occupiesx = occupiesx + 1;
     		}
     		address hexCoordValidator = 0x18b84dfffa22fc3bf502cc46ac64d13306df4d41;
-    		if(!eh.blockHexCoordsValid(occupiesx+x, occupiesy+y))
+    		if(!blockHexCoordsValid(occupiesx+x, occupiesy+y))
     			return true;
     	}
     	return false;
@@ -465,5 +466,62 @@ contract Etheria is EtheriaHelper {
     		return true;
     	else
     		return false;
+    }
+    
+    function blockHexCoordsValid(int8 x, int8 y) private constant returns (bool)
+    {
+    	if(-33 <= y && y <= 33)
+    	{
+    		if(y % 2 != 0 ) // odd
+    		{
+    			if(-50 <= x && x <= 49)
+    				return true;
+    		}
+    		else // even
+    		{
+    			if(-49 <= x && x <= 49)
+    				return true;
+    		}	
+    	}	
+    	else
+    	{	
+    		uint8 absx;
+			uint8 absy;
+			if(x < 0)
+				absx = uint8(x*-1);
+			else
+				absx = uint8(x);
+			if(y < 0)
+				absy = uint8(y*-1);
+			else
+				absy = uint8(y);
+    		if((y >= 0 && x >= 0) || (y < 0 && x > 0)) // first or 4th quadrants
+    		{
+    			if(y % 2 != 0 ) // odd
+    			{
+    				if (((absx*2) + (absy*3)) <= 198)
+    					return true;
+    			}	
+    			else	// even
+    			{
+    				if ((((absx+1)*2) + ((absy-1)*3)) <= 198)
+    					return true;
+    			}
+    		}
+    		else
+    		{	
+    			if(y % 2 == 0 ) // even
+    			{
+    				if (((absx*2) + (absy*3)) <= 198)
+    					return true;
+    			}	
+    			else	// odd
+    			{
+    				if ((((absx+1)*2) + ((absy-1)*3)) <= 198)
+    					return true;
+    			}
+    		}
+    	}
+    	return false;
     }
 }
