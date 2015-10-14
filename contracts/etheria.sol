@@ -1,4 +1,10 @@
-contract Etheria {
+contract HexCoordValidator 
+{
+	function blockHexCoordsValid(int8 x, int8 y) constant returns (bool)
+	{}
+}
+
+contract Etheria is HexCoordValidator{
 	
 	/***
 	 *     _____             _                  _     _       _ _   
@@ -25,8 +31,11 @@ contract Etheria {
     	uint lastfarm;
     }
     
+    HexCoordValidator hcv;
+	
     function Etheria() {
     	creator = msg.sender;
+    	hcv = HexCoordValidator(0x18b84dfffa22fc3bf502cc46ac64d13306df4d41);
     }
     
     function setInitializer(address _i)
@@ -190,7 +199,7 @@ contract Etheria {
     		}	
     		else
     		{
-    			owner.send(msg.value);     		 // this was a valid offer, send money to contract owner
+    			creator.send(msg.value);     		 // this was a valid offer, send money to contract owner
     			tiles[x][y].owner = msg.sender;  // set tile owner to the buyer
     			return;		
     		}	
@@ -394,62 +403,6 @@ contract Etheria {
 		}	
     }
     
-    // NEEDS NO INFORMATION FROM MAP... COULD BE PLACED IN ANOTHER CONTRACT
-    function blockHexCoordsValid(int8 x, int8 y) constant returns (bool)
-    {
-    	if(-33 <= y && y <= 33)
-    	{
-    		if(y % 2 != 0 ) // odd
-    		{
-    			if(-50 <= x && x <= 49)
-    				return true;
-    		}
-    		else // even
-    		{
-    			if(-49 <= x && x <= 49)
-    				return true;
-    		}	
-    	}	
-    	else
-    	{	
-    		int8 absx;
-			int8 absy;
-			absx = x;
-			if(absx < 0)
-				absx = absx*-1;
-			absy = y;
-			if(absy < 0)
-				absy = absy*-1;
-    		if((y >= 0 && x >= 0) || (y < 0 && x > 0)) // first or 4th quadrants
-    		{
-    			if(y % 2 != 0 ) // odd
-    			{
-    				if (((absx/3) + (absy/2)) <= 33)
-    					return true;
-    			}	
-    			else	// even
-    			{
-    				if ((((absx+1)/3) + ((absy-1)/2)) <= 33)
-    					return true;
-    			}
-    		}
-    		else
-    		{	
-    			if(y % 2 == 0 ) // even
-    			{
-    				if (((absx/3) + (absy/2)) <= 33)
-    					return true;
-    			}	
-    			else	// odd
-    			{
-    				if ((((absx+1)/3) + ((absy-1)/2)) <= 33)
-    					return true;
-    			}
-    		}
-    	}
-    	return false;
-    }
-    
     function wouldFallOutside(int8 which, int8 x, int8 y) constant returns (bool)
     {
     	int8 occupiesx = 0;
@@ -463,7 +416,8 @@ contract Etheria {
     		{
     			occupiesx = occupiesx + 1;
     		}
-    		if(!blockHexCoordsValid(occupiesx+x, occupiesy+y))
+    		address hexCoordValidator = 0x18b84dfffa22fc3bf502cc46ac64d13306df4d41;
+    		if(!hcv.blockHexCoordsValid(occupiesx+x, occupiesy+y))
     			return true;
     	}
     	return false;

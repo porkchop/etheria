@@ -1,11 +1,7 @@
-contract HexCoordValidator {
+contract HexCoordValidator{
 	
-    function HexCoordValidator() {
-    	creator = msg.sender;
-    }
-    
     //function blockHexCoordsValid(int8 x, int8 y) constant returns (bool)
-    function (int8 x, int8 y) constant returns (bool)
+    function blockHexCoordsValid(int8 x, int8 y) constant returns (bool)
     {
     	if(-33 <= y && y <= 33)
     	{
@@ -22,24 +18,26 @@ contract HexCoordValidator {
     	}	
     	else
     	{	
-    		int8 absx;
-			int8 absy;
-			absx = x;
-			if(absx < 0)
-				absx = absx*-1;
-			absy = y;
-			if(absy < 0)
-				absy = absy*-1;
+    		uint8 absx;
+			uint8 absy;
+			if(x < 0)
+				absx = uint8(x*-1);
+			else
+				absx = uint8(x);
+			if(y < 0)
+				absy = uint8(y*-1);
+			else
+				absy = uint8(y);
     		if((y >= 0 && x >= 0) || (y < 0 && x > 0)) // first or 4th quadrants
     		{
     			if(y % 2 != 0 ) // odd
     			{
-    				if (((absx/3) + (absy/2)) <= 33)
+    				if (((absx*2) + (absy*3)) <= 198)
     					return true;
     			}	
     			else	// even
     			{
-    				if ((((absx+1)/3) + ((absy-1)/2)) <= 33)
+    				if ((((absx+1)*2) + ((absy-1)*3)) <= 198)
     					return true;
     			}
     		}
@@ -47,12 +45,12 @@ contract HexCoordValidator {
     		{	
     			if(y % 2 == 0 ) // even
     			{
-    				if (((absx/3) + (absy/2)) <= 33)
+    				if (((absx*2) + (absy*3)) <= 198)
     					return true;
     			}	
     			else	// odd
     			{
-    				if ((((absx+1)/3) + ((absy-1)/2)) <= 33)
+    				if ((((absx+1)*2) + ((absy-1)*3)) <= 198)
     					return true;
     			}
     		}
