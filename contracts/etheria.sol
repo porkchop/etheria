@@ -130,12 +130,12 @@ contract Etheria {
             return;
     	uint metaindex = indexOfBlockToEdit*7;
         //current.blocks[metaindex] = error; // irrelevant. We can't change "which" type of block it is
-    	tiles[x][y].blocks[metaindex + 1] = block[1];
-    	tiles[x][y].blocks[metaindex + 2] = block[2];
-    	tiles[x][y].blocks[metaindex + 3] = block[3];
-    	tiles[x][y].blocks[metaindex + 4] = block[4];
-    	tiles[x][y].blocks[metaindex + 5] = block[5];
-    	tiles[x][y].blocks[metaindex + 6] = block[6];
+    	tiles[x][y].blocks[metaindex + 1] = block[1]; //x 
+    	tiles[x][y].blocks[metaindex + 2] = block[2]; //y
+    	tiles[x][y].blocks[metaindex + 3] = block[3]; //z
+    	tiles[x][y].blocks[metaindex + 4] = block[4]; //r
+    	tiles[x][y].blocks[metaindex + 5] = block[5]; //g
+    	tiles[x][y].blocks[metaindex + 6] = block[6]; //b
     	return;
     }
     
@@ -282,6 +282,8 @@ contract Etheria {
     	uint8 which;
     	int8[3][8] occupies; // [x,y,z] 8 times
     	int8[3][] surroundedby; // [x,y,z]
+//    	int8[3][16] surroundedby; // [x,y,z] 16 times (probably less than 16)
+//    	int8 surroundedbylength;
     }
     
     function initBlockDef(uint8 which, int8[3][8] occupies, int8[3][] surroundedby)
@@ -499,6 +501,43 @@ contract Etheria {
     			}
     		}
     	}
+    	return false;
+    }
+    
+    function touchesAnother(uint8 coordx, uint8 coordy, int8 which, int8 x, int8 y, int8 z) constant returns (bool)
+    {
+    	//console.log('touches another?');
+    	int8 sx = 0;
+    	int8 sy = 0;
+    	int8 sz = 0;
+    	
+    	uint surroundedbylength = uint(blocks[uint(which)].surroundedby.length);
+    	int8[3][] memory surroundings;
+    	for(var b = 0; b < surroundedbylength; b++)
+    	{
+    		sx = blocks[uint(which)].surroundedby[b][0];
+    		sy = blocks[uint(which)].surroundedby[b][1];
+    		sz = blocks[uint(which)].surroundedby[b][2];
+    		
+    		if(y % 2 != 0 && sy%2 != 0) // if y is odd, offset the x by 1
+    		{
+    			sx = sx + 1;
+    		}
+    		surroundings[b][0] = sx+x;
+    		surroundings[b][1] = sy+y;
+    		surroundings[b][2] = sz+z;
+    	}
+    	
+    	for(var s = 0; s < surroundings.length; s++)
+    	{
+    		for(var o = 0; o < occupado[coordx][coordy].length; o++)
+    		{
+    			if(surroundings[s][0] == occupado[coordx][coordy][o][0] && surroundings[s][1] == occupado[coordx][coordy][o][1] && surroundings[s][2] == occupado[coordx][coordy][o][2]) // are the arrays equal?
+    			{
+    				return true;
+    			}
+    		}	
+    	}	
     	return false;
     }
     
