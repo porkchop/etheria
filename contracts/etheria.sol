@@ -11,12 +11,9 @@ contract Etheria {
 	 */
     uint8 mapsize = 17;
     Tile[17][17] tiles;
-    bool allrowsinitialized;
-    bool[17] rowsinitialized;
     uint liquidBalance = 0;
     uint illiquidBalance = 0;
     uint8 SEA_LEVEL = 125;
-    address owner;
     
     struct Tile 
     {
@@ -30,7 +27,6 @@ contract Etheria {
     }
     
     function Etheria() {
-    	owner = msg.sender;
     }
     
     /***
@@ -44,15 +40,8 @@ contract Etheria {
      *                 |_|                    
      */
     
-    function getMapsize() constant public returns (uint8)
-    {
-    	return mapsize;
-    }
-    
     function initializeTiles(uint8 row, uint8[17] _elevations)
     {
-    	if(allrowsinitialized == true)
-    		return;
     	
     	if(row >= mapsize) // this row index is out of bounds.
     		return; 
@@ -60,14 +49,6 @@ contract Etheria {
     	for(uint8 x = 0; x < mapsize; x++)
     	    tiles[x][row].elevation = _elevations[x];
     	
-    	rowsinitialized[row] = true;
-    	
-    	for(uint r = 0; r < mapsize; r++)
-    	{
-    		if(rowsinitialized[r] == false) // at least one row is not yet initialized. Return.
-    			return;
-    	}	
-    	allrowsinitialized = true;
     }
     
     
@@ -324,15 +305,7 @@ contract Etheria {
      *                                                                                        
      */
     
-    function retrieveLiquidBalance()
-    {
-    	if(msg.sender == owner)
-    		owner.send(liquidBalance);
-    }
-    
     Block[20] blocks;
-    bool allblocksinitialized;
-    bool[20] blocksinitialized;
     
     struct Block
     {
@@ -344,10 +317,6 @@ contract Etheria {
     
     function initializeBlockDefinition(uint8 which, int8[24] occupies, int8[] surroundedby)
     {
-    	if(allblocksinitialized)
-    		return;
-    	else
-    	{
     		blocks[which].which = which;
         	for(uint8 o = 0; o < 8; o++)
         	{	
@@ -364,15 +333,6 @@ contract Etheria {
         			blocks[which].sb[oo][ii] = surroundedby[oo*3+ii]; // counts from 0-? (up to 16*3)
         		}
         	}
-        	
-        	blocksinitialized[which] = true;
-        	for(uint b = 0; b < 20; b++)
-        	{
-        		if(blocksinitialized[b] == false) // at least one row is not yet initialized. Return.
-        			return;
-        	}	
-        	allblocksinitialized = true;
-    	}	
     }
     
     function getOccupies(uint8 which) constant returns (int8[3][8])
@@ -476,13 +436,4 @@ contract Etheria {
 		}	
     }
     
-    /**********
-    Standard kill() function to recover funds 
-    **********/
-   
-    function kill()
-    { 
-    	if (msg.sender == owner)
-    		suicide(owner);  // kills this contract and sends remaining funds back to creator
-    }
 }
