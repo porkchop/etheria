@@ -11,7 +11,6 @@ contract Etheria {
 	 */
     uint8 mapsize = 17;
     Tile[17][17] tiles;
-    uint8 SEA_LEVEL = 125;
     address initializer;
     address owner;
     
@@ -187,7 +186,7 @@ contract Etheria {
     			msg.sender.send(msg.value); 		// return their money
     		return;
     	}
-    	else if(tiles[x][y].owner == address(0)) // if unowned, accept offer of 1 ETH immediately
+    	else if(tiles[x][y].elevation >= 125 && tiles[x][y].owner == address(0)) // if unowned and above sea level, accept offer of 1 ETH immediately
     	{
     		if(msg.value != 1000000000000000000) // 1 ETH is the starting value. If not enough or too much...
     		{
@@ -277,56 +276,35 @@ contract Etheria {
     	return tiles[x][y].offers;
     }
     
-    /***
-     *     _____             _                  _     _           _                           
-     *    /  __ \           | |                | |   | |         | |                          
-     *    | /  \/ ___  _ __ | |_ _ __ __ _  ___| |_  | |__   __ _| | __ _ _ __   ___ ___  ___ 
-     *    | |    / _ \| '_ \| __| '__/ _` |/ __| __| | '_ \ / _` | |/ _` | '_ \ / __/ _ \/ __|
-     *    | \__/\ (_) | | | | |_| | | (_| | (__| |_  | |_) | (_| | | (_| | | | | (_|  __/\__ \
-     *     \____/\___/|_| |_|\__|_|  \__,_|\___|\__| |_.__/ \__,_|_|\__,_|_| |_|\___\___||___/
-     *                                                                                        
-     */
-    
     Block[20] blocks;
     
     struct Block
     {
     	uint8 which;
-    	int8[3][8] occ; // [x,y,z] 8 times
-    	uint8 numsb; 
-    	int8[3][16] sb; // [x,y,z] 16 times
+    	int8[3][8] occupies; // [x,y,z] 8 times
+    	int8[3][] surroundedby; // [x,y,z]
     }
     
-    function initializeBlockDefinition(uint8 which, int8[24] occupies, int8[] surroundedby)
+    function initializeBlockDefinition(uint8 which, int8[3][8] occupies, int8[3][] surroundedby)
     {
     		blocks[which].which = which;
         	for(uint8 o = 0; o < 8; o++)
         	{	
         		for(uint8 i = 0; i < 3; i++)
         		{
-        			blocks[which].occ[o][i] = occupies[o*3+i]; // counts from 0-23
-        		
+        			blocks[which].occupies[o][i] = occupies[o][i];
         		}
         	}
-        	for(uint8 oo = 0; oo < (surroundedby.length/3); oo++)
+        	blocks[which].surroundedby.length = surroundedby.length;
+        	for(uint8 oo = 0; oo < surroundedby.length; oo++)
         	{	
         		for(uint8 ii = 0; ii < 3; ii++)
         		{
-        			blocks[which].sb[oo][ii] = surroundedby[oo*3+ii]; // counts from 0-? (up to 16*3)
+        			blocks[which].surroundedby[oo][ii] = surroundedby[oo][ii];
         		}
         	}
     }
-    
-    function getOccupies(uint8 which) constant returns (int8[3][8])
-    {
-    	return blocks[which].occ;
-    }
-    
-    function getSurroundedBy(uint8 which) constant returns (int8[3][16])
-    {
-    	return blocks[which].sb;
-    }
-    
+        
     int8[3][][17][17] occupado; 
     
     function initializeOccupado(uint col, uint row)
