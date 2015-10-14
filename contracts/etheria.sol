@@ -11,9 +11,9 @@ contract Etheria {
 	 */
     uint8 mapsize = 17;
     Tile[17][17] tiles;
-    uint liquidBalance = 0;
-    uint illiquidBalance = 0;
     uint8 SEA_LEVEL = 125;
+    address initializer;
+    address owner;
     
     struct Tile 
     {
@@ -27,6 +27,8 @@ contract Etheria {
     }
     
     function Etheria() {
+    	initializer = 0x1312fd55346f4ced45e0da98cd5ab0dc50a5459f; // some to-be-killed initializer contract
+    	owner = msg.sender;
     }
     
     /***
@@ -42,13 +44,11 @@ contract Etheria {
     
     function initializeTiles(uint8 row, uint8[17] _elevations)
     {
-    	
     	if(row >= mapsize) // this row index is out of bounds.
     		return; 
     	
     	for(uint8 x = 0; x < mapsize; x++)
-    	    tiles[x][row].elevation = _elevations[x];
-    	
+    		tiles[x][row].elevation = _elevations[x];
     }
     
     
@@ -63,30 +63,6 @@ contract Etheria {
         	}	
         }	
     	return elevations;
-    }
-    
-    /***
-     *    ______                                                        _   _   _ _           
-     *    | ___ \                                                      | | | | (_) |          
-     *    | |_/ /_   _ _   _   _   _ _ __   _____      ___ __   ___  __| | | |_ _| | ___  ___ 
-     *    | ___ \ | | | | | | | | | | '_ \ / _ \ \ /\ / / '_ \ / _ \/ _` | | __| | |/ _ \/ __|
-     *    | |_/ / |_| | |_| | | |_| | | | | (_) \ V  V /| | | |  __/ (_| | | |_| | |  __/\__ \
-     *    \____/ \__,_|\__, |  \__,_|_| |_|\___/ \_/\_/ |_| |_|\___|\__,_|  \__|_|_|\___||___/
-     *                  __/ |                                                                 
-     *                 |___/                                                                  
-     */
-   
-    function buyTile(uint8 x, uint8 y) 
-    {
-    	if(msg.value == 0) // must provide cash money to buy tiles
-    		return;
-    	if(tiles[x][y].elevation >= SEA_LEVEL && tiles[x][y].owner == 0 && msg.value == 1000000000000000000) // 1 eth
-    	{
-    		tiles[x][y].owner = msg.sender;
-    		liquidBalance+=msg.value;
-    	}
-    	else
-    		msg.sender.send(msg.value); // return money
     }
     
     function getOwners() constant returns(address[17][17])
@@ -205,27 +181,36 @@ contract Etheria {
     
     function makeOffer(uint8 x, uint8 y)
     {
-    	if(msg.value == 0)
-    		return;
-    	else if(msg.value < 10000000000000000 || msg.value > 1208925819614629174706175) // .01 ether up to (2^80 - 1) wei is the valid range
+    	if(msg.value < 10000000000000000 || msg.value > 1208925819614629174706175) // .01 ether up to (2^80 - 1) wei is the valid range
     	{
-    		msg.sender.send(msg.value); 		// return their money
+    		if(!(msg.value == 0))
+    			msg.sender.send(msg.value); 		// return their money
     		return;
     	}
+    	else if(tiles[x][y].owner == address(0)) // if unowned, accept offer of 1 ETH immediately
+    	{
+    		if(msg.value != 1000000000000000000) // 1 ETH is the starting value. If not enough or too much...
+    		{
+    			msg.sender.send(msg.value); 	 // return their money
+        		return;
+    		}	
+    		else
+    		{
+    			owner.send(msg.value);     		 // this was a valid offer, send money to contract owner
+    			tiles[x][y].owner = msg.sender;  // set tile owner to the buyer
+    			return;		
+    		}	
+    	}	
     	else
     	{
-    		if(tiles[x][y].offerers.length > 10) // this tile can only hold 10 offers at a time
-    			return;
-    		else
+    		if(tiles[x][y].offerers.length < 10) // this tile can only hold 10 offers at a time
     		{
     			for(uint8 i = 0; i < tiles[x][y].offerers.length; i++)
     			{
     				if(tiles[x][y].offerers[i] == msg.sender) // user has already made an offer. Update it and return;
     				{
     					msg.sender.send(tiles[x][y].offers[i]); // return their previous money
-    					illiquidBalance-=tiles[x][y].offers[i];
     					tiles[x][y].offers[i] = msg.value; // set the new offer
-    					illiquidBalance+=msg.value;
     					return;
     				}
     			}	
@@ -234,7 +219,6 @@ contract Etheria {
     			tiles[x][y].offers.length++; // make room for 1 more
     			tiles[x][y].offerers[tiles[x][y].offerers.length - 1] = msg.sender; // record who is making the offer
     			tiles[x][y].offers[tiles[x][y].offers.length - 1] = msg.value; // record the offer
-    			illiquidBalance+=msg.value;
     		}	
     	}
     }
@@ -260,7 +244,6 @@ contract Etheria {
     {
     	// return the money
         tiles[x][y].offerers[i].send(tiles[x][y].offers[i]);
-        illiquidBalance-=tiles[x][y].offers[i];
     			
     	// delete user and offer and reshape the array
     	delete tiles[x][y].offerers[i];   // zero out user
@@ -278,7 +261,6 @@ contract Etheria {
     function acceptOffer(uint8 x, uint8 y, uint8 i) // accepts the offer at index (1-10)
     {
     	tiles[x][y].owner.send(tiles[x][y].offers[i]); // send offer money to oldowner
-    	illiquidBalance-=tiles[x][y].offers[i];
     	tiles[x][y].owner = tiles[x][y].offerers[i]; // new owner is the offerer
     	delete tiles[x][y].offerers; // delete all offerers
     	delete tiles[x][y].offers; // delete all offers
