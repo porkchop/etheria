@@ -1,5 +1,13 @@
 import 'mortal'; // TODO
 
+contract BlockInfoRetriever is mortal 
+{
+	function getBlockDefOccupies(uint8 row, uint8[17] _elevations)
+	{}
+	function initBlockDef(uint8 which, int8[3][8] occupies, int8[3][] surroundedby)
+    {}
+}
+
 contract Etheria is mortal // TODO
 {
 	
@@ -33,12 +41,14 @@ contract Etheria is mortal // TODO
     	int8[3][] occupado;
     }
     
+    BlockDefRetriever bdr;
+    
     Block[20] blocks;
+    
     struct Block
     {
-    	uint8 which;
     	int8[3][8] occupies; // [x,y,z] 8 times
-    	int8[3][] surroundedby; // [x,y,z]
+    	int8[3][] attachesto; // [x,y,z]
     }
 	
     function Etheria() {
@@ -247,20 +257,26 @@ contract Etheria is mortal // TODO
     	return blocks[which].occupies;
     }
     
-    function getBlockDefSurroundedby(uint8 which) public constant returns (int8[3][])
+    function getBlockDefAttachesto(uint8 which) public constant returns (int8[3][])
     {
-    	return blocks[which].surroundedby;
+    	return blocks[which].attachesto;
     }
     
-    function initBlockDef(uint8 which, int8[3][8] occupies, int8[3][] surroundedby) public 
+    function initBlockDefOccupies(uint8 which, int8[3][8] occupies) public 
     {
 // TODO
 //    	if(msg.sender != initializer)
 //    		return;
-    	blocks[which].which = which;
     	blocks[which].occupies = occupies;
-    	//blocks[which].surroundedby.length = surroundedby.length;
-    	blocks[which].surroundedby = surroundedby;
+    }
+    
+    function initBlockDefAttachesto(uint8 which, int8[3][] attachesto) public
+    {
+// TODO
+//    	if(msg.sender != initializer)
+//    		return;
+    	blocks[which].attachesto.length = attachesto.length;
+    	blocks[which].attachesto = attachesto;
     }
     
 //    function getOccupies(int8 which, int8 x, int8 y, int8 z) private constant returns (int8[3][8])
@@ -279,16 +295,16 @@ contract Etheria is mortal // TODO
 //    
 //    function getSurroundings(int8 which, int8 x, int8 y, int8 z) private constant returns (int8[3][])
 //    {
-//    	int8[3][] surroundedby = blocks[uint(which)].surroundedby;
-//    	for(uint8 b = 0; b < surroundedby.length; b++)
+//    	int8[3][] attachesto = blocks[uint(which)].attachesto;
+//    	for(uint8 b = 0; b < attachesto.length; b++)
 //    	{
-//    		surroundedby[b][0] = surroundedby[b][0]+x;
-//    		surroundedby[b][1] = surroundedby[b][1]+y;
-//    		if(y % 2 != 0 && surroundedby[b][1]%2 != 0)
-//    			surroundedby[b][0] = surroundedby[b][0]+1; // anchor y and this hex y are both odd, offset by +1
-//    		surroundedby[b][2] = surroundedby[b][2]+z;
+//    		attachesto[b][0] = attachesto[b][0]+x;
+//    		attachesto[b][1] = attachesto[b][1]+y;
+//    		if(y % 2 != 0 && attachesto[b][1]%2 != 0)
+//    			attachesto[b][0] = attachesto[b][0]+1; // anchor y and this hex y are both odd, offset by +1
+//    		attachesto[b][2] = attachesto[b][2]+z;
 //    	}
-//    	return surroundedby;
+//    	return attachesto;
 //    }
     
     function isValidBlockLocation(uint8 col, uint8 row, int8 which, int8 x, int8 y, int8 z) private constant returns (bool)
@@ -332,23 +348,23 @@ contract Etheria is mortal // TODO
     		return false;
     	}	
     	
-//    	int8[3][] surroundedby = blocks[uint(which)].surroundedby;
-//    	for(b = 0; b < surroundedby.length; b++)
+//    	int8[3][] attachesto = blocks[uint(which)].attachesto;
+//    	for(b = 0; b < attachesto.length; b++)
 //    	{
-//    		surroundedby[b][0] = surroundedby[b][0]+x;
-//    		surroundedby[b][1] = surroundedby[b][1]+y;
-//    		if(y % 2 != 0 && surroundedby[b][1]%2 != 0)
-//    			surroundedby[b][0] = surroundedby[b][0]+1; // anchor y and this hex y are both odd, offset by +1
-//    		surroundedby[b][2] = surroundedby[b][2]+z;
+//    		attachesto[b][0] = attachesto[b][0]+x;
+//    		attachesto[b][1] = attachesto[b][1]+y;
+//    		if(y % 2 != 0 && attachesto[b][1]%2 != 0)
+//    			attachesto[b][0] = attachesto[b][0]+1; // anchor y and this hex y are both odd, offset by +1
+//    		attachesto[b][2] = attachesto[b][2]+z;
 //    	}
 //    	
-//    	for(uint8 l = 0; l < surroundedby.length; l++)
+//    	for(uint8 l = 0; l < attachesto.length; l++)
 //    	{
 //    		for(uint o = 0; o < tiles[col][row].occupado.length; o++)
 //    		{
 //    			if(wouldoccupy[l][2] == 0) // if on the ground, touches is always true
 //    				return true;
-//    			if(surroundedby[l][0] == tiles[col][row].occupado[o][0] && surroundedby[l][1] == tiles[col][row].occupado[o][1] && surroundedby[l][2] == tiles[col][row].occupado[o][2]) // are the arrays equal?
+//    			if(attachesto[l][0] == tiles[col][row].occupado[o][0] && attachesto[l][1] == tiles[col][row].occupado[o][1] && attachesto[l][2] == tiles[col][row].occupado[o][2]) // are the arrays equal?
 //    				return true;
 //    		}
 //    		if(l >= 8 && touches == true)
