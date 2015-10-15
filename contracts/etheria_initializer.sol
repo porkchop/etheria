@@ -9,11 +9,9 @@ import "mortal";
 //}
 
 contract EtheriaInterface is mortal {
-	function initTiles(uint8 row, uint8[17] _elevations)
+	function initElevations(uint8 row, uint8[17] _elevations)
 	{}
 	function initBlockDef(uint8 which, int8[3][8] occupies, int8[3][] surroundedby)
-    {}
-	function initOccupado(uint col, uint row)
     {}
 }
 
@@ -25,7 +23,7 @@ contract EtheriaInitializer is EtheriaInterface {
     	ei = _e;
     }
     
-    function initTilesRemote(uint8 row, uint8[17] _elevations)
+    function initElevationsRemote(uint8 row, uint8[17] _elevations)
     {
     	ei.initTiles(row, _elevations);
     }
@@ -34,10 +32,4 @@ contract EtheriaInitializer is EtheriaInterface {
     {
     	ei.initBlockDef(which, occupies, surroundedby);
     }
-        
-    function initOccupadoRemote(uint col, uint row)
-    {
-    	ei.initOccupado(col,row);
-    }
-    
 }

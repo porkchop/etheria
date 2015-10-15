@@ -27,11 +27,9 @@ contract Etheria //is EtheriaHelper
     	int8[3][] occupado;
     }
     
-   // EtheriaHelper eh;
 	
     function Etheria() {
     	creator = msg.sender;
-    	//eh = EtheriaHelper(0xf20c9fa34847f6bc42b2f60014268bec65676af7);
     }
     
     function setInitializer(address _i)
@@ -53,16 +51,15 @@ contract Etheria //is EtheriaHelper
      *                 |_|                    
      */
     
-    // needs access to Tiles
-    function initTiles(uint8 row, uint8[17] _elevations)
+    function initElevations(uint8 row, uint8[17] _elevations)
     {
-    	if(msg.sender != initializer)
-    		return;
+// TODO
+//    	if(msg.sender != initializer)
+//    		return;
     	for(uint8 col = 0; col < mapsize; col++)
     		tiles[col][row].elevation = _elevations[col];
     }
     
-    // needs access to Tiles
     function getElevations() constant returns (uint8[17][17])
     {
         uint8[17][17] memory elevations;
@@ -76,7 +73,6 @@ contract Etheria //is EtheriaHelper
     	return elevations;
     }
     
-    // needs access to Tiles
     function getOwners() constant returns(address[17][17])
     {
         address[17][17] memory owners;
@@ -101,7 +97,6 @@ contract Etheria //is EtheriaHelper
      *                                                                                                    
      */
     // see EtheriaHelper for non-refucktored version of this algorithm.
-    // needs access to nothing
     function getUint8FromByte32(bytes32 _b32, uint8 byteindex) private constant returns(uint8) 
     {
     	if(byteindex == 0)
@@ -110,7 +105,6 @@ contract Etheria //is EtheriaHelper
     		return uint8(((uint(_b32) % (16 ** (64 - (byteindex*2)))) - ((uint(_b32) % (16 ** (64 - (byteindex*2)))) % (16 ** (64 - 2 - (byteindex*2))))) / (16 ** (64 - 2 - (byteindex*2)))); 	
     }
     
-    // needs access to Tiles
     function farmTile(uint8 col, uint8 row)
     {
         if(tiles[col][row].owner != msg.sender)
@@ -130,7 +124,6 @@ contract Etheria //is EtheriaHelper
     	tiles[col][row].lastfarm = block.number;
     }
     
-    // needs access to Tiles and Blocks
     function editBlock(uint8 col, uint8 row, uint index, int8[5] block)  
     {
         if(tiles[col][row].owner != msg.sender)
@@ -195,10 +188,6 @@ contract Etheria //is EtheriaHelper
     	return tiles[col][row].blocks;
     }
     
-    // block edit validation
-    
-    
-    
     // TODO:
     // DONE block texturing
     // DONE angle camera
@@ -228,8 +217,9 @@ contract Etheria //is EtheriaHelper
     
     function initBlockDef(uint8 which, int8[3][8] occupies, int8[3][] surroundedby)
     {
-    	if(msg.sender != initializer)
-    		return;
+// TODO
+//    	if(msg.sender != initializer)
+//    		return;
     	blocks[which].which = which;
     	for(uint8 o = 0; o < 8; o++)
     	{	
@@ -248,33 +238,33 @@ contract Etheria //is EtheriaHelper
     	}
     }
     
-    function getOccupies(int8 which, int8 x, int8 y, int8 z) private constant returns (int8[3][8])
-    {
-    	int8[3][8] wouldoccupy = blocks[uint(which)].occupies;
-    	for(uint8 b = 0; b < 8; b++) // always 8 hexes
-    	{
-    		wouldoccupy[b][0] = wouldoccupy[b][0]+x;
-    		wouldoccupy[b][1] = wouldoccupy[b][1]+y;
-    		if(y % 2 != 0 && wouldoccupy[b][1]%2 != 0)
-    			wouldoccupy[b][0] = wouldoccupy[b][0]+1; // anchor y and this hex y are both odd, offset by +1
-    		wouldoccupy[b][2] = wouldoccupy[b][2]+z;
-    	}
-    	return wouldoccupy;
-    }
-    
-    function getSurroundings(int8 which, int8 x, int8 y, int8 z) private constant returns (int8[3][])
-    {
-    	int8[3][] surroundings = blocks[uint(which)].surroundedby;
-    	for(uint8 b = 0; b < surroundings.length; b++)
-    	{
-    		surroundings[b][0] = surroundings[b][0]+x;
-    		surroundings[b][1] = surroundings[b][1]+y;
-    		if(y % 2 != 0 && surroundings[b][1]%2 != 0)
-    			surroundings[b][0] = surroundings[b][0]+1; // anchor y and this hex y are both odd, offset by +1
-    		surroundings[b][2] = surroundings[b][2]+z;
-    	}
-    	return surroundings;
-    }
+//    function getOccupies(int8 which, int8 x, int8 y, int8 z) private constant returns (int8[3][8])
+//    {
+//    	int8[3][8] wouldoccupy = blocks[uint(which)].occupies;
+//    	for(uint8 b = 0; b < 8; b++) // always 8 hexes
+//    	{
+//    		wouldoccupy[b][0] = wouldoccupy[b][0]+x;
+//    		wouldoccupy[b][1] = wouldoccupy[b][1]+y;
+//    		if(y % 2 != 0 && wouldoccupy[b][1]%2 != 0)
+//    			wouldoccupy[b][0] = wouldoccupy[b][0]+1; // anchor y and this hex y are both odd, offset by +1
+//    		wouldoccupy[b][2] = wouldoccupy[b][2]+z;
+//    	}
+//    	return wouldoccupy;
+//    }
+//    
+//    function getSurroundings(int8 which, int8 x, int8 y, int8 z) private constant returns (int8[3][])
+//    {
+//    	int8[3][] surroundings = blocks[uint(which)].surroundedby;
+//    	for(uint8 b = 0; b < surroundings.length; b++)
+//    	{
+//    		surroundings[b][0] = surroundings[b][0]+x;
+//    		surroundings[b][1] = surroundings[b][1]+y;
+//    		if(y % 2 != 0 && surroundings[b][1]%2 != 0)
+//    			surroundings[b][0] = surroundings[b][0]+1; // anchor y and this hex y are both odd, offset by +1
+//    		surroundings[b][2] = surroundings[b][2]+z;
+//    	}
+//    	return surroundings;
+//    }
     
     function isValidBlockLocation(uint8 col, uint8 row, int8 which, int8 x, int8 y, int8 z) private constant returns (bool)
     {
@@ -287,7 +277,7 @@ contract Etheria //is EtheriaHelper
     		if(y % 2 != 0 && wouldoccupy[b][1]%2 != 0)
     			wouldoccupy[b][0] = wouldoccupy[b][0]+1; // anchor y and this hex y are both odd, offset by +1
     		wouldoccupy[b][2] = wouldoccupy[b][2]+z;
-    		if(!blockHexCoordsValid(wouldoccupy[b][0], wouldoccupy[b][1]))
+    		if(!blockHexCoordsValid(wouldoccupy[b][0], wouldoccupy[b][1])) // this is the out-of-bounds check
     			return false;
     	}
     	
