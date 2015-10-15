@@ -1,4 +1,6 @@
-contract Etheria //is EtheriaHelper 
+import 'mortal'; // TODO
+
+contract Etheria is mortal // TODO
 {
 	
 	/***
@@ -97,12 +99,20 @@ contract Etheria //is EtheriaHelper
      *                                                                                                    
      */
     // see EtheriaHelper for non-refucktored version of this algorithm.
-    function getUint8FromByte32(bytes32 _b32, uint8 byteindex) private constant returns(uint8) 
-    {
+    function getUint8FromByte32(bytes32 _b32, uint8 byteindex) public constant returns(uint8) {
+    	uint numdigits = 64;
+    	uint buint = uint(_b32);
+    	uint upperpowervar = 16 ** (numdigits - (byteindex*2)); 		// @i=0 upperpowervar=16**64 (SEE EXCEPTION BELOW), @i=1 upperpowervar=16**62, @i upperpowervar=16**60
+    	uint lowerpowervar = 16 ** (numdigits - 2 - (byteindex*2));		// @i=0 upperpowervar=16**62, @i=1 upperpowervar=16**60, @i upperpowervar=16**58
+    	uint postheadchop;
     	if(byteindex == 0)
-    		return uint8((uint(_b32) - (uint(_b32) % (16 ** (64 - 2 - (byteindex*2))))) / (16 ** (64 - 2 - (byteindex*2)))); 	
+    		postheadchop = buint; 								//for byteindex 0, buint is just the input number. 16^64 is out of uint range, so this exception has to be made.
     	else
-    		return uint8(((uint(_b32) % (16 ** (64 - (byteindex*2)))) - ((uint(_b32) % (16 ** (64 - (byteindex*2)))) % (16 ** (64 - 2 - (byteindex*2))))) / (16 ** (64 - 2 - (byteindex*2)))); 	
+    		postheadchop = buint % upperpowervar; 				// @i=0 _b32=a1b2c3d4... postheadchop=a1b2c3d4, @i=1 postheadchop=b2c3d4, @i=2 postheadchop=c3d4
+    	uint remainder = postheadchop % lowerpowervar; 			// @i=0 remainder=b2c3d4, @i=1 remainder=c3d4, @i=2 remainder=d4
+    	uint evenedout = postheadchop - remainder; 				// @i=0 evenedout=a1000000, @i=1 remainder=b20000, @i=2 remainder=c300
+    	uint b = evenedout / lowerpowervar; 					// @i=0 b=a1 (to uint), @i=1 b=b2, @i=2 b=c3
+    	return uint8(b);
     }
     
     function farmTile(uint8 col, uint8 row)
@@ -114,7 +124,7 @@ contract Etheria //is EtheriaHelper
         bytes32 lastblockhash = block.blockhash(block.number - 1);
     	for(uint8 i = 0; i < 20; i++)
     	{
-            tiles[col][row].blocks.length+=5;
+            tiles[col][row].blocks.length+=1;
     	    tiles[col][row].blocks[tiles[col][row].blocks.length - 1][0] = int8(getUint8FromByte32(lastblockhash,i) % 32); // which, guaranteed 0-31
     	    tiles[col][row].blocks[tiles[col][row].blocks.length - 1][1] = 0; // x
     	    tiles[col][row].blocks[tiles[col][row].blocks.length - 1][2] = 0; // y

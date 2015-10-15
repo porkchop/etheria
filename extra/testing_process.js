@@ -32,9 +32,12 @@ etheria.getElevations(); // are they all properly initialized?
 
 // BUY A TILE
 etheria.getOwners(); // should be all 0x0000000000000000000000000000000000000000
-etheria.makeOffer.sendTransaction(8,8,{from:eth.coinbase,value:1000000000000000000});
+etheria.makeOffer.sendTransaction(8,8,{from:eth.accounts[0],value:1000000000000000000});
+etheria.makeOffer.sendTransaction(7,7,{from:eth.accounts[1],value:1000000000000000000});
 etheria.getOwners(); // should be all 0x0000000000000000000000000000000000000000 except 8,8 which should be 250000000000000000
-web3.fromWei(eth.getBalance(etheria.address));
+web3.fromWei(eth.getBalance(etheria.address)); // should be zero, money is sent to creator
+web3.fromWei(eth.getBalance(eth.accounts[1])); // should be - 1
+web3.fromWei(eth.getBalance(eth.accounts[0])); // should be + 1
 
 // FARM A TILE
 etheria.getBlocks(8,8); // should be empty array
