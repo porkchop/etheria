@@ -1,14 +1,21 @@
 import 'mortal'; // TODO
 
-contract BlockInfoRetriever is mortal 
+
+contract BlockDefRetriever is mortal 
 {
-	function getBlockDefOccupies(uint8 row, uint8[17] _elevations)
+	function getOccupies(uint8 which) returns (int8[3][8])
 	{}
-	function initBlockDef(uint8 which, int8[3][8] occupies, int8[3][] surroundedby)
+	function getAttachesto(uint8 which) returns (int8[3][8])
     {}
 }
 
-contract Etheria is mortal // TODO
+//contract MapElevationRetriever 
+//{
+//	function getElevations() constant returns (uint8[17][17])
+//	{}
+//}
+
+contract Etheria is BlockDefRetriever // TODO
 {
 	
 	/***
@@ -22,14 +29,11 @@ contract Etheria is mortal // TODO
 	 */
     uint8 mapsize = 17;
     Tile[17][17] tiles;
-    bool initializerset;
-    address initializer;
     address creator;
 //    bool[17] elevationsInitialized;
 //    bool allElevationsInitialized;
-//    bool[32] blockDefsInitialized;
-//    bool allBlockDefsInitialized;
     
+        
     struct Tile 
     {
     	uint8 elevation;
@@ -42,25 +46,9 @@ contract Etheria is mortal // TODO
     }
     
     BlockDefRetriever bdr;
-    
-    Block[20] blocks;
-    
-    struct Block
-    {
-    	int8[3][8] occupies; // [x,y,z] 8 times
-    	int8[3][] attachesto; // [x,y,z]
-    }
-	
     function Etheria() {
     	creator = msg.sender;
-    }
-    
-    function setInitializer(address _i)
-    {
-    	if(initializerset)
-    		return;
-    	initializer = _i;
-    	initializerset = true;
+    	bdr = BlockDefRetriever(0xed9c3aead241f6fd8e6b6951e29c3dcb5b3662c1);
     }
     
     /***
@@ -155,22 +143,14 @@ contract Etheria is mortal // TODO
     	tiles[col][row].lastfarm = block.number;
     }
     
-    function getWhatHappened() public constant returns (uint8)
-    {
-    	return whathappened;
-    }
-    
-    uint8 whathappened;
     function editBlock(uint8 col, uint8 row, uint index, int8[5] block)  
     {
         if(tiles[col][row].owner != msg.sender)
         {
-        	whathappened = 1;
         	return;
         }
         if(block[3] < -1) // Can't hide blocks or change configuration of hidden blocks. This limitation is to prevent massive reorganization of occupado. 
         {
-        	whathappened = 2;
         	return;
         }
         block[0] = tiles[col][row].blocks[index][0]; // can't change the which, so set it to whatever it already was
@@ -220,10 +200,6 @@ contract Etheria is mortal // TODO
          	}	
          	tiles[col][row].blocks[index] = block;
         }
-    	else
-    	{
-    		whathappened = 3;
-    	}
         // else not a valid block location, return
     	return;
     }
@@ -251,33 +227,6 @@ contract Etheria is mortal // TODO
     // block trading
     // reclamation
     // price modifier
-    
-    function getBlockDefOccupies(uint8 which) public constant returns (int8[3][8])
-    {
-    	return blocks[which].occupies;
-    }
-    
-    function getBlockDefAttachesto(uint8 which) public constant returns (int8[3][])
-    {
-    	return blocks[which].attachesto;
-    }
-    
-    function initBlockDefOccupies(uint8 which, int8[3][8] occupies) public 
-    {
-// TODO
-//    	if(msg.sender != initializer)
-//    		return;
-    	blocks[which].occupies = occupies;
-    }
-    
-    function initBlockDefAttachesto(uint8 which, int8[3][] attachesto) public
-    {
-// TODO
-//    	if(msg.sender != initializer)
-//    		return;
-    	blocks[which].attachesto.length = attachesto.length;
-    	blocks[which].attachesto = attachesto;
-    }
     
 //    function getOccupies(int8 which, int8 x, int8 y, int8 z) private constant returns (int8[3][8])
 //    {
@@ -310,7 +259,7 @@ contract Etheria is mortal // TODO
     function isValidBlockLocation(uint8 col, uint8 row, int8 which, int8 x, int8 y, int8 z) private constant returns (bool)
     {
     	// first, get the 8 hexes it would occupy
-    	int8[3][8] wouldoccupy = blocks[uint(which)].occupies;
+    	int8[3][8] memory wouldoccupy = bdr.getOccupies(uint8(which));
     	bool touches;
     	for(uint8 b = 0; b < 8; b++) // always 8 hexes
     	{
@@ -321,14 +270,12 @@ contract Etheria is mortal // TODO
     		wouldoccupy[b][2] = wouldoccupy[b][2]+z;
     		if(!blockHexCoordsValid(wouldoccupy[b][0], wouldoccupy[b][1])) // this is the out-of-bounds check
     		{
-    			whathappened = 3;
     			return false;
     		}
 //    		for(uint o = 0; o < tiles[col][row].occupado.length; o++)
 //        	{
 //    			if(wouldoccupy[b][0] == tiles[col][row].occupado[o][0] && wouldoccupy[b][1] == tiles[col][row].occupado[o][1] && wouldoccupy[b][2] == tiles[col][row].occupado[o][2]) // are the arrays equal?
 //    			{
-//    				whathappened = 4;
 //    				return false; // this hex conflicts. The proposed block does not avoid overlap. Return false immediately.
 //    			}
 //        	}
@@ -339,12 +286,10 @@ contract Etheria is mortal // TODO
     	}
     	if(touches) // the 8 hexes didn't go out of bounds, didn't overlap, and at least one touched the ground.
     	{
-    		whathappened = 5;
     		return true;
     	}
     	else
     	{
-    		whathappened = 6;
     		return false;
     	}	
     	
