@@ -1,7 +1,6 @@
 import 'mortal'; // TODO
 
-
-contract BlockDefRetriever is mortal 
+contract BlockDefRetriever is mortal  // TODO
 {
 	function getOccupies(uint8 which) returns (int8[3][8])
 	{}
@@ -9,13 +8,13 @@ contract BlockDefRetriever is mortal
     {}
 }
 
-//contract MapElevationRetriever 
-//{
-//	function getElevations() constant returns (uint8[33][33])
-//	{}
-//}
+contract MapElevationRetriever 
+{
+	function getElevation(uint8 col, uint8 row) constant returns (uint8)
+	{}
+}
 
-contract Etheria is BlockDefRetriever // TODO
+contract Etheria is BlockDefRetriever,MapElevationRetriever
 {
 	
 	/***
@@ -30,9 +29,6 @@ contract Etheria is BlockDefRetriever // TODO
     uint8 mapsize = 33;
     Tile[33][33] tiles;
     address creator;
-//    bool[33] elevationsInitialized;
-//    bool allElevationsInitialized;
-    
         
     struct Tile 
     {
@@ -43,47 +39,18 @@ contract Etheria is BlockDefRetriever // TODO
     	int8[5][] blocks; //0 = which,1 = blockx,2 = blocky,3 = blockz, 4 = color
     	uint lastfarm;
     	int8[3][] occupado;
+    	string name;
+    	string status;
     }
     
     BlockDefRetriever bdr;
+    MapElevationRetriever mer;
     
     function Etheria() {
     	creator = msg.sender;
     	bdr = BlockDefRetriever(0xed9c3aead241f6fd8e6b6951e29c3dcb5b3662c1); 
+    	mer = MapElevationRetriever(0xc35a4e966bf792734a25ea524448ea54de385e4e);
     }
-    
-    /***
-     *    ___  ___              _       _ _   
-     *    |  \/  |             (_)     (_) |  
-     *    | .  . | __ _ _ __    _ _ __  _| |_ 
-     *    | |\/| |/ _` | '_ \  | | '_ \| | __|
-     *    | |  | | (_| | |_) | | | | | | | |_ 
-     *    \_|  |_/\__,_| .__/  |_|_| |_|_|\__|
-     *                 | |                    
-     *                 |_|                    
-     */
-    
-//    function initElevations(uint8 row, uint8[33] _elevations)
-//    {
-//// TODO
-////    	if(msg.sender != initializer)
-////    		return;
-//    	for(uint8 col = 0; col < mapsize; col++)
-//    		tiles[col][row].elevation = _elevations[col];
-//    }
-//    
-//    function getElevations() constant returns (uint8[33][33])
-//    {
-//        uint8[33][33] memory elevations;
-//        for(uint8 row = 0; row < mapsize; row++)
-//        {
-//        	for(uint8 col = 0; col < mapsize; col++)
-//        	{
-//        		elevations[col][row] = tiles[col][row].elevation; 
-//        	}	
-//        }	
-//    	return elevations;
-//    }
     
     function getOwners() constant returns(address[33][33])
     {
@@ -96,6 +63,28 @@ contract Etheria is BlockDefRetriever // TODO
         	}	
         }	
     	return owners;
+    }
+    
+    function getName(uint8 col, uint8 row) public constant returns(string)
+    {
+    	return tiles[col][row].name;
+    }
+    function setName(uint8 col, uint8 row, string _n) public
+    {
+    	if(tiles[col][row].owner != msg.sender)
+    		return;
+    	tiles[col][row].name = _n;
+    }
+    
+    function getStatus(uint8 col, uint8 row) public constant returns(string)
+    {
+    	return tiles[col][row].status;
+    }
+    function setStatus(uint8 col, uint8 row, string _s) public
+    {
+    	if(tiles[col][row].owner != msg.sender)
+    		return;
+    	tiles[col][row].status = _s;
     }
     
     /***
@@ -159,7 +148,8 @@ contract Etheria is BlockDefRetriever // TODO
     	if(isValidBlockLocation(col,row,block[0],block[1],block[2],block[3]))
         {	// the new placement is valid
         	// get the proposed new 8 hex locations
-         	int8[3][8] wouldoccupy = blocks[uint(block[0])].occupies;
+         	int8[3][8] memory wouldoccupy = bdr.getOccupies(uint8(block[0]));
+         	int8[3][8] memory didoccupy = wouldoccupy;
          	for(uint8 b = 0; b < 8; b++) // always 8 hexes
          	{
          		wouldoccupy[b][0] = wouldoccupy[b][0]+block[1];
@@ -171,7 +161,6 @@ contract Etheria is BlockDefRetriever // TODO
          	if(tiles[col][row].blocks[index][3] >= 0) // If the previous z was greater than 0 (i.e. not hidden) ...
          	{
          		// get the previous 8 hex locations
-         		int8[3][8] didoccupy = blocks[uint(block[0])].occupies;
              	for(uint8 a = 0; a < 8; a++) // always 8 hexes
              	{
              		didoccupy[a][0] = didoccupy[a][0]+tiles[col][row].blocks[index][1];
@@ -257,6 +246,13 @@ contract Etheria is BlockDefRetriever // TODO
 //    	return attachesto;
 //    }
     
+    uint8 whathappened;
+    
+    function getWhatHappened() public constant returns (uint8)
+    {
+    	return whathappened;
+    }
+    
     function isValidBlockLocation(uint8 col, uint8 row, int8 which, int8 x, int8 y, int8 z) private constant returns (bool)
     {
     	// first, get the 8 hexes it would occupy
@@ -271,15 +267,17 @@ contract Etheria is BlockDefRetriever // TODO
     		wouldoccupy[b][2] = wouldoccupy[b][2]+z;
     		if(!blockHexCoordsValid(wouldoccupy[b][0], wouldoccupy[b][1])) // this is the out-of-bounds check
     		{
+    			whathappened = 1;
     			return false;
     		}
-//    		for(uint o = 0; o < tiles[col][row].occupado.length; o++)
-//        	{
-//    			if(wouldoccupy[b][0] == tiles[col][row].occupado[o][0] && wouldoccupy[b][1] == tiles[col][row].occupado[o][1] && wouldoccupy[b][2] == tiles[col][row].occupado[o][2]) // are the arrays equal?
-//    			{
-//    				return false; // this hex conflicts. The proposed block does not avoid overlap. Return false immediately.
-//    			}
-//        	}
+    		for(uint o = 0; o < tiles[col][row].occupado.length; o++)
+        	{
+    			if(wouldoccupy[b][0] == tiles[col][row].occupado[o][0] && wouldoccupy[b][1] == tiles[col][row].occupado[o][1] && wouldoccupy[b][2] == tiles[col][row].occupado[o][2]) // are the arrays equal?
+    			{
+    				whathappened = 2;
+    				return false; // this hex conflicts. The proposed block does not avoid overlap. Return false immediately.
+    			}
+        	}
     		if(touches == false && wouldoccupy[b][2] == 0) // if on the ground, touches is always true, only check if touches is not yet true
     		{
     			touches = true;
@@ -287,13 +285,16 @@ contract Etheria is BlockDefRetriever // TODO
     	}
     	if(touches) // the 8 hexes didn't go out of bounds, didn't overlap, and at least one touched the ground.
     	{
+    		whathappened = 3;
     		return true;
     	}
     	else
     	{
+    		whathappened = 4;
     		return false;
     	}	
-    	
+    	if(!touches)
+    	{	
 //    	int8[3][] attachesto = blocks[uint(which)].attachesto;
 //    	for(b = 0; b < attachesto.length; b++)
 //    	{
@@ -316,10 +317,17 @@ contract Etheria is BlockDefRetriever // TODO
 //    		if(l >= 8 && touches == true)
 //    			return true;
 //    	}	
-//    	if(touches == true)
-//    		return true;
-//    	else
-//    		return false;
+    	}
+    	if(touches) // the 8 hexes didn't go out of bounds, didn't overlap, and at least one touched the ground.
+    	{
+    		whathappened = 5;
+    		return true;
+    	}
+    	else
+    	{
+    		whathappened = 6;
+    		return false;
+    	}	
     }
     
     function blockHexCoordsValid(int8 x, int8 y) private constant returns (bool)
@@ -398,7 +406,8 @@ contract Etheria is BlockDefRetriever // TODO
     			msg.sender.send(msg.value); 		// return their money
     		return;
     	}
-    	else if(tiles[col][row].elevation >= 125 && tiles[col][row].owner == address(0)) // if unowned and above sea level, accept offer of 1 ETH immediately
+    	else if(mer.getElevation(col,row) >= 125 && tiles[col][row].owner == address(0) ||  // if unowned and above sea level, accept offer of 1 ETH immediately
+    			   (block.number - tiles[col][row].lastfarm) > 100000) 					// or if it's been more than 100000 blocks since the tile was last farmed
     	{
     		if(msg.value != 1000000000000000000) // 1 ETH is the starting value. If not enough or too much...
     		{
@@ -409,6 +418,7 @@ contract Etheria is BlockDefRetriever // TODO
     		{
     			creator.send(msg.value);     		 // this was a valid offer, send money to contract owner
     			tiles[col][row].owner = msg.sender;  // set tile owner to the buyer
+    			farmTile(col,row); 					 // always immediately farm the tile
     			return;		
     		}	
     	}	
@@ -471,7 +481,10 @@ contract Etheria is BlockDefRetriever // TODO
     
     function acceptOffer(uint8 col, uint8 row, uint8 i) // accepts the offer at index (1-10)
     {
-    	tiles[col][row].owner.send(tiles[col][row].offers[i]); // send offer money to oldowner
+    	uint offeramount = tiles[col][row].offers[i];
+    	uint housecut = offeramount / 10;
+    	creator.send(housecut);
+    	tiles[col][row].owner.send(offeramount-housecut); // send offer money to oldowner
     	tiles[col][row].owner = tiles[col][row].offerers[i]; // new owner is the offerer
     	delete tiles[col][row].offerers; // delete all offerers
     	delete tiles[col][row].offers; // delete all offers

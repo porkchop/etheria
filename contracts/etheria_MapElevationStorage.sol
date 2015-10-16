@@ -15,6 +15,11 @@ contract MapElevationStorage
     	return elevations[col][row];
     }
     
+//    function getLocked() public constant returns (bool)
+//    {
+//    	return allElevationsInitialized;
+//    }
+    
     function initElevations(uint8 col, uint8[33] _elevations) public 
     {
     	if(allElevationsInitialized) // lockout

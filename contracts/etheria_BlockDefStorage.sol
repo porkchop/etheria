@@ -22,6 +22,11 @@ contract BlockDefStorage
     	return blocks[which].attachesto;
     }
     
+//  function getLocked() public constant returns (bool)
+//  {
+//  	return (allOccupiesInitialized && allAttachestoInitialized);
+//  }
+    
     function initOccupies(uint8 which, int8[3][8] occupies) public 
     {
     	if(allOccupiesInitialized) // lockout
