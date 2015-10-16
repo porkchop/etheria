@@ -11,7 +11,7 @@ contract BlockDefRetriever is mortal
 
 //contract MapElevationRetriever 
 //{
-//	function getElevations() constant returns (uint8[17][17])
+//	function getElevations() constant returns (uint8[33][33])
 //	{}
 //}
 
@@ -27,16 +27,16 @@ contract Etheria is BlockDefRetriever // TODO
 	 *     \____/\___/|_| |_|\__|_|  \__,_|\___|\__| |_|_| |_|_|\__|
 	 *                                                              
 	 */
-    uint8 mapsize = 17;
-    Tile[17][17] tiles;
+    uint8 mapsize = 33;
+    Tile[33][33] tiles;
     address creator;
-//    bool[17] elevationsInitialized;
+//    bool[33] elevationsInitialized;
 //    bool allElevationsInitialized;
     
         
     struct Tile 
     {
-    	uint8 elevation;
+    	//uint8 elevation;
     	address owner;
     	address[] offerers;
     	uint[] offers;
@@ -46,9 +46,10 @@ contract Etheria is BlockDefRetriever // TODO
     }
     
     BlockDefRetriever bdr;
+    
     function Etheria() {
     	creator = msg.sender;
-    	bdr = BlockDefRetriever(0xed9c3aead241f6fd8e6b6951e29c3dcb5b3662c1);
+    	bdr = BlockDefRetriever(0xed9c3aead241f6fd8e6b6951e29c3dcb5b3662c1); 
     }
     
     /***
@@ -62,31 +63,31 @@ contract Etheria is BlockDefRetriever // TODO
      *                 |_|                    
      */
     
-    function initElevations(uint8 row, uint8[17] _elevations)
-    {
-// TODO
-//    	if(msg.sender != initializer)
-//    		return;
-    	for(uint8 col = 0; col < mapsize; col++)
-    		tiles[col][row].elevation = _elevations[col];
-    }
+//    function initElevations(uint8 row, uint8[33] _elevations)
+//    {
+//// TODO
+////    	if(msg.sender != initializer)
+////    		return;
+//    	for(uint8 col = 0; col < mapsize; col++)
+//    		tiles[col][row].elevation = _elevations[col];
+//    }
+//    
+//    function getElevations() constant returns (uint8[33][33])
+//    {
+//        uint8[33][33] memory elevations;
+//        for(uint8 row = 0; row < mapsize; row++)
+//        {
+//        	for(uint8 col = 0; col < mapsize; col++)
+//        	{
+//        		elevations[col][row] = tiles[col][row].elevation; 
+//        	}	
+//        }	
+//    	return elevations;
+//    }
     
-    function getElevations() constant returns (uint8[17][17])
+    function getOwners() constant returns(address[33][33])
     {
-        uint8[17][17] memory elevations;
-        for(uint8 row = 0; row < mapsize; row++)
-        {
-        	for(uint8 col = 0; col < mapsize; col++)
-        	{
-        		elevations[col][row] = tiles[col][row].elevation; 
-        	}	
-        }	
-    	return elevations;
-    }
-    
-    function getOwners() constant returns(address[17][17])
-    {
-        address[17][17] memory owners;
+        address[33][33] memory owners;
         for(uint8 row = 0; row < mapsize; row++)
         {
         	for(uint8 col = 0; col < mapsize; col++)
