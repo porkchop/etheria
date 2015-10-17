@@ -256,7 +256,8 @@ contract Etheria is BlockDefRetriever,MapElevationRetriever
     
     function getOccupiesFromBDR(uint8 which) public constant returns(int8[3][8])
     {
-    	return bdr.getOccupies(which);
+    	int8[3][8] memory occ = bdr.getOccupies(which);
+    	return occ;
     }
     
     function blockHexCoordsValid(int8 x, int8 y) private constant returns (bool)
