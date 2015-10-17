@@ -133,64 +133,93 @@ contract Etheria is BlockDefRetriever,MapElevationRetriever
     	tiles[col][row].lastfarm = block.number;
     }
     
-    function editBlock(uint8 col, uint8 row, uint index, int8[5] block)  
+    // SEVERAL CHECKS TO BE PERFORMED
+    // 1. DID THE OWNER SEND THIS MESSAGE?
+    // 2. IS THE Z LOCATION OF THE BLOCK BELOW ZERO? BLOCKS CANNOT BE HIDDEN AFTER SHOWING
+    // 3. DO ANY OF THE PROPOSED HEXES FALL OUTSIDE OF THE TILE? 
+    // 4. DO ANY OF THE PROPOSED HEXES CONFLICT WITH ENTRIES IN OCCUPADO? 
+    // 5. DO ANY OF THE BLOCKS TOUCH ANOTHER?
+    
+    function editBlock(uint8 col, uint8 row, uint index, int8[5] _block)  
     {
-        if(tiles[col][row].owner != msg.sender)
+        if(tiles[col][row].owner != msg.sender) // 1. DID THE OWNER SEND THIS MESSAGE?
         {
+        	whathappened = 1;
         	return;
         }
-        if(block[3] < -1) // Can't hide blocks\. This limitation is to prevent massive reorganization of occupado. 
+        if(_block[3] < -1) // 2. IS THE Z LOCATION OF THE BLOCK BELOW ZERO? BLOCKS CANNOT BE HIDDEN
         {
+        	whathappened = 2;
         	return;
         }
-        block[0] = tiles[col][row].blocks[index][0]; // can't change the which, so set it to whatever it already was
-              
-    	if(isValidBlockLocation(col,row,block[0],block[1],block[2],block[3]))
-        {	// the new placement is valid
-        	// get the proposed new 8 hex locations
-         	int8[3][8] memory wouldoccupy = bdr.getOccupies(uint8(block[0]));
-         	int8[3][8] memory didoccupy = wouldoccupy;
-         	for(uint8 b = 0; b < 8; b++) // always 8 hexes
+        
+        _block[0] = tiles[col][row].blocks[index][0]; // can't change the which, so set it to whatever it already was
+
+        bool touches;
+        
+        int8[3][8] memory wouldoccupy = bdr.getOccupies(uint8(_block[0])); // start would and did with the base set of 8 occupancies
+        int8[3][8] memory didoccupy = bdr.getOccupies(uint8(_block[0]));
+        
+        for(uint8 b = 0; b < 8; b++) // always 8 hexes, calculate the wouldoccupy and the didoccupy
+     	{
+     		wouldoccupy[b][0] = wouldoccupy[b][0]+_block[1];
+     		wouldoccupy[b][1] = wouldoccupy[b][1]+_block[2];
+     		if(wouldoccupy[0][1] % 2 != 0 && wouldoccupy[b][1]%2 != 0)
+     			wouldoccupy[b][0] = wouldoccupy[b][0]+1; // anchor y and this hex y are both odd, offset by +1
+     		wouldoccupy[b][2] = wouldoccupy[b][2]+_block[3];
+     		
+     		if(!blockHexCoordsValid(wouldoccupy[b][0], wouldoccupy[b][1])) // 3. DO ANY OF THE PROPOSED HEXES FALL OUTSIDE OF THE TILE? 
+    		{
+    			whathappened = 3;
+    			return;
+    		}
+     		for(uint o = 0; o < tiles[col][row].occupado.length; o++)  // 4. DO ANY OF THE PROPOSED HEXES CONFLICT WITH ENTRIES IN OCCUPADO? 
+        	{
+    			if(wouldoccupy[b][0] == tiles[col][row].occupado[o][0] && wouldoccupy[b][1] == tiles[col][row].occupado[o][1] && wouldoccupy[b][2] == tiles[col][row].occupado[o][2]) // are the arrays equal?
+    			{
+    				whathappened = 4;
+    				return; // this hex conflicts. The proposed block does not avoid overlap. Return false immediately.
+    			}
+        	}
+    		if(touches == false && wouldoccupy[b][2] == 0)  // 5. DO ANY OF THE BLOCKS TOUCH ANOTHER? (GROUND ONLY FOR NOW)
+    		{
+    			touches = true; // once true, always true til the end of this method
+    		}	
+     		
+     		didoccupy[b][0] = didoccupy[b][0]+tiles[col][row].blocks[index][1];
+     		didoccupy[b][1] = didoccupy[b][1]+tiles[col][row].blocks[index][2];
+     		if(didoccupy[0][1] % 2 != 0 && didoccupy[b][1]%2 != 0)
+     			didoccupy[b][0] = didoccupy[b][0]+1; // anchor y and this hex y are both odd, offset by +1
+     		didoccupy[b][2] = didoccupy[b][2]+tiles[col][row].blocks[index][3];
+     	}
+        
+        // EVERYTHING CHECKED OUT, WRITE OR OVERWRITE THE HEXES IN OCCUPADO
+ 
+      	if(tiles[col][row].blocks[index][3] >= 0) // If the previous z was greater than 0 (i.e. not hidden) ...
+     	{
+     		// get the previous 8 hex locations
+         	for(uint8 l = 0; l < 8; l++) // loop 8 times,find the previous occupado entries and overwrite them
          	{
-         		wouldoccupy[b][0] = wouldoccupy[b][0]+block[1];
-         		wouldoccupy[b][1] = wouldoccupy[b][1]+block[2];
-         		if(wouldoccupy[0][1] % 2 != 0 && wouldoccupy[b][1]%2 != 0)
-         			wouldoccupy[b][0] = wouldoccupy[b][0]+1; // anchor y and this hex y are both odd, offset by +1
-         		wouldoccupy[b][2] = wouldoccupy[b][2]+block[3];
+         		for(o = 0; o < tiles[col][row].occupado.length; o++)
+         		{
+         			if(didoccupy[l][0] == tiles[col][row].occupado[o][0] && didoccupy[l][1] == tiles[col][row].occupado[o][1] && didoccupy[l][2] == tiles[col][row].occupado[o][2]) // are the arrays equal?
+         			{
+         				tiles[col][row].occupado[o] = wouldoccupy[l]; // found it. Overwrite it
+         			}
+         		}
          	}
-         	if(tiles[col][row].blocks[index][3] >= 0) // If the previous z was greater than 0 (i.e. not hidden) ...
+     	}
+     	else // previous block was hidden
+     	{
+     		for(uint8 ll = 0; ll < 8; ll++) // add the 8 new hexes to occupado
          	{
-         		// get the previous 8 hex locations
-             	for(uint8 a = 0; a < 8; a++) // always 8 hexes
-             	{
-             		didoccupy[a][0] = didoccupy[a][0]+tiles[col][row].blocks[index][1];
-             		didoccupy[a][1] = didoccupy[a][1]+tiles[col][row].blocks[index][2];
-             		if(didoccupy[0][1] % 2 != 0 && didoccupy[a][1]%2 != 0)
-             			didoccupy[a][0] = didoccupy[a][0]+1; // anchor y and this hex y are both odd, offset by +1
-             		didoccupy[a][2] = didoccupy[a][2]+tiles[col][row].blocks[index][3];
-             	}
-             	for(uint8 l = 0; l < 8; l++) // loop 8 times,find the previous occupado entries and overwrite them
-             	{
-             		for(uint o = 0; o < tiles[col][row].occupado.length; o++)
-             		{
-             			if(didoccupy[l][0] == tiles[col][row].occupado[o][0] && didoccupy[l][1] == tiles[col][row].occupado[o][1] && didoccupy[l][2] == tiles[col][row].occupado[o][2]) // are the arrays equal?
-             			{
-             				tiles[col][row].occupado[o] = wouldoccupy[l]; // found it. Overwrite it
-             			}
-             		}
-             	}
+     			tiles[col][row].occupado.length++;
+     			tiles[col][row].occupado[tiles[col][row].occupado.length-1] = wouldoccupy[ll];
          	}
-         	else // previous block was hidden
-         	{
-         		for(uint8 ll = 0; ll < 8; ll++) // add the 8 new hexes to occupado
-             	{
-         			tiles[col][row].occupado.length++;
-         			tiles[col][row].occupado[tiles[col][row].occupado.length-1] = wouldoccupy[ll];
-             	}
-         	}	
-         	tiles[col][row].blocks[index] = block;
-        }
-        // else not a valid block location, return
+     	}
+      	
+     	tiles[col][row].blocks[index] = _block;
+     	whathappened = 5;
     	return;
     }
     
@@ -218,34 +247,6 @@ contract Etheria is BlockDefRetriever,MapElevationRetriever
     // reclamation
     // price modifier
     
-//    function getOccupies(int8 which, int8 x, int8 y, int8 z) private constant returns (int8[3][8])
-//    {
-//    	int8[3][8] wouldoccupy = blocks[uint(which)].occupies;
-//    	for(uint8 b = 0; b < 8; b++) // always 8 hexes
-//    	{
-//    		wouldoccupy[b][0] = wouldoccupy[b][0]+x;
-//    		wouldoccupy[b][1] = wouldoccupy[b][1]+y;
-//    		if(y % 2 != 0 && wouldoccupy[b][1]%2 != 0)
-//    			wouldoccupy[b][0] = wouldoccupy[b][0]+1; // anchor y and this hex y are both odd, offset by +1
-//    		wouldoccupy[b][2] = wouldoccupy[b][2]+z;
-//    	}
-//    	return wouldoccupy;
-//    }
-//    
-//    function getSurroundings(int8 which, int8 x, int8 y, int8 z) private constant returns (int8[3][])
-//    {
-//    	int8[3][] attachesto = blocks[uint(which)].attachesto;
-//    	for(uint8 b = 0; b < attachesto.length; b++)
-//    	{
-//    		attachesto[b][0] = attachesto[b][0]+x;
-//    		attachesto[b][1] = attachesto[b][1]+y;
-//    		if(y % 2 != 0 && attachesto[b][1]%2 != 0)
-//    			attachesto[b][0] = attachesto[b][0]+1; // anchor y and this hex y are both odd, offset by +1
-//    		attachesto[b][2] = attachesto[b][2]+z;
-//    	}
-//    	return attachesto;
-//    }
-    
     uint8 whathappened;
     
     function getWhatHappened() public constant returns (uint8)
@@ -258,84 +259,6 @@ contract Etheria is BlockDefRetriever,MapElevationRetriever
     	return bdr.getOccupies(which);
     }
     
-    function isValidBlockLocation(uint8 col, uint8 row, int8 which, int8 x, int8 y, int8 z) private constant returns (bool)
-    {
-    	// first, get the 8 hexes it would occupy
-    	int8[3][8] memory wouldoccupy = bdr.getOccupies(uint8(which));
-    	
-    	bool touches;
-    	for(uint8 b = 0; b < 8; b++) // always 8 hexes
-    	{
-    		wouldoccupy[b][0] = wouldoccupy[b][0]+x;
-    		wouldoccupy[b][1] = wouldoccupy[b][1]+y;
-    		if(y % 2 != 0 && wouldoccupy[b][1]%2 != 0)
-    			wouldoccupy[b][0] = wouldoccupy[b][0]+1; // anchor y and this hex y are both odd, offset by +1
-    		wouldoccupy[b][2] = wouldoccupy[b][2]+z;
-    		if(!blockHexCoordsValid(wouldoccupy[b][0], wouldoccupy[b][1])) // this is the out-of-bounds check
-    		{
-    			whathappened = 1;
-    			return false;
-    		}
-//    		for(uint o = 0; o < tiles[col][row].occupado.length; o++)
-//        	{
-//    			if(wouldoccupy[b][0] == tiles[col][row].occupado[o][0] && wouldoccupy[b][1] == tiles[col][row].occupado[o][1] && wouldoccupy[b][2] == tiles[col][row].occupado[o][2]) // are the arrays equal?
-//    			{
-//    				whathappened = 2;
-//    				return false; // this hex conflicts. The proposed block does not avoid overlap. Return false immediately.
-//    			}
-//        	}
-//    		if(touches == false && wouldoccupy[b][2] == 0) // if on the ground, touches is always true, only check if touches is not yet true
-//    		{
-//    			touches = true;
-//    		}	
-    	}
-    	if(touches) // the 8 hexes didn't go out of bounds, didn't overlap, and at least one touched the ground.
-    	{
-    		whathappened = 3;
-    		return true;
-    	}
-    	else
-    	{
-    		whathappened = 4;
-    		return false;
-    	}	
-    	if(!touches)
-    	{	
-//    	int8[3][] attachesto = blocks[uint(which)].attachesto;
-//    	for(b = 0; b < attachesto.length; b++)
-//    	{
-//    		attachesto[b][0] = attachesto[b][0]+x;
-//    		attachesto[b][1] = attachesto[b][1]+y;
-//    		if(y % 2 != 0 && attachesto[b][1]%2 != 0)
-//    			attachesto[b][0] = attachesto[b][0]+1; // anchor y and this hex y are both odd, offset by +1
-//    		attachesto[b][2] = attachesto[b][2]+z;
-//    	}
-//    	
-//    	for(uint8 l = 0; l < attachesto.length; l++)
-//    	{
-//    		for(uint o = 0; o < tiles[col][row].occupado.length; o++)
-//    		{
-//    			if(wouldoccupy[l][2] == 0) // if on the ground, touches is always true
-//    				return true;
-//    			if(attachesto[l][0] == tiles[col][row].occupado[o][0] && attachesto[l][1] == tiles[col][row].occupado[o][1] && attachesto[l][2] == tiles[col][row].occupado[o][2]) // are the arrays equal?
-//    				return true;
-//    		}
-//    		if(l >= 8 && touches == true)
-//    			return true;
-//    	}	
-    	}
-    	if(touches) // the 8 hexes didn't go out of bounds, didn't overlap, and at least one touched the ground.
-    	{
-    		whathappened = 5;
-    		return true;
-    	}
-    	else
-    	{
-    		whathappened = 6;
-    		return false;
-    	}	
-    }
-    
     function blockHexCoordsValid(int8 x, int8 y) private constant returns (bool)
     {
     	if(-33 <= y && y <= 33)
@@ -344,21 +267,13 @@ contract Etheria is BlockDefRetriever,MapElevationRetriever
     		{
     			if(-50 <= x && x <= 49)
     				return true;
-    			else
-    			{	
-    				whathappened = 20;
-    				return false;
-    			}
+    			
     		}
     		else // even
     		{
     			if(-49 <= x && x <= 49)
     				return true;
-    			else
-    			{	
-    				whathappened = 21;
-    				return false;
-    			}
+    			
     		}	
     	}	
     	else
@@ -379,21 +294,13 @@ contract Etheria is BlockDefRetriever,MapElevationRetriever
     			{
     				if (((absx*2) + (absy*3)) <= 198)
     					return true;
-    				else
-        			{	
-        				whathappened = 22;
-        				return false;
-        			}
+    				
     			}	
     			else	// even
     			{
     				if ((((absx+1)*2) + ((absy-1)*3)) <= 198)
     					return true;
-    				else
-        			{	
-        				whathappened = 23;
-        				return false;
-        			}
+    				
     			}
     		}
     		else
@@ -402,25 +309,16 @@ contract Etheria is BlockDefRetriever,MapElevationRetriever
     			{
     				if (((absx*2) + (absy*3)) <= 198)
     					return true;
-    				else
-        			{	
-        				whathappened = 24;
-        				return false;
-        			}
+    				
     			}	
     			else	// odd
     			{
     				if ((((absx+1)*2) + ((absy-1)*3)) <= 198)
     					return true;
-    				else
-        			{	
-        				whathappened = 25;
-        				return false;
-        			}
+    				
     			}
     		}
     	}
-    	whathappened = 26;
     	return false;
     }
     
