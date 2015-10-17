@@ -139,7 +139,7 @@ contract Etheria is BlockDefRetriever,MapElevationRetriever
         {
         	return;
         }
-        if(block[3] < -1) // Can't hide blocks or change configuration of hidden blocks. This limitation is to prevent massive reorganization of occupado. 
+        if(block[3] < -1) // Can't hide blocks\. This limitation is to prevent massive reorganization of occupado. 
         {
         	return;
         }
@@ -253,10 +253,16 @@ contract Etheria is BlockDefRetriever,MapElevationRetriever
     	return whathappened;
     }
     
+    function getOccupiesFromBDR(uint8 which) public constant returns(int8[3][8])
+    {
+    	return bdr.getOccupies(which);
+    }
+    
     function isValidBlockLocation(uint8 col, uint8 row, int8 which, int8 x, int8 y, int8 z) private constant returns (bool)
     {
     	// first, get the 8 hexes it would occupy
     	int8[3][8] memory wouldoccupy = bdr.getOccupies(uint8(which));
+    	
     	bool touches;
     	for(uint8 b = 0; b < 8; b++) // always 8 hexes
     	{
@@ -270,18 +276,18 @@ contract Etheria is BlockDefRetriever,MapElevationRetriever
     			whathappened = 1;
     			return false;
     		}
-    		for(uint o = 0; o < tiles[col][row].occupado.length; o++)
-        	{
-    			if(wouldoccupy[b][0] == tiles[col][row].occupado[o][0] && wouldoccupy[b][1] == tiles[col][row].occupado[o][1] && wouldoccupy[b][2] == tiles[col][row].occupado[o][2]) // are the arrays equal?
-    			{
-    				whathappened = 2;
-    				return false; // this hex conflicts. The proposed block does not avoid overlap. Return false immediately.
-    			}
-        	}
-    		if(touches == false && wouldoccupy[b][2] == 0) // if on the ground, touches is always true, only check if touches is not yet true
-    		{
-    			touches = true;
-    		}	
+//    		for(uint o = 0; o < tiles[col][row].occupado.length; o++)
+//        	{
+//    			if(wouldoccupy[b][0] == tiles[col][row].occupado[o][0] && wouldoccupy[b][1] == tiles[col][row].occupado[o][1] && wouldoccupy[b][2] == tiles[col][row].occupado[o][2]) // are the arrays equal?
+//    			{
+//    				whathappened = 2;
+//    				return false; // this hex conflicts. The proposed block does not avoid overlap. Return false immediately.
+//    			}
+//        	}
+//    		if(touches == false && wouldoccupy[b][2] == 0) // if on the ground, touches is always true, only check if touches is not yet true
+//    		{
+//    			touches = true;
+//    		}	
     	}
     	if(touches) // the 8 hexes didn't go out of bounds, didn't overlap, and at least one touched the ground.
     	{
@@ -338,11 +344,21 @@ contract Etheria is BlockDefRetriever,MapElevationRetriever
     		{
     			if(-50 <= x && x <= 49)
     				return true;
+    			else
+    			{	
+    				whathappened = 20;
+    				return false;
+    			}
     		}
     		else // even
     		{
     			if(-49 <= x && x <= 49)
     				return true;
+    			else
+    			{	
+    				whathappened = 21;
+    				return false;
+    			}
     		}	
     	}	
     	else
@@ -363,11 +379,21 @@ contract Etheria is BlockDefRetriever,MapElevationRetriever
     			{
     				if (((absx*2) + (absy*3)) <= 198)
     					return true;
+    				else
+        			{	
+        				whathappened = 22;
+        				return false;
+        			}
     			}	
     			else	// even
     			{
     				if ((((absx+1)*2) + ((absy-1)*3)) <= 198)
     					return true;
+    				else
+        			{	
+        				whathappened = 23;
+        				return false;
+        			}
     			}
     		}
     		else
@@ -376,14 +402,25 @@ contract Etheria is BlockDefRetriever,MapElevationRetriever
     			{
     				if (((absx*2) + (absy*3)) <= 198)
     					return true;
+    				else
+        			{	
+        				whathappened = 24;
+        				return false;
+        			}
     			}	
     			else	// odd
     			{
     				if ((((absx+1)*2) + ((absy-1)*3)) <= 198)
     					return true;
+    				else
+        			{	
+        				whathappened = 25;
+        				return false;
+        			}
     			}
     		}
     	}
+    	whathappened = 26;
     	return false;
     }
     
@@ -404,6 +441,7 @@ contract Etheria is BlockDefRetriever,MapElevationRetriever
     	{
     		if(!(msg.value == 0))
     			msg.sender.send(msg.value); 		// return their money
+    		whathappened = 10;
     		return;
     	}
     	else if(mer.getElevation(col,row) >= 125 && tiles[col][row].owner == address(0) ||  // if unowned and above sea level, accept offer of 1 ETH immediately
@@ -412,6 +450,7 @@ contract Etheria is BlockDefRetriever,MapElevationRetriever
     		if(msg.value != 1000000000000000000) // 1 ETH is the starting value. If not enough or too much...
     		{
     			msg.sender.send(msg.value); 	 // return their money
+    			whathappened = 11;
         		return;
     		}	
     		else
@@ -419,6 +458,7 @@ contract Etheria is BlockDefRetriever,MapElevationRetriever
     			creator.send(msg.value);     		 // this was a valid offer, send money to contract owner
     			tiles[col][row].owner = msg.sender;  // set tile owner to the buyer
     			farmTile(col,row); 					 // always immediately farm the tile
+    			whathappened = 12;
     			return;		
     		}	
     	}	
@@ -432,6 +472,7 @@ contract Etheria is BlockDefRetriever,MapElevationRetriever
     				{
     					msg.sender.send(tiles[col][row].offers[i]); // return their previous money
     					tiles[col][row].offers[i] = msg.value; // set the new offer
+    					whathappened = 13;
     					return;
     				}
     			}	
@@ -440,8 +481,14 @@ contract Etheria is BlockDefRetriever,MapElevationRetriever
     			tiles[col][row].offers.length++; // make room for 1 more
     			tiles[col][row].offerers[tiles[col][row].offerers.length - 1] = msg.sender; // record who is making the offer
     			tiles[col][row].offers[tiles[col][row].offers.length - 1] = msg.value; // record the offer
+    			whathappened = 14;
+        		return;
     		}	
+    		whathappened = 15;
+    		return;
     	}
+    	whathappened = 16;
+		return;
     }
     
     function retractOffer(uint8 col, uint8 row) // retracts the first offer in the array by this user.
