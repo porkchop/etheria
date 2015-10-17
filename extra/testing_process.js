@@ -13,26 +13,9 @@ etheria.getOwners(); // should be all 0x0000000000000000000000000000000000000000
 web3.fromWei(eth.getBalance(etheria.address)); // should be zero, money is sent to creator
 web3.fromWei(eth.getBalance(eth.accounts[0])); // should be + 1
 web3.fromWei(eth.getBalance(eth.accounts[1])); // should be - 1
+//etheria.farmTile.sendTransaction(3,4,{from:eth.accounts[1],gas:2000000}); // no need for this. Blocks automatically farmed on purchase
 etheria.getBlocks(3,4); // should be a set of blocks automatically farmed on purchase
 etheria.editBlock.sendTransaction(3,4,0,[0,20,20,0,40], {from:eth.accounts[1],gas:2900000}); // moves first block to 20,20,0
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // BUY A TILE
 etheria.makeOffer.sendTransaction(8,8,{from:eth.accounts[0],value:100000000000000000, gas:2000000}); // should fail. Too low.
@@ -91,73 +74,71 @@ etheria.getOffers(2,2);
 
 // KILL CONTRACT. DOES IT RETURN VALUE?
 
-
-//INIT BLOCK DEFINITIONS
-//blockdefstorage.initOccupies.sendTransaction(0, [[0,0,0],[0,0,1],[0,0,2],[0,0,3],[0,0,4],[0,0,5],[0,0,6],[0,0,7]],{from:eth.coinbase, gas:2000000});
-//blockdefstorage.initOccupies.sendTransaction(1, [[0,0,0],[0,1,0],[1,2,0],[1,3,0],[2,4,0],[2,5,0],[3,6,0],[3,7,0]],{from:eth.accounts[1], gas:2000000});
-//blockdefstorage.initOccupies.sendTransaction(2, [[0,0,0],[1,0,0],[2,0,0],[3,0,0],[4,0,0],[5,0,0],[6,0,0],[7,0,0]],{from:eth.coinbase, gas:2000000});
-//blockdefstorage.initOccupies.sendTransaction(3, [[0,0,0],[-1,1,0],[-1,2,0],[-2,3,0],[-2,4,0],[-3,5,0],[-3,6,0],[-4,7,0]],{from:eth.accounts[1], gas:2000000});
-//blockdefstorage.initOccupies.sendTransaction(4, [[0,0,0],[1,0,0],[1,1,0],[2,1,0],[3,2,0],[4,2,0],[4,3,0],[5,3,0]],{from:eth.coinbase, gas:2000000});
-//blockdefstorage.initOccupies.sendTransaction(5, [[0,0,0],[-1,0,0],[-2,1,0],[-3,1,0],[-3,2,0],[-4,2,0],[-5,3,0],[-6,3,0]],{from:eth.accounts[1], gas:2000000});
-//blockdefstorage.initOccupies.sendTransaction(6, [[0,0,0],[1,0,0],[0,0,1],[1,0,1],[0,0,2],[1,0,2],[0,0,3],[1,0,3]],{from:eth.coinbase, gas:2000000});
-//blockdefstorage.initOccupies.sendTransaction(7, [[0,0,0],[0,1,0],[0,0,1],[0,1,1],[0,0,2],[0,1,2],[0,0,3],[0,1,3]],{from:eth.accounts[1], gas:2000000});
-//blockdefstorage.initOccupies.sendTransaction(8, [[0,0,0],[-1,1,0],[0,0,1],[-1,1,1],[0,0,2],[-1,1,2],[0,0,3],[-1,1,3]],{from:eth.coinbase, gas:2000000});
-//blockdefstorage.initOccupies.sendTransaction(9, [[0,0,0],[0,1,0],[1,2,0],[1,3,0],[0,0,1],[0,1,1],[1,2,1],[1,3,1]],{from:eth.accounts[1], gas:2000000});
-//blockdefstorage.initOccupies.sendTransaction(10, [[0,0,0],[1,0,0],[2,0,0],[3,0,0],[0,0,1],[1,0,1],[2,0,1],[3,0,1]],{from:eth.coinbase, gas:2000000});
-//blockdefstorage.initOccupies.sendTransaction(11, [[0,0,0],[-1,1,0],[-1,2,0],[-2,3,0],[0,0,1],[-1,1,1],[-1,2,1],[-2,3,1]],{from:eth.accounts[1], gas:2000000});
-//blockdefstorage.initOccupies.sendTransaction(12, [[0,0,0],[1,0,0],[1,1,0],[2,1,0],[0,0,1],[1,0,1],[1,1,1],[2,1,1]],{from:eth.coinbase, gas:2000000});
-//blockdefstorage.initOccupies.sendTransaction(13, [[0,0,0],[-1,0,0],[-2,1,0],[-3,1,0],[0,0,1],[-1,0,1],[-2,1,1],[-3,1,1]],{from:eth.accounts[1], gas:2000000});
-//blockdefstorage.initOccupies.sendTransaction(14, [[0,0,0],[0,1,0],[0,2,0],[0,3,0],[0,4,0],[0,5,0],[0,6,0],[0,7,0]],{from:eth.coinbase, gas:2000000});
-//blockdefstorage.initOccupies.sendTransaction(15, [[0,0,0],[-1,1,0],[0,2,0],[-1,3,0],[0,4,0],[-1,5,0],[0,6,0],[-1,7,0]],{from:eth.accounts[1], gas:2000000});
-//blockdefstorage.initOccupies.sendTransaction(16, [[0,0,0],[0,1,0],[0,2,0],[0,3,0],[0,0,1],[0,1,1],[0,2,1],[0,3,1]],{from:eth.coinbase, gas:2000000});
-//blockdefstorage.initOccupies.sendTransaction(17, [[0,0,0],[-1,1,0],[0,2,0],[-1,3,0],[0,0,1],[-1,1,1],[0,2,1],[-1,3,1]],{from:eth.accounts[1], gas:2000000});
-//blockdefstorage.initOccupies.sendTransaction(18, [[0,0,0],[0,1,0],[0,1,1],[1,2,1],[1,2,2],[1,3,2],[1,3,3],[2,4,3]],{from:eth.coinbase, gas:2000000});
-//blockdefstorage.initOccupies.sendTransaction(19, [[0,0,0],[1,0,0],[1,0,1],[2,0,1],[2,0,2],[3,0,2],[3,0,3],[4,0,3]],{from:eth.accounts[1], gas:2000000});
-//blockdefstorage.initOccupies.sendTransaction(20, [[0,0,0],[0,-1,0],[0,-1,1],[1,-2,1],[1,-2,2],[1,-3,2],[1,-3,3],[2,-4,3]],{from:eth.coinbase, gas:2000000});
-//blockdefstorage.initOccupies.sendTransaction(21, [[0,0,0],[-1,-1,0],[-1,-1,1],[-1,-2,1],[-1,-2,2],[-2,-3,2],[-2,-3,3],[-2,-4,3]],{from:eth.accounts[1], gas:2000000});
-//blockdefstorage.initOccupies.sendTransaction(22, [[0,0,0],[-1,0,0],[-1,0,1],[-2,0,1],[-2,0,2],[-3,0,2],[-3,0,3],[-4,0,3]],{from:eth.coinbase, gas:2000000});
-//blockdefstorage.initOccupies.sendTransaction(23, [[0,0,0],[-1,1,0],[-1,1,1],[-1,2,1],[-1,2,2],[-2,3,2],[-2,3,3],[-2,4,3]],{from:eth.accounts[1], gas:2000000});
-//blockdefstorage.initOccupies.sendTransaction(24, [[0,0,0],[0,0,1],[0,0,2],[0,1,2],[1,2,2],[1,3,2],[1,3,1],[1,3,0]],{from:eth.coinbase, gas:2000000});
-//blockdefstorage.initOccupies.sendTransaction(25, [[0,0,0],[0,0,1],[0,0,2],[1,0,2],[2,0,2],[3,0,2],[3,0,1],[3,0,0]],{from:eth.accounts[1], gas:2000000});
-//blockdefstorage.initOccupies.sendTransaction(26, [[0,0,0],[0,0,1],[0,0,2],[0,-1,2],[1,-2,2],[1,-3,2],[1,-3,1],[1,-3,0]],{from:eth.coinbase, gas:2000000});
-//blockdefstorage.initOccupies.sendTransaction(27, [[0,0,0],[0,0,1],[0,0,2],[1,0,2],[1,1,2],[1,2,2],[1,2,1],[1,2,0]],{from:eth.accounts[1], gas:2000000});
-//blockdefstorage.initOccupies.sendTransaction(28, [[0,0,0],[0,0,1],[0,0,2],[-1,-1,2],[0,-2,2],[1,-2,2],[1,-2,1],[1,-2,0]],{from:eth.coinbase, gas:2000000});
-//blockdefstorage.initOccupies.sendTransaction(29, [[0,0,0],[0,0,1],[0,0,2],[-1,0,2],[-2,-1,2],[-1,-2,2],[-1,-2,1],[-1,-2,0]],{from:eth.accounts[1], gas:2000000});
-//blockdefstorage.initOccupies.sendTransaction(30, [[0,0,0],[0,0,1],[0,0,2],[0,1,2],[0,2,2],[-1,2,2],[-1,2,1],[-1,2,0]],{from:eth.coinbase, gas:2000000});
-//blockdefstorage.initOccupies.sendTransaction(31, [[0,0,0],[0,0,1],[0,0,2],[0,0,3],[0,0,4],[-1,1,0],[-1,-1,0],[1,0,0]],{from:eth.accounts[1], gas:2000000});
+//blockdefstorage.initOccupies.sendTransaction(0, [[0,0,0],[0,0,1],[0,0,2],[0,0,3],[0,0,4],[0,0,5],[0,0,6],[0,0,7]],{from:eth.coinbase, gas:500000});
+//blockdefstorage.initOccupies.sendTransaction(1, [[0,0,0],[0,1,0],[1,2,0],[1,3,0],[2,4,0],[2,5,0],[3,6,0],[3,7,0]],{from:eth.coinbase, gas:500000});
+//blockdefstorage.initOccupies.sendTransaction(2, [[0,0,0],[1,0,0],[2,0,0],[3,0,0],[4,0,0],[5,0,0],[6,0,0],[7,0,0]],{from:eth.coinbase, gas:500000});
+//blockdefstorage.initOccupies.sendTransaction(3, [[0,0,0],[-1,1,0],[-1,2,0],[-2,3,0],[-2,4,0],[-3,5,0],[-3,6,0],[-4,7,0]],{from:eth.coinbase, gas:500000});
+//blockdefstorage.initOccupies.sendTransaction(4, [[0,0,0],[1,0,0],[1,1,0],[2,1,0],[3,2,0],[4,2,0],[4,3,0],[5,3,0]],{from:eth.coinbase, gas:500000});
+//blockdefstorage.initOccupies.sendTransaction(5, [[0,0,0],[-1,0,0],[-2,1,0],[-3,1,0],[-3,2,0],[-4,2,0],[-5,3,0],[-6,3,0]],{from:eth.coinbase, gas:500000});
+//blockdefstorage.initOccupies.sendTransaction(6, [[0,0,0],[1,0,0],[0,0,1],[1,0,1],[0,0,2],[1,0,2],[0,0,3],[1,0,3]],{from:eth.coinbase, gas:500000});
+//blockdefstorage.initOccupies.sendTransaction(7, [[0,0,0],[0,1,0],[0,0,1],[0,1,1],[0,0,2],[0,1,2],[0,0,3],[0,1,3]],{from:eth.coinbase, gas:500000});
+//blockdefstorage.initOccupies.sendTransaction(8, [[0,0,0],[-1,1,0],[0,0,1],[-1,1,1],[0,0,2],[-1,1,2],[0,0,3],[-1,1,3]],{from:eth.coinbase, gas:500000});
+//blockdefstorage.initOccupies.sendTransaction(9, [[0,0,0],[0,1,0],[1,2,0],[1,3,0],[0,0,1],[0,1,1],[1,2,1],[1,3,1]],{from:eth.coinbase, gas:500000});
+//blockdefstorage.initOccupies.sendTransaction(10, [[0,0,0],[1,0,0],[2,0,0],[3,0,0],[0,0,1],[1,0,1],[2,0,1],[3,0,1]],{from:eth.coinbase, gas:500000});
+//blockdefstorage.initOccupies.sendTransaction(11, [[0,0,0],[-1,1,0],[-1,2,0],[-2,3,0],[0,0,1],[-1,1,1],[-1,2,1],[-2,3,1]],{from:eth.coinbase, gas:500000});
+//blockdefstorage.initOccupies.sendTransaction(12, [[0,0,0],[1,0,0],[1,1,0],[2,1,0],[0,0,1],[1,0,1],[1,1,1],[2,1,1]],{from:eth.coinbase, gas:500000});
+//blockdefstorage.initOccupies.sendTransaction(13, [[0,0,0],[-1,0,0],[-2,1,0],[-3,1,0],[0,0,1],[-1,0,1],[-2,1,1],[-3,1,1]],{from:eth.coinbase, gas:500000});
+//blockdefstorage.initOccupies.sendTransaction(14, [[0,0,0],[0,1,0],[0,2,0],[0,3,0],[0,4,0],[0,5,0],[0,6,0],[0,7,0]],{from:eth.coinbase, gas:500000});
+//blockdefstorage.initOccupies.sendTransaction(15, [[0,0,0],[-1,1,0],[0,2,0],[-1,3,0],[0,4,0],[-1,5,0],[0,6,0],[-1,7,0]],{from:eth.coinbase, gas:500000});
+//blockdefstorage.initOccupies.sendTransaction(16, [[0,0,0],[0,1,0],[0,2,0],[0,3,0],[0,0,1],[0,1,1],[0,2,1],[0,3,1]],{from:eth.coinbase, gas:500000});
+//blockdefstorage.initOccupies.sendTransaction(17, [[0,0,0],[-1,1,0],[0,2,0],[-1,3,0],[0,0,1],[-1,1,1],[0,2,1],[-1,3,1]],{from:eth.coinbase, gas:500000});
+//blockdefstorage.initOccupies.sendTransaction(18, [[0,0,0],[0,1,0],[0,1,1],[1,2,1],[1,2,2],[1,3,2],[1,3,3],[2,4,3]],{from:eth.coinbase, gas:500000});
+//blockdefstorage.initOccupies.sendTransaction(19, [[0,0,0],[1,0,0],[1,0,1],[2,0,1],[2,0,2],[3,0,2],[3,0,3],[4,0,3]],{from:eth.coinbase, gas:500000});
+//blockdefstorage.initOccupies.sendTransaction(20, [[0,0,0],[0,-1,0],[0,-1,1],[1,-2,1],[1,-2,2],[1,-3,2],[1,-3,3],[2,-4,3]],{from:eth.coinbase, gas:500000});
+//blockdefstorage.initOccupies.sendTransaction(21, [[0,0,0],[-1,-1,0],[-1,-1,1],[-1,-2,1],[-1,-2,2],[-2,-3,2],[-2,-3,3],[-2,-4,3]],{from:eth.coinbase, gas:500000});
+//blockdefstorage.initOccupies.sendTransaction(22, [[0,0,0],[-1,0,0],[-1,0,1],[-2,0,1],[-2,0,2],[-3,0,2],[-3,0,3],[-4,0,3]],{from:eth.coinbase, gas:500000});
+//blockdefstorage.initOccupies.sendTransaction(23, [[0,0,0],[-1,1,0],[-1,1,1],[-1,2,1],[-1,2,2],[-2,3,2],[-2,3,3],[-2,4,3]],{from:eth.coinbase, gas:500000});
+//blockdefstorage.initOccupies.sendTransaction(24, [[0,0,0],[0,0,1],[0,0,2],[0,1,2],[1,2,2],[1,3,2],[1,3,1],[1,3,0]],{from:eth.coinbase, gas:500000});
+//blockdefstorage.initOccupies.sendTransaction(25, [[0,0,0],[0,0,1],[0,0,2],[1,0,2],[2,0,2],[3,0,2],[3,0,1],[3,0,0]],{from:eth.coinbase, gas:500000});
+//blockdefstorage.initOccupies.sendTransaction(26, [[0,0,0],[0,0,1],[0,0,2],[0,-1,2],[1,-2,2],[1,-3,2],[1,-3,1],[1,-3,0]],{from:eth.coinbase, gas:500000});
+//blockdefstorage.initOccupies.sendTransaction(27, [[0,0,0],[0,0,1],[0,0,2],[1,0,2],[1,1,2],[1,2,2],[1,2,1],[1,2,0]],{from:eth.coinbase, gas:500000});
+//blockdefstorage.initOccupies.sendTransaction(28, [[0,0,0],[0,0,1],[0,0,2],[-1,-1,2],[0,-2,2],[1,-2,2],[1,-2,1],[1,-2,0]],{from:eth.coinbase, gas:500000});
+//blockdefstorage.initOccupies.sendTransaction(29, [[0,0,0],[0,0,1],[0,0,2],[-1,0,2],[-2,-1,2],[-1,-2,2],[-1,-2,1],[-1,-2,0]],{from:eth.coinbase, gas:500000});
+//blockdefstorage.initOccupies.sendTransaction(30, [[0,0,0],[0,0,1],[0,0,2],[0,1,2],[0,2,2],[-1,2,2],[-1,2,1],[-1,2,0]],{from:eth.coinbase, gas:500000});
+//blockdefstorage.initOccupies.sendTransaction(31, [[0,0,0],[0,0,1],[0,0,2],[0,0,3],[0,0,4],[-1,1,0],[-1,-1,0],[1,0,0]],{from:eth.coinbase, gas:500000});
 //
-//blockdefstorage.initAttachesto.sendTransaction(0, [[0,0,-1],[0,0,8]],{from:eth.coinbase, gas:3000000});
-//blockdefstorage.initAttachesto.sendTransaction(1, [[0,0,-1],[0,1,-1],[1,2,-1],[1,3,-1],[2,4,-1],[2,5,-1],[3,6,-1],[3,7,-1],[0,0,1],[0,1,1],[1,2,1],[1,3,1],[2,4,1],[2,5,1],[3,6,1],[3,7,1]],{from:eth.accounts[1], gas:3000000});
-//blockdefstorage.initAttachesto.sendTransaction(2, [[0,0,-1],[1,0,-1],[2,0,-1],[3,0,-1],[4,0,-1],[5,0,-1],[6,0,-1],[7,0,-1],[0,0,1],[1,0,1],[2,0,1],[3,0,1],[4,0,1],[5,0,1],[6,0,1],[7,0,1]],{from:eth.coinbase, gas:3000000});
-//blockdefstorage.initAttachesto.sendTransaction(3, [[0,0,-1],[-1,1,-1],[-1,2,-1],[-2,3,-1],[-2,4,-1],[-3,5,-1],[-3,6,-1],[-4,7,-1],[0,0,1],[-1,1,1],[-1,2,1],[-2,3,1],[-2,4,1],[-3,5,1],[-3,6,1],[-4,7,1]],{from:eth.accounts[1], gas:3140000});
-//blockdefstorage.initAttachesto.sendTransaction(4, [[0,0,-1],[1,0,-1],[1,1,-1],[2,1,-1],[3,2,-1],[4,2,-1],[4,3,-1],[5,3,-1],[0,0,1],[1,0,1],[1,1,1],[2,1,1],[3,2,1],[4,2,1],[4,3,1],[5,3,1]],{from:eth.coinbase, gas:3000000});
-//blockdefstorage.initAttachesto.sendTransaction(5, [[0,0,-1],[-1,0,-1],[-2,1,-1],[-3,1,-1],[-3,2,-1],[-4,2,-1],[-5,3,-1],[-6,3,-1],[0,0,1],[-1,0,1],[-2,1,1],[-3,1,1],[-3,2,1],[-4,2,1],[-5,3,1],[-6,3,1]],{from:eth.accounts[1], gas:3140000}); // problematic
-//blockdefstorage.initAttachesto.sendTransaction(6, [[0,0,-1],[1,0,-1],[0,0,4],[1,0,4]],{from:eth.coinbase, gas:3000000});
-//blockdefstorage.initAttachesto.sendTransaction(7, [[0,0,-1],[0,1,-1],[0,0,4],[0,1,4]],{from:eth.accounts[1], gas:3000000});
-//blockdefstorage.initAttachesto.sendTransaction(8, [[0,0,-1],[-1,1,-1],[0,0,4],[-1,1,4]],{from:eth.coinbase, gas:3000000});
-//blockdefstorage.initAttachesto.sendTransaction(9, [[0,0,-1],[0,1,-1],[1,2,-1],[1,3,-1],[0,0,2],[0,1,2],[1,2,2],[1,3,2]],{from:eth.accounts[1], gas:3000000});
-//blockdefstorage.initAttachesto.sendTransaction(10, [[0,0,-1],[1,0,-1],[2,0,-1],[3,0,-1],[0,0,2],[1,0,2],[2,0,2],[3,0,2]],{from:eth.coinbase, gas:3000000});
-//blockdefstorage.initAttachesto.sendTransaction(11, [[0,0,-1],[-1,1,-1],[-1,2,-1],[-2,3,-1],[0,0,2],[-1,1,2],[-1,2,2],[-2,3,2]],{from:eth.accounts[1], gas:3000000});
-//blockdefstorage.initAttachesto.sendTransaction(12, [[0,0,-1],[1,0,-1],[1,1,-1],[2,1,-1],[0,0,2],[1,0,2],[1,1,2],[2,1,2]],{from:eth.coinbase, gas:3000000});
-//blockdefstorage.initAttachesto.sendTransaction(13, [[0,0,-1],[-1,0,-1],[-2,1,-1],[-3,1,-1],[0,0,2],[-1,0,2],[-2,1,2],[-3,1,2]],{from:eth.accounts[1], gas:3000000});
-//blockdefstorage.initAttachesto.sendTransaction(14, [[0,0,-1],[0,1,-1],[0,2,-1],[0,3,-1],[0,4,-1],[0,5,-1],[0,6,-1],[0,7,-1],[0,0,1],[0,1,1],[0,2,1],[0,3,1],[0,4,1],[0,5,1],[0,6,1],[0,7,1]],{from:eth.coinbase, gas:3000000});
-//blockdefstorage.initAttachesto.sendTransaction(15, [[0,0,-1],[-1,1,-1],[0,2,-1],[-1,3,-1],[0,4,-1],[-1,5,-1],[0,6,-1],[-1,7,-1],[0,0,1],[-1,1,1],[0,2,1],[-1,3,1],[0,4,1],[-1,5,1],[0,6,1],[-1,7,1]],{from:eth.accounts[1], gas:3000000});
-//blockdefstorage.initAttachesto.sendTransaction(16, [[0,0,-1],[0,1,-1],[0,2,-1],[0,3,-1],[0,0,2],[0,1,2],[0,2,2],[0,3,2]],{from:eth.coinbase, gas:3000000});
-//blockdefstorage.initAttachesto.sendTransaction(17, [[0,0,-1],[-1,1,-1],[0,2,-1],[-1,3,-1],[0,0,2],[-1,1,2],[0,2,2],[-1,3,1]],{from:eth.accounts[1], gas:3000000});
-//blockdefstorage.initAttachesto.sendTransaction(18, [[0,0,-1],[0,1,-1],[1,2,0],[1,3,1],[2,4,2],[0,0,1],[0,1,2],[1,2,3],[1,3,4],[2,4,4]],{from:eth.coinbase, gas:3000000});
-//blockdefstorage.initAttachesto.sendTransaction(19, [[0,0,-1],[1,0,-1],[2,0,0],[3,0,1],[4,0,2],[0,0,1],[1,0,2],[2,0,3],[3,0,4],[4,0,4]],{from:eth.accounts[1], gas:3000000});
-//blockdefstorage.initAttachesto.sendTransaction(20, [[0,0,-1],[0,-1,-1],[1,-2,0],[1,-3,1],[2,-4,2],[0,0,1],[0,-1,2],[1,-2,3],[1,-3,4],[2,-4,4]],{from:eth.coinbase, gas:3000000});
-//blockdefstorage.initAttachesto.sendTransaction(21, [[0,0,-1],[-1,-1,-1],[-1,-2,0],[-2,-3,1],[-2,-4,2],[0,0,1],[-1,-1,2],[-1,-2,3],[-2,-3,4],[-2,-4,4]],{from:eth.accounts[1], gas:3000000});
-//blockdefstorage.initAttachesto.sendTransaction(22, [[0,0,-1],[-1,0,-1],[-2,0,0],[-3,0,1],[-4,0,2],[0,0,1],[-1,0,2],[-2,0,3],[-3,0,4],[-4,0,4]],{from:eth.coinbase, gas:3000000});
-//blockdefstorage.initAttachesto.sendTransaction(23, [[0,0,-1],[-1,1,-1],[-1,2,0],[-2,3,1],[-2,4,2],[0,0,1],[-1,1,2],[-1,2,3],[-2,3,4],[-2,4,4]],{from:eth.accounts[1], gas:3000000});
-//blockdefstorage.initAttachesto.sendTransaction(24, [[0,0,-1],[0,1,1],[1,2,1],[1,3,-1],[0,0,3],[0,1,3],[1,2,3],[1,3,3]],{from:eth.coinbase, gas:3000000});
-//blockdefstorage.initAttachesto.sendTransaction(25, [[0,0,-1],[1,0,1],[2,0,1],[3,0,-1],[0,0,3],[1,0,3],[2,0,3],[3,0,3]],{from:eth.accounts[1], gas:3000000});
-//blockdefstorage.initAttachesto.sendTransaction(26, [[0,0,-1],[0,-1,1],[1,-2,1],[1,-3,-1],[0,0,3],[0,-1,3],[1,-2,3],[1,-3,3]],{from:eth.coinbase, gas:3000000});
-//blockdefstorage.initAttachesto.sendTransaction(27, [[0,0,-1],[1,0,1],[1,1,1],[1,2,-1],[0,0,3],[1,0,3],[1,1,3],[1,2,3]],{from:eth.accounts[1], gas:3000000});
-//blockdefstorage.initAttachesto.sendTransaction(28, [[0,0,-1],[-1,-1,1],[0,-2,1],[1,-2,-1],[0,0,3],[-1,-1,3],[0,-2,3],[1,-2,3]],{from:eth.coinbase, gas:3000000});
-//blockdefstorage.initAttachesto.sendTransaction(29, [[0,0,-1],[-1,0,1],[-2,-1,1],[-1,-2,-1],[0,0,3],[-1,0,3],[-2,-1,3],[-1,-2,3]],{from:eth.accounts[1], gas:3000000});
-//blockdefstorage.initAttachesto.sendTransaction(30, [[0,0,-1],[0,1,1],[0,2,1],[-1,2,-1],[0,0,3],[0,1,3],[0,2,3],[-1,2,3]],{from:eth.coinbase, gas:3000000});
-//blockdefstorage.initAttachesto.sendTransaction(31, [[0,0,-1],[-1,1,-1],[-1,-1,-1],[1,0,-1],[0,0,5],[-1,1,1],[-1,-1,1],[1,0,1]],{from:eth.accounts[1], gas:3000000});
+//blockdefstorage.initAttachesto.sendTransaction(0, [[0,0,-1],[0,0,8],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0]],{from:eth.coinbase, gas:500000});
+//blockdefstorage.initAttachesto.sendTransaction(1, [[0,0,-1],[0,1,-1],[1,2,-1],[1,3,-1],[2,4,-1],[2,5,-1],[3,6,-1],[3,7,-1],[0,0,1],[0,1,1],[1,2,1],[1,3,1],[2,4,1],[2,5,1],[3,6,1],[3,7,1]],{from:eth.coinbase, gas:500000});
+//blockdefstorage.initAttachesto.sendTransaction(2, [[0,0,-1],[1,0,-1],[2,0,-1],[3,0,-1],[4,0,-1],[5,0,-1],[6,0,-1],[7,0,-1],[0,0,1],[1,0,1],[2,0,1],[3,0,1],[4,0,1],[5,0,1],[6,0,1],[7,0,1]],{from:eth.coinbase, gas:500000});
+//blockdefstorage.initAttachesto.sendTransaction(3, [[0,0,-1],[-1,1,-1],[-1,2,-1],[-2,3,-1],[-2,4,-1],[-3,5,-1],[-3,6,-1],[-4,7,-1],[0,0,1],[-1,1,1],[-1,2,1],[-2,3,1],[-2,4,1],[-3,5,1],[-3,6,1],[-4,7,1]],{from:eth.coinbase, gas:500000});
+//blockdefstorage.initAttachesto.sendTransaction(4, [[0,0,-1],[1,0,-1],[1,1,-1],[2,1,-1],[3,2,-1],[4,2,-1],[4,3,-1],[5,3,-1],[0,0,1],[1,0,1],[1,1,1],[2,1,1],[3,2,1],[4,2,1],[4,3,1],[5,3,1]],{from:eth.coinbase, gas:500000});
+//blockdefstorage.initAttachesto.sendTransaction(5, [[0,0,-1],[-1,0,-1],[-2,1,-1],[-3,1,-1],[-3,2,-1],[-4,2,-1],[-5,3,-1],[-6,3,-1],[0,0,1],[-1,0,1],[-2,1,1],[-3,1,1],[-3,2,1],[-4,2,1],[-5,3,1],[-6,3,1]],{from:eth.coinbase, gas:500000});
+//blockdefstorage.initAttachesto.sendTransaction(6, [[0,0,-1],[1,0,-1],[0,0,4],[1,0,4],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0]],{from:eth.coinbase, gas:500000});
+//blockdefstorage.initAttachesto.sendTransaction(7, [[0,0,-1],[0,1,-1],[0,0,4],[0,1,4],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0]],{from:eth.coinbase, gas:500000});
+//blockdefstorage.initAttachesto.sendTransaction(8, [[0,0,-1],[-1,1,-1],[0,0,4],[-1,1,4],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0]],{from:eth.coinbase, gas:500000});
+//blockdefstorage.initAttachesto.sendTransaction(9, [[0,0,-1],[0,1,-1],[1,2,-1],[1,3,-1],[0,0,2],[0,1,2],[1,2,2],[1,3,2],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0]],{from:eth.coinbase, gas:500000});
+//blockdefstorage.initAttachesto.sendTransaction(10, [[0,0,-1],[1,0,-1],[2,0,-1],[3,0,-1],[0,0,2],[1,0,2],[2,0,2],[3,0,2],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0]],{from:eth.coinbase, gas:500000});
+//blockdefstorage.initAttachesto.sendTransaction(11, [[0,0,-1],[-1,1,-1],[-1,2,-1],[-2,3,-1],[0,0,2],[-1,1,2],[-1,2,2],[-2,3,2],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0]],{from:eth.coinbase, gas:500000});
+//blockdefstorage.initAttachesto.sendTransaction(12, [[0,0,-1],[1,0,-1],[1,1,-1],[2,1,-1],[0,0,2],[1,0,2],[1,1,2],[2,1,2],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0]],{from:eth.coinbase, gas:500000});
+//blockdefstorage.initAttachesto.sendTransaction(13, [[0,0,-1],[-1,0,-1],[-2,1,-1],[-3,1,-1],[0,0,2],[-1,0,2],[-2,1,2],[-3,1,2],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0]],{from:eth.coinbase, gas:500000});
+//blockdefstorage.initAttachesto.sendTransaction(14, [[0,0,-1],[0,1,-1],[0,2,-1],[0,3,-1],[0,4,-1],[0,5,-1],[0,6,-1],[0,7,-1],[0,0,1],[0,1,1],[0,2,1],[0,3,1],[0,4,1],[0,5,1],[0,6,1],[0,7,1]],{from:eth.coinbase, gas:500000});
+//blockdefstorage.initAttachesto.sendTransaction(15, [[0,0,-1],[-1,1,-1],[0,2,-1],[-1,3,-1],[0,4,-1],[-1,5,-1],[0,6,-1],[-1,7,-1],[0,0,1],[-1,1,1],[0,2,1],[-1,3,1],[0,4,1],[-1,5,1],[0,6,1],[-1,7,1]],{from:eth.coinbase, gas:500000});
+//blockdefstorage.initAttachesto.sendTransaction(16, [[0,0,-1],[0,1,-1],[0,2,-1],[0,3,-1],[0,0,2],[0,1,2],[0,2,2],[0,3,2],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0]],{from:eth.coinbase, gas:500000});
+//blockdefstorage.initAttachesto.sendTransaction(17, [[0,0,-1],[-1,1,-1],[0,2,-1],[-1,3,-1],[0,0,2],[-1,1,2],[0,2,2],[-1,3,1],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0]],{from:eth.coinbase, gas:500000});
+//blockdefstorage.initAttachesto.sendTransaction(18, [[0,0,-1],[0,1,-1],[1,2,0],[1,3,1],[2,4,2],[0,0,1],[0,1,2],[1,2,3],[1,3,4],[2,4,4],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0]],{from:eth.coinbase, gas:500000});
+//blockdefstorage.initAttachesto.sendTransaction(19, [[0,0,-1],[1,0,-1],[2,0,0],[3,0,1],[4,0,2],[0,0,1],[1,0,2],[2,0,3],[3,0,4],[4,0,4],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0]],{from:eth.coinbase, gas:500000});
+//blockdefstorage.initAttachesto.sendTransaction(20, [[0,0,-1],[0,-1,-1],[1,-2,0],[1,-3,1],[2,-4,2],[0,0,1],[0,-1,2],[1,-2,3],[1,-3,4],[2,-4,4],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0]],{from:eth.coinbase, gas:500000});
+//blockdefstorage.initAttachesto.sendTransaction(21, [[0,0,-1],[-1,-1,-1],[-1,-2,0],[-2,-3,1],[-2,-4,2],[0,0,1],[-1,-1,2],[-1,-2,3],[-2,-3,4],[-2,-4,4],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0]],{from:eth.coinbase, gas:500000});
+//blockdefstorage.initAttachesto.sendTransaction(22, [[0,0,-1],[-1,0,-1],[-2,0,0],[-3,0,1],[-4,0,2],[0,0,1],[-1,0,2],[-2,0,3],[-3,0,4],[-4,0,4],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0]],{from:eth.coinbase, gas:500000});
+//blockdefstorage.initAttachesto.sendTransaction(23, [[0,0,-1],[-1,1,-1],[-1,2,0],[-2,3,1],[-2,4,2],[0,0,1],[-1,1,2],[-1,2,3],[-2,3,4],[-2,4,4],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0]],{from:eth.coinbase, gas:500000});
+//blockdefstorage.initAttachesto.sendTransaction(24, [[0,0,-1],[0,1,1],[1,2,1],[1,3,-1],[0,0,3],[0,1,3],[1,2,3],[1,3,3],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0]],{from:eth.coinbase, gas:500000});
+//blockdefstorage.initAttachesto.sendTransaction(25, [[0,0,-1],[1,0,1],[2,0,1],[3,0,-1],[0,0,3],[1,0,3],[2,0,3],[3,0,3],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0]],{from:eth.coinbase, gas:500000});
+//blockdefstorage.initAttachesto.sendTransaction(26, [[0,0,-1],[0,-1,1],[1,-2,1],[1,-3,-1],[0,0,3],[0,-1,3],[1,-2,3],[1,-3,3],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0]],{from:eth.coinbase, gas:500000});
+//blockdefstorage.initAttachesto.sendTransaction(27, [[0,0,-1],[1,0,1],[1,1,1],[1,2,-1],[0,0,3],[1,0,3],[1,1,3],[1,2,3],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0]],{from:eth.coinbase, gas:500000});
+//blockdefstorage.initAttachesto.sendTransaction(28, [[0,0,-1],[-1,-1,1],[0,-2,1],[1,-2,-1],[0,0,3],[-1,-1,3],[0,-2,3],[1,-2,3],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0]],{from:eth.coinbase, gas:500000});
+//blockdefstorage.initAttachesto.sendTransaction(29, [[0,0,-1],[-1,0,1],[-2,-1,1],[-1,-2,-1],[0,0,3],[-1,0,3],[-2,-1,3],[-1,-2,3],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0]],{from:eth.coinbase, gas:500000});
+//blockdefstorage.initAttachesto.sendTransaction(30, [[0,0,-1],[0,1,1],[0,2,1],[-1,2,-1],[0,0,3],[0,1,3],[0,2,3],[-1,2,3],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0]],{from:eth.coinbase, gas:500000});
+//blockdefstorage.initAttachesto.sendTransaction(31, [[0,0,-1],[-1,1,-1],[-1,-1,-1],[1,0,-1],[0,0,5],[-1,1,1],[-1,-1,1],[1,0,1],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0]],{from:eth.coinbase, gas:500000});
 
 //keeper
 //mapelevationstorage.initElevations.sendTransaction(0,[116,116,116,116,116,116,116,116,116,116,116,116,116,116,116,116,116,116,116,116,116,116,116,116,116,116,116,116,116,116,116,116,116], {from:eth.coinbase,gas:3000000});
