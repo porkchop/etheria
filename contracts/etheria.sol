@@ -157,19 +157,6 @@ contract Etheria is mortal
     // 5. DO ANY OF THE BLOCKS TOUCH ANOTHER?
     // 6. NONE OF THE OCCUPY BLOCKS TOUCHED THE GROUND. BUT MAYBE THEY TOUCH ANOTHER BLOCK?
     
-//    int8[24] didoccupy;
-//    int8[24] wouldoccupy;
-//    
-//    function getWouldOccupy() public constant returns (int8[24])
-//    {
-//    	return wouldoccupy;
-//    }
-//    
-//    function getDidOccupy() public constant returns (int8[24])
-//    {
-//    	return didoccupy;
-//    }
-    
     function editBlock(uint8 col, uint8 row, uint index, int8[5] _block)  
     {
     	if(col < 0 || col > (mapsize-1) || row < 0 || row > (mapsize-1)) // row and/or col was not between 0-mapsize
@@ -231,7 +218,7 @@ contract Etheria is mortal
          			}
          		}
          	}
-         	whathappened = 23;
+         	//whathappened = 23;
      	}
      	else // previous block was hidden
      	{
@@ -242,7 +229,7 @@ contract Etheria is mortal
      			tile.occupado[tile.occupado.length-1][1] = wouldoccupy[ll+1];
      			tile.occupado[tile.occupado.length-1][2] = wouldoccupy[ll+2];
          	}
-     		whathappened = 24;
+     		//whathappened = 24;
      	}
      	tile.blocks[index] = _block;
     	return;

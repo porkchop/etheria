@@ -15,8 +15,24 @@ etheria.getOwner(4,5); 																						// should be 0x00000000000000000000
 etheria.makeOffer.sendTransaction(4,5,{from:eth.accounts[1],gas:1000000,value:web3.toWei(1,'ether')}); 		// whathappened = 4, purchase of unowned tile successful, 50169 gas used
 etheria.getOwner(4,5);																						// should be all 0x0000000000000000000000000000000000000000 except 8,8 which should be 250000000000000000
 checkAllBalances();																							// check balances. should show creator++, buyer--
-etheria.farmTile.sendTransaction(3,4,{from:eth.accounts[1],gas:2000000}); 								    // farm some blocks on the newly purchased tile // 531,728 gas used
+etheria.farmTile.sendTransaction(0,33,{from:eth.accounts[1],gas:2000000}); 								    // whathappened = 30 out of bounds
+etheria.farmTile.sendTransaction(4,5,{from:eth.accounts[0],gas:2000000});									// whathappened = 31, msg.sender doesn't own the tile
+etheria.farmTile.sendTransaction(4,5,{from:eth.accounts[1],gas:2000000}); 								    // whathappened = 33 farming success // farm some blocks on the newly purchased tile // 531,728 gas used
+etheria.farmTile.sendTransaction(4,5,{from:eth.accounts[1],gas:2000000});									// whathappened = 32 too soon to farm again
 etheria.getBlocks(4,5); 																					// should be a set of 10 blocks automatically farmed on purchase
+etheria.editBlock.sendTransaction(-4,5,0,[0,1,1,0,40], {from:eth.accounts[1],gas:2000000});					// whathappened = 20, c,r OOB
+etheria.editBlock.sendTransaction(4,5,0,[0,20,20,0,40], {from:eth.accounts[0],gas:2000000});				// whathappened = 21, Owner not msg.sender
+etheria.editBlock.sendTransaction(4,5,0,[0,20,20,-1,40], {from:eth.accounts[1],gas:2000000});				// whathappened = 22, cannot hide blocks once they are unhidden
+etheria.editBlock.sendTransaction(4,5,0,[0,-51,2,0,40], {from:eth.accounts[1],gas:2000000});				// whathappened = 10, first hex out of bounds
+etheria.editBlock.sendTransaction(4,5,0,[0,0,66,0,40], {from:eth.accounts[1],gas:2000000});				    // whathappened = 10, subsequent hex out of  bounds (possible this could succeed with certain block types. If so, check block type and try next line)
+etheria.editBlock.sendTransaction(4,5,0,[0,0,-66,0,40], {from:eth.accounts[1],gas:2000000});				// whathappened = 10, subsequent hex out of  bounds (if this also succeeds, then type must = 0, it's the only one that can fit at both 0,66 and 0,-66)
+
+etheria.editBlock.sendTransaction(4,5,1,[0,0,0,0,40], {from:eth.accounts[1],gas:2000000});					// whathappened = 14, success (touches ground)
+etheria.editBlock.sendTransaction(4,5,2,[0,0,0,0,40], {from:eth.accounts[1],gas:2000000});					// whathappened = 11, conflicts with occupado
+etheria.editBlock.sendTransaction(4,5,3,[0,0,0,20,40], {from:eth.accounts[1],gas:2000000});					// whathappened = 13, doesn't touch anything
+etheria.editBlock.sendTransaction(4,5,3,[0,0,0,1,140], {from:eth.accounts[1],gas:2000000});					// whathappened = 12, success (stacks) -- check this to make sure z is correct for whatever was placed at 0,0
+
+etheria.editBlock.sendTransaction(4,5,0,[0,51,1,0,40], {from:eth.accounts[1],gas:2000000});					// whathappened = 20, OOB
 etheria.editBlock.sendTransaction(4,5,0,[0,20,20,0,40], {from:eth.accounts[1],gas:2000000}); 				// moves first block to 20,20,0 // 419000 gas used
 etheria.editBlock.sendTransaction(4,5,0,[0,20,20,1,40], {from:eth.accounts[1],gas:2000000}); 				// tries to hover the first block // should fail 
 etheria.editBlock.sendTransaction(4,5,0,[0,55,55,0,40], {from:eth.accounts[1],gas:2000000}); 				// tries to put a block out of bounds // should fail 
