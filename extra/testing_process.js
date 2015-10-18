@@ -2,6 +2,13 @@
 Etheria testing
 **/
 
+// block outside tile
+// floating block
+// block overlapping another
+// rehiding block
+// 
+
+
 // CHECK INITIALIZATION
 etheria.getOwners(); // should be all 0x0000000000000000000000000000000000000000 (40 zeros)
 web3.fromWei(eth.getBalance(eth.accounts[0])); 
