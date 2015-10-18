@@ -1,5 +1,5 @@
-// var abi = [{"constant":false,"inputs":[],"name":"kill","outputs":[],"type":"function"},{"constant":true,"inputs":[{"name":"_b32","type":"bytes32"},{"name":"byteindex","type":"uint8"}],"name":"getUint8FromByte32","outputs":[{"name":"","type":"uint8"}],"type":"function"},{"constant":false,"inputs":[{"name":"col","type":"uint8"},{"name":"row","type":"uint8"},{"name":"_s","type":"string"}],"name":"setStatus","outputs":[],"type":"function"},{"constant":false,"inputs":[{"name":"col","type":"uint8"},{"name":"row","type":"uint8"}],"name":"makeOffer","outputs":[],"type":"function"},{"constant":true,"inputs":[{"name":"col","type":"uint8"},{"name":"row","type":"uint8"}],"name":"getOfferers","outputs":[{"name":"","type":"address[]"}],"type":"function"},{"constant":false,"inputs":[{"name":"col","type":"uint8"},{"name":"row","type":"uint8"},{"name":"index","type":"uint256"},{"name":"_block","type":"int8[5]"}],"name":"editBlock","outputs":[],"type":"function"},{"constant":true,"inputs":[{"name":"col","type":"uint8"},{"name":"row","type":"uint8"}],"name":"getOccupado","outputs":[{"name":"","type":"int8[3][]"}],"type":"function"},{"constant":false,"inputs":[{"name":"col","type":"uint8"},{"name":"row","type":"uint8"},{"name":"_n","type":"string"}],"name":"setName","outputs":[],"type":"function"},{"constant":false,"inputs":[{"name":"col","type":"uint8"},{"name":"row","type":"uint8"}],"name":"farmTile","outputs":[],"type":"function"},{"constant":true,"inputs":[],"name":"getOwners","outputs":[{"name":"","type":"address[33][33]"}],"type":"function"},{"constant":true,"inputs":[{"name":"col","type":"uint8"},{"name":"row","type":"uint8"}],"name":"getName","outputs":[{"name":"","type":"string"}],"type":"function"},{"constant":false,"inputs":[{"name":"col","type":"uint8"},{"name":"row","type":"uint8"},{"name":"i","type":"uint8"}],"name":"acceptOffer","outputs":[],"type":"function"},{"constant":false,"inputs":[{"name":"col","type":"uint8"},{"name":"row","type":"uint8"},{"name":"i","type":"uint8"}],"name":"rejectOffer","outputs":[],"type":"function"},{"constant":true,"inputs":[{"name":"col","type":"uint8"},{"name":"row","type":"uint8"}],"name":"getOffers","outputs":[{"name":"","type":"uint256[]"}],"type":"function"},{"constant":true,"inputs":[{"name":"col","type":"uint8"},{"name":"row","type":"uint8"}],"name":"getStatus","outputs":[{"name":"","type":"string"}],"type":"function"},{"constant":false,"inputs":[{"name":"col","type":"uint8"},{"name":"row","type":"uint8"}],"name":"retractOffer","outputs":[],"type":"function"},{"constant":true,"inputs":[{"name":"col","type":"uint8"},{"name":"row","type":"uint8"}],"name":"getBlocks","outputs":[{"name":"","type":"int8[5][]"}],"type":"function"},{"inputs":[],"type":"constructor"}]
-// var etheria = web3.eth.contract(abi).at('0x5dc23a8abc3aa4b5992a4bda54988c9e40887651');
+// var abi = [{"constant":false,"inputs":[],"name":"kill","outputs":[],"type":"function"},{"constant":true,"inputs":[{"name":"_b32","type":"bytes32"},{"name":"byteindex","type":"uint8"}],"name":"getUint8FromByte32","outputs":[{"name":"","type":"uint8"}],"type":"function"},{"constant":false,"inputs":[{"name":"col","type":"uint8"},{"name":"row","type":"uint8"},{"name":"_s","type":"string"}],"name":"setStatus","outputs":[],"type":"function"},{"constant":false,"inputs":[{"name":"col","type":"uint8"},{"name":"row","type":"uint8"}],"name":"makeOffer","outputs":[],"type":"function"},{"constant":true,"inputs":[{"name":"col","type":"uint8"},{"name":"row","type":"uint8"}],"name":"getOfferers","outputs":[{"name":"","type":"address[]"}],"type":"function"},{"constant":false,"inputs":[{"name":"col","type":"uint8"},{"name":"row","type":"uint8"},{"name":"index","type":"uint256"},{"name":"_block","type":"int8[5]"}],"name":"editBlock","outputs":[],"type":"function"},{"constant":true,"inputs":[{"name":"col","type":"uint8"},{"name":"row","type":"uint8"}],"name":"getOccupado","outputs":[{"name":"","type":"int8[3][]"}],"type":"function"},{"constant":false,"inputs":[{"name":"col","type":"uint8"},{"name":"row","type":"uint8"},{"name":"_n","type":"string"}],"name":"setName","outputs":[],"type":"function"},{"constant":false,"inputs":[{"name":"col","type":"uint8"},{"name":"row","type":"uint8"}],"name":"farmTile","outputs":[],"type":"function"},{"constant":true,"inputs":[{"name":"col","type":"uint8"},{"name":"row","type":"uint8"}],"name":"getName","outputs":[{"name":"","type":"string"}],"type":"function"},{"constant":false,"inputs":[{"name":"col","type":"uint8"},{"name":"row","type":"uint8"},{"name":"i","type":"uint8"}],"name":"acceptOffer","outputs":[],"type":"function"},{"constant":false,"inputs":[{"name":"col","type":"uint8"},{"name":"row","type":"uint8"},{"name":"i","type":"uint8"}],"name":"rejectOffer","outputs":[],"type":"function"},{"constant":true,"inputs":[{"name":"col","type":"uint8"},{"name":"row","type":"uint8"}],"name":"getOffers","outputs":[{"name":"","type":"uint256[]"}],"type":"function"},{"constant":true,"inputs":[{"name":"col","type":"uint8"},{"name":"row","type":"uint8"}],"name":"getStatus","outputs":[{"name":"","type":"string"}],"type":"function"},{"constant":true,"inputs":[{"name":"col","type":"uint8"},{"name":"row","type":"uint8"}],"name":"getOwner","outputs":[{"name":"","type":"address"}],"type":"function"},{"constant":false,"inputs":[{"name":"col","type":"uint8"},{"name":"row","type":"uint8"}],"name":"retractOffer","outputs":[],"type":"function"},{"constant":true,"inputs":[{"name":"col","type":"uint8"},{"name":"row","type":"uint8"}],"name":"getBlocks","outputs":[{"name":"","type":"int8[5][]"}],"type":"function"},{"inputs":[],"type":"constructor"}]
+// var etheria = web3.eth.contract(abi).at('0x4f602ad0f56907466451243083266dadce60cac6');
 
 import 'mortal';
 
@@ -55,9 +55,10 @@ contract Etheria is mortal
     }
     function setName(uint8 col, uint8 row, string _n) public
     {
-    	if(tiles[col][row].owner != msg.sender)
+    	Tile tile = tiles[col][row];
+    	if(tile.owner != msg.sender)
     		return;
-    	tiles[col][row].name = _n;
+    	tile.name = _n;
     }
     
     function getStatus(uint8 col, uint8 row) public constant returns(string)
@@ -66,9 +67,10 @@ contract Etheria is mortal
     }
     function setStatus(uint8 col, uint8 row, string _s) public
     {
-    	if(tiles[col][row].owner != msg.sender)
+    	Tile tile = tiles[col][row];
+    	if(tile.owner != msg.sender)
     		return;
-    	tiles[col][row].status = _s;
+    	tile.status = _s;
     }
     
     /***
@@ -99,21 +101,22 @@ contract Etheria is mortal
     
     function farmTile(uint8 col, uint8 row) public 
     {
-        if(tiles[col][row].owner != msg.sender)
+    	Tile tile = tiles[col][row];
+        if(tile.owner != msg.sender)
             return;
-        if((block.number - tiles[col][row].lastfarm) < 4320) // a day's worth of blocks hasn't passed yet. can only farm once a day. (Assumes block times of 20 seconds.)
+        if((block.number - tile.lastfarm) < 4320) // a day's worth of blocks hasn't passed yet. can only farm once a day. (Assumes block times of 20 seconds.)
         	return;
         bytes32 lastblockhash = block.blockhash(block.number - 1);
     	for(uint8 i = 0; i < 10; i++)
     	{
-            tiles[col][row].blocks.length+=1;
-    	    tiles[col][row].blocks[tiles[col][row].blocks.length - 1][0] = int8(getUint8FromByte32(lastblockhash,i) % 32); // which, guaranteed 0-31
-    	    tiles[col][row].blocks[tiles[col][row].blocks.length - 1][1] = 0; // x
-    	    tiles[col][row].blocks[tiles[col][row].blocks.length - 1][2] = 0; // y
-    	    tiles[col][row].blocks[tiles[col][row].blocks.length - 1][3] = -1; // z
-    	    tiles[col][row].blocks[tiles[col][row].blocks.length - 1][4] = 0; // color
+            tile.blocks.length+=1;
+    	    tile.blocks[tile.blocks.length - 1][0] = int8(getUint8FromByte32(lastblockhash,i) % 32); // which, guaranteed 0-31
+    	    tile.blocks[tile.blocks.length - 1][1] = 0; // x
+    	    tile.blocks[tile.blocks.length - 1][2] = 0; // y
+    	    tile.blocks[tile.blocks.length - 1][3] = -1; // z
+    	    tile.blocks[tile.blocks.length - 1][4] = 0; // color
     	}
-    	tiles[col][row].lastfarm = block.number;
+    	tile.lastfarm = block.number;
     }
     
     // SEVERAL CHECKS TO BE PERFORMED
@@ -139,7 +142,8 @@ contract Etheria is mortal
     
     function editBlock(uint8 col, uint8 row, uint index, int8[5] _block)  
     {
-        if(tiles[col][row].owner != msg.sender) // 1. DID THE OWNER SEND THIS MESSAGE?
+    	Tile tile = tiles[col][row];
+        if(tile.owner != msg.sender) // 1. DID THE OWNER SEND THIS MESSAGE?
         {
         	//whathappened = 1;
         	return;
@@ -150,7 +154,7 @@ contract Etheria is mortal
         	return;
         }
         
-        _block[0] = tiles[col][row].blocks[index][0]; // can't change the which, so set it to whatever it already was
+        _block[0] = tile.blocks[index][0]; // can't change the which, so set it to whatever it already was
 
         int8[24] memory didoccupy = bds.getOccupies(uint8(_block[0]));
         int8[24] memory wouldoccupy = bds.getOccupies(uint8(_block[0]));
@@ -163,11 +167,11 @@ contract Etheria is mortal
  				 wouldoccupy[b] = wouldoccupy[b]+1;  			   // then offset x by +1
  			 wouldoccupy[b+2] = wouldoccupy[b+2]+_block[3];
  			 
- 			 didoccupy[b] = didoccupy[b]+tiles[col][row].blocks[index][1];
- 			 didoccupy[b+1] = didoccupy[b+1]+tiles[col][row].blocks[index][2];
+ 			 didoccupy[b] = didoccupy[b]+tile.blocks[index][1];
+ 			 didoccupy[b+1] = didoccupy[b+1]+tile.blocks[index][2];
  			 if(didoccupy[1] % 2 != 0 && didoccupy[b+1] % 2 == 0) // if anchor y and this hex y are both odd,
  				 didoccupy[b] = didoccupy[b]+1; 					 // then offset x by +1
-       		didoccupy[b+2] = didoccupy[b+2]+tiles[col][row].blocks[index][3];
+       		didoccupy[b+2] = didoccupy[b+2]+tile.blocks[index][3];
  		}
         
         if(!isValidLocation(col,row,_block, wouldoccupy))
@@ -177,17 +181,17 @@ contract Etheria is mortal
         
         // EVERYTHING CHECKED OUT, WRITE OR OVERWRITE THE HEXES IN OCCUPADO
         
-      	if(tiles[col][row].blocks[index][3] >= 0) // If the previous z was greater than 0 (i.e. not hidden) ...
+      	if(tile.blocks[index][3] >= 0) // If the previous z was greater than 0 (i.e. not hidden) ...
      	{
          	for(uint8 l = 0; l < 24; l+=3) // loop 8 times,find the previous occupado entries and overwrite them
          	{
-         		for(uint o = 0; o < tiles[col][row].occupado.length; o++)
+         		for(uint o = 0; o < tile.occupado.length; o++)
          		{
-         			if(didoccupy[l] == tiles[col][row].occupado[o][0] && didoccupy[l+1] == tiles[col][row].occupado[o][1] && didoccupy[l+2] == tiles[col][row].occupado[o][2]) // x,y,z equal?
+         			if(didoccupy[l] == tile.occupado[o][0] && didoccupy[l+1] == tile.occupado[o][1] && didoccupy[l+2] == tile.occupado[o][2]) // x,y,z equal?
          			{
-         				tiles[col][row].occupado[o][0] = wouldoccupy[l]; // found it. Overwrite it
-         				tiles[col][row].occupado[o][1] = wouldoccupy[l+1];
-         				tiles[col][row].occupado[o][2] = wouldoccupy[l+2];
+         				tile.occupado[o][0] = wouldoccupy[l]; // found it. Overwrite it
+         				tile.occupado[o][1] = wouldoccupy[l+1];
+         				tile.occupado[o][2] = wouldoccupy[l+2];
          			}
          		}
          	}
@@ -196,14 +200,14 @@ contract Etheria is mortal
      	{
      		for(uint8 ll = 0; ll < 24; ll+=3) // add the 8 new hexes to occupado
          	{
-     			tiles[col][row].occupado.length++;
-     			tiles[col][row].occupado[tiles[col][row].occupado.length-1][0] = wouldoccupy[ll];
-     			tiles[col][row].occupado[tiles[col][row].occupado.length-1][1] = wouldoccupy[ll+1];
-     			tiles[col][row].occupado[tiles[col][row].occupado.length-1][2] = wouldoccupy[ll+2];
+     			tile.occupado.length++;
+     			tile.occupado[tile.occupado.length-1][0] = wouldoccupy[ll];
+     			tile.occupado[tile.occupado.length-1][1] = wouldoccupy[ll+1];
+     			tile.occupado[tile.occupado.length-1][2] = wouldoccupy[ll+2];
          	}
      	}
       	
-     	tiles[col][row].blocks[index] = _block;
+     	tile.blocks[index] = _block;
     	return;
     }
        
@@ -220,7 +224,7 @@ contract Etheria is mortal
     function isValidLocation(uint8 col, uint8 row, int8[5] _block, int8[24] wouldoccupy) private constant returns (bool)
     {
     	bool touches;
-          
+    	Tile tile = tiles[col][row];
     	//int8[24] memory wouldoccupy = bds.getOccupies(uint8(_block[0]));
     	
         for(uint8 b = 0; b < 24; b+=3) // always 8 hexes, calculate the wouldoccupy and the didoccupy
@@ -236,9 +240,9 @@ contract Etheria is mortal
        			//whathappened = 3;
       			return false;
       		}
-       		for(uint o = 0; o < tiles[col][row].occupado.length; o++)  // 4. DO ANY OF THE PROPOSED HEXES CONFLICT WITH ENTRIES IN OCCUPADO? 
+       		for(uint o = 0; o < tile.occupado.length; o++)  // 4. DO ANY OF THE PROPOSED HEXES CONFLICT WITH ENTRIES IN OCCUPADO? 
           	{
-      			if(wouldoccupy[b] == tiles[col][row].occupado[o][0] && wouldoccupy[b+1] == tiles[col][row].occupado[o][1] && wouldoccupy[b+2] == tiles[col][row].occupado[o][2]) // do the x,y,z entries of each match?
+      			if(wouldoccupy[b] == tile.occupado[o][0] && wouldoccupy[b+1] == tile.occupado[o][1] && wouldoccupy[b+2] == tile.occupado[o][2]) // do the x,y,z entries of each match?
       			{
       				//whathappened = 4;
       				return false; // this hex conflicts. The proposed block does not avoid overlap. Return false immediately.
@@ -262,9 +266,9 @@ contract Etheria is mortal
            		if(attachesto[1] % 2 != 0 && attachesto[a+1] % 2 == 0) // if anchor y and this hex y are both odd,  (for attachesto, anchory is the same as for occupies, but the z is different. Nothing to worry about)
            			attachesto[a] = attachesto[a]+1;  			       // then offset x by +1
            		attachesto[a+2] = attachesto[a+2]+_block[3];
-           		for(o = 0; o < tiles[col][row].occupado.length && !touches; o++)
+           		for(o = 0; o < tile.occupado.length && !touches; o++)
            		{
-           			if(attachesto[a] == tiles[col][row].occupado[o][0] && attachesto[a+1] == tiles[col][row].occupado[o][1] && attachesto[a+2] == tiles[col][row].occupado[o][2]) // a valid attachesto found in occupado?
+           			if(attachesto[a] == tile.occupado[o][0] && attachesto[a+1] == tile.occupado[o][1] && attachesto[a+2] == tile.occupado[o][2]) // a valid attachesto found in occupado?
            			{
            				touches = true;
            			}
@@ -387,59 +391,51 @@ contract Etheria is mortal
     
     function makeOffer(uint8 col, uint8 row)
     {
-    	if(msg.value < 100000000000000000 || msg.value > 1208925819614629174706175) // .1 ether up to (2^80 - 1) wei is the valid range
-    	{
-    		if(!(msg.value == 0))
-    			msg.sender.send(msg.value); 		// return their money
-    		return;
-    	}
-    	else if(tiles[col][row].owner == address(0))								// if UNOWNED
-    	{	  // if unowned and above sea level, accept offer of 1 ETH immediately
-    		if(msg.value != 1000000000000000000)									// 1 ETH is the starting value. If not return;
-    		{
+    	Tile tile = tiles[col][row];
+    	if(msg.value == 0) // checking this first means that we will ALWAYS need to return money on any other failure
+    	{ }	// do nothing, just return
+    	else if(msg.value < 100000000000000000 || msg.value > 1208925819614629174706175 || col < 0 || col > (mapsize-1) || row < 0 || col > (mapsize-1)) // .1 ether up to (2^80 - 1) wei is the valid range or // row and/or col was not between 0-mapsize
+    		msg.sender.send(msg.value); 		// return their money
+    	else if(tile.owner == address(0))								// if UNOWNED
+    	{	  
+    		if(msg.value != 1000000000000000000 || mer.getElevation(col,row) < 125)	// 1 ETH is the starting value. If not return; // Also, if below sea level, return. 
     			msg.sender.send(msg.value); 	 									// return their money
-        		return;	
+    		else
+    		{	
+    			creator.send(msg.value);     		 								// this was a valid offer, send money to contract creator
+    			tile.owner = msg.sender;  								// set tile owner to the buyer
     		}
-    		if(mer.getElevation(col,row) < 125)										// if below sea level, return
-    		{
-    			msg.sender.send(msg.value); 	 									// return their money
-        		return;	
-    		}
-    		creator.send(msg.value);     		 // this was a valid offer, send money to contract owner
-    		tiles[col][row].owner = msg.sender;  // set tile owner to the buyer
-    		farmTile(col,row); 					 // always immediately farm the tile
-    		return;		
     	}	
     	else 																		// if already OWNED
     	{
-    		if(tiles[col][row].offerers.length >= 10) 								// this tile can only hold 10 offers at a time and it already has 10
-    		{
-    			msg.sender.send(msg.value); 	 									// return their money
-        		return;	
-    		}	
-    		for(uint8 i = 0; i < tiles[col][row].offerers.length; i++)
-			{
-				if(tiles[col][row].offerers[i] == msg.sender) 						// user has already made an offer. Update it and return;
-				{
-					msg.sender.send(tiles[col][row].offers[i]); 					// return their previous money
-					tiles[col][row].offers[i] = msg.value; 							// set the new offer
-					return;
-				}
-			}	
-			// the user has not yet made an offer
-			tiles[col][row].offerers.length++; // make room for 1 more
-			tiles[col][row].offers.length++; // make room for 1 more
-			tiles[col][row].offerers[tiles[col][row].offerers.length - 1] = msg.sender; // record who is making the offer
-			tiles[col][row].offers[tiles[col][row].offers.length - 1] = msg.value; // record the offer
-			return;
+    		if(tile.owner == msg.sender || tile.offerers.length >= 10) // trying to make an offer on their own tile. or the offer list is full (10 max)
+    			msg.sender.send(msg.value); 	 									// return the money
+    		else
+    		{	
+    			for(uint8 i = 0; i < tile.offerers.length; i++)
+    			{
+    				if(tile.offerers[i] == msg.sender) 						// user has already made an offer. Update it and return;
+    				{
+    					msg.sender.send(tile.offers[i]); 					// return their previous money
+    					tile.offers[i] = msg.value; 							// set the new offer
+    					return;
+    				}
+    			}	
+    			// the user has not yet made an offer
+    			tile.offerers.length++; // make room for 1 more
+    			tile.offers.length++; // make room for 1 more
+    			tile.offerers[tile.offerers.length - 1] = msg.sender; // record who is making the offer
+    			tile.offers[tile.offers.length - 1] = msg.value; // record the offer
+    		}
     	}
     }
     
     function retractOffer(uint8 col, uint8 row) // retracts the first offer in the array by this user.
     {
-        for(uint8 i = 0; i < tiles[col][row].offerers.length; i++)
+    	Tile tile = tiles[col][row];
+        for(uint8 i = 0; i < tile.offerers.length; i++)
     	{
-    		if(tiles[col][row].offerers[i] == msg.sender) // this user has an offer on file. Remove it.
+    		if(tile.offerers[i] == msg.sender) // this user has an offer on file. Remove it.
     			removeOffer(col,row,i);
     	}	
     }
@@ -454,31 +450,33 @@ contract Etheria is mortal
     
     function removeOffer(uint8 col, uint8 row, uint8 i) private // index 0-10, can't be odd
     {
+    	Tile tile = tiles[col][row];
     	// return the money
-        tiles[col][row].offerers[i].send(tiles[col][row].offers[i]);
+        tile.offerers[i].send(tile.offers[i]);
     			
     	// delete user and offer and reshape the array
-    	delete tiles[col][row].offerers[i];   // zero out user
-    	delete tiles[col][row].offers[i];   // zero out offer
-    	for(uint8 j = i+1; j < tiles[col][row].offerers.length; j++) // close the arrays after the gap
+    	delete tile.offerers[i];   // zero out user
+    	delete tile.offers[i];   // zero out offer
+    	for(uint8 j = i+1; j < tile.offerers.length; j++) // close the arrays after the gap
     	{
-    	    tiles[col][row].offerers[j-1] = tiles[col][row].offerers[j];
-    	    tiles[col][row].offers[j-1] = tiles[col][row].offers[j];
+    	    tile.offerers[j-1] = tile.offerers[j];
+    	    tile.offers[j-1] = tile.offers[j];
     	}
-    	tiles[col][row].offerers.length--;
-    	tiles[col][row].offers.length--;
+    	tile.offerers.length--;
+    	tile.offers.length--;
     	return;
     }
     
     function acceptOffer(uint8 col, uint8 row, uint8 i) // accepts the offer at index (1-10)
     {
-    	uint offeramount = tiles[col][row].offers[i];
+    	Tile tile = tiles[col][row];
+    	uint offeramount = tile.offers[i];
     	uint housecut = offeramount / 10;
     	creator.send(housecut);
-    	tiles[col][row].owner.send(offeramount-housecut); // send offer money to oldowner
-    	tiles[col][row].owner = tiles[col][row].offerers[i]; // new owner is the offerer
-    	delete tiles[col][row].offerers; // delete all offerers
-    	delete tiles[col][row].offers; // delete all offers
+    	tile.owner.send(offeramount-housecut); // send offer money to oldowner
+    	tile.owner = tile.offerers[i]; // new owner is the offerer
+    	delete tile.offerers; // delete all offerers
+    	delete tile.offers; // delete all offers
     	return;
     }
     
