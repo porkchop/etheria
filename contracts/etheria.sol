@@ -393,45 +393,46 @@ contract Etheria is mortal
     			msg.sender.send(msg.value); 		// return their money
     		return;
     	}
-    	else if(mer.getElevation(col,row) >= 125 && tiles[col][row].owner == address(0) ||  // if unowned and above sea level, accept offer of 1 ETH immediately
-    			   (block.number - tiles[col][row].lastfarm) > 100000) 					// or if it's been more than 100000 blocks since the tile was last farmed
-    	{
-    		if(msg.value != 1000000000000000000) // 1 ETH is the starting value. If not enough or too much...
+    	else if(tiles[col][row].owner == address(0))								// if UNOWNED
+    	{	  // if unowned and above sea level, accept offer of 1 ETH immediately
+    		if(msg.value != 1000000000000000000)									// 1 ETH is the starting value. If not return;
     		{
-    			msg.sender.send(msg.value); 	 // return their money
-        		return;
-    		}	
-    		else
+    			msg.sender.send(msg.value); 	 									// return their money
+        		return;	
+    		}
+    		if(mer.getElevation(col,row) < 125)										// if below sea level, return
     		{
-    			creator.send(msg.value);     		 // this was a valid offer, send money to contract owner
-    			tiles[col][row].owner = msg.sender;  // set tile owner to the buyer
-    			farmTile(col,row); 					 // always immediately farm the tile
-    			return;		
-    		}	
+    			msg.sender.send(msg.value); 	 									// return their money
+        		return;	
+    		}
+    		creator.send(msg.value);     		 // this was a valid offer, send money to contract owner
+    		tiles[col][row].owner = msg.sender;  // set tile owner to the buyer
+    		farmTile(col,row); 					 // always immediately farm the tile
+    		return;		
     	}	
-    	else
+    	else 																		// if already OWNED
     	{
-    		if(tiles[col][row].offerers.length < 10) // this tile can only hold 10 offers at a time
+    		if(tiles[col][row].offerers.length >= 10) 								// this tile can only hold 10 offers at a time and it already has 10
     		{
-    			for(uint8 i = 0; i < tiles[col][row].offerers.length; i++)
-    			{
-    				if(tiles[col][row].offerers[i] == msg.sender) // user has already made an offer. Update it and return;
-    				{
-    					msg.sender.send(tiles[col][row].offers[i]); // return their previous money
-    					tiles[col][row].offers[i] = msg.value; // set the new offer
-    					return;
-    				}
-    			}	
-    			// the user has not yet made an offer
-    			tiles[col][row].offerers.length++; // make room for 1 more
-    			tiles[col][row].offers.length++; // make room for 1 more
-    			tiles[col][row].offerers[tiles[col][row].offerers.length - 1] = msg.sender; // record who is making the offer
-    			tiles[col][row].offers[tiles[col][row].offers.length - 1] = msg.value; // record the offer
-        		return;
+    			msg.sender.send(msg.value); 	 									// return their money
+        		return;	
     		}	
-    		return;
+    		for(uint8 i = 0; i < tiles[col][row].offerers.length; i++)
+			{
+				if(tiles[col][row].offerers[i] == msg.sender) 						// user has already made an offer. Update it and return;
+				{
+					msg.sender.send(tiles[col][row].offers[i]); 					// return their previous money
+					tiles[col][row].offers[i] = msg.value; 							// set the new offer
+					return;
+				}
+			}	
+			// the user has not yet made an offer
+			tiles[col][row].offerers.length++; // make room for 1 more
+			tiles[col][row].offers.length++; // make room for 1 more
+			tiles[col][row].offerers[tiles[col][row].offerers.length - 1] = msg.sender; // record who is making the offer
+			tiles[col][row].offers[tiles[col][row].offers.length - 1] = msg.value; // record the offer
+			return;
     	}
-		return;
     }
     
     function retractOffer(uint8 col, uint8 row) // retracts the first offer in the array by this user.
