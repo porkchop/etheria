@@ -2,21 +2,22 @@
 Etheria testing
 **/
 
-// ALL OF THESE SHOULD SUCCEED
-
 // CHECK INITIALIZATION
 etheria.getOwners(); // should be all 0x0000000000000000000000000000000000000000 (40 zeros)
 web3.fromWei(eth.getBalance(eth.accounts[0])); 
 web3.fromWei(eth.getBalance(eth.accounts[1])); 
-etheria.makeOffer.sendTransaction(3,4,{from:eth.accounts[1],value:1000000000000000000, gas:2000000}); // should succeed
+etheria.makeOffer.sendTransaction(4,5,{from:eth.accounts[1],gas:2000000,value:web3.toWei(1,'ether')}); // 595224 gas used
 etheria.getOwners(); // should be all 0x0000000000000000000000000000000000000000 except 8,8 which should be 250000000000000000
 web3.fromWei(eth.getBalance(etheria.address)); // should be zero, money is sent to creator
 web3.fromWei(eth.getBalance(eth.accounts[0])); // should be + 1
 web3.fromWei(eth.getBalance(eth.accounts[1])); // should be - 1
 //etheria.farmTile.sendTransaction(3,4,{from:eth.accounts[1],gas:2000000}); // no need for this. Blocks automatically farmed on purchase
-etheria.getBlocks(3,4); // should be a set of blocks automatically farmed on purchase
-etheria.editBlock.sendTransaction(3,4,0,[0,20,20,0,40], {from:eth.accounts[1],gas:2900000}); // moves first block to 20,20,0
-
+etheria.getBlocks(4,5); // should be a set of blocks automatically farmed on purchase
+etheria.editBlock.sendTransaction(4,5,0,[0,20,20,0,40], {from:eth.accounts[1],gas:2000000}); // moves first block to 20,20,0 // 419000 gas used
+etheria.editBlock.sendTransaction(4,5,0,[0,20,20,1,40], {from:eth.accounts[1],gas:2000000}); // tries to hover the first block // should fail with whathappened = 5;
+etheria.editBlock.sendTransaction(4,5,0,[0,55,55,0,40], {from:eth.accounts[1],gas:2000000}); // should fail out of bounds with whathappened = 3 **************** got whathappened = 
+etheria.editBlock.sendTransaction(4,5,1,[0,20,20,0,40], {from:eth.accounts[1],gas:600000}); // tries to overlap second block with block at 20,20. Should fail with whathappened = 4 (conflicts with occupado) ********* Got whathappened=6 OK // 442000 gas used
+etheria.editBlock.sendTransaction(4,5,1,[0,20,20,8,40], {from:eth.accounts[1],gas:600000}); 
 // BUY A TILE
 etheria.makeOffer.sendTransaction(8,8,{from:eth.accounts[0],value:100000000000000000, gas:2000000}); // should fail. Too low.
 etheria.makeOffer.sendTransaction(0,0,{from:eth.accounts[0],value:1000000000000000000, gas:2000000}); // should fail. Can't buy water tiles
@@ -35,8 +36,6 @@ etheria.farmTile.sendTransaction(8,8,{from:eth.coinbase,gas:2000000}); // should
 etheria.getBlocks(8,8); // should be an array of length 7 * 10 = 70
 etheria.farmTile.sendTransaction(8,8,{from:eth.coinbase,gas:2000000}); // should fail if it's been less than X blocks.
 etheria.getBlocks(8,8); // should be an array of length 7 * 10 = 70
-
-
 
 // EDIT blocks
 etheria.editBlock.sendTransaction(8,8,0,[0,1,2,3,40], {from:eth.coinbase,gas:2900000});

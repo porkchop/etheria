@@ -1,31 +1,21 @@
-import 'mortal'; // TODO
+import 'mortal';
 
 contract BlockDefStorage 
 {
-	function getOccupies(uint8 which) returns (int8[24])
+	function getOccupies(uint8 which) public returns (int8[24])
 	{}
-	function getAttachesto(uint8 which) returns (int8[48])
+	function getAttachesto(uint8 which) public returns (int8[48])
     {}
 }
 
 contract MapElevationRetriever 
 {
-	function getElevation(uint8 col, uint8 row) constant returns (uint8)
+	function getElevation(uint8 col, uint8 row) public constant returns (uint8)
 	{}
 }
 
-contract Etheria is mortal // todo
+contract Etheria is mortal
 {
-	
-	/***
-	 *     _____             _                  _     _       _ _   
-	 *    /  __ \           | |                | |   (_)     (_) |  
-	 *    | /  \/ ___  _ __ | |_ _ __ __ _  ___| |_   _ _ __  _| |_ 
-	 *    | |    / _ \| '_ \| __| '__/ _` |/ __| __| | | '_ \| | __|
-	 *    | \__/\ (_) | | | | |_| | | (_| | (__| |_  | | | | | | |_ 
-	 *     \____/\___/|_| |_|\__|_|  \__,_|\___|\__| |_|_| |_|_|\__|
-	 *                                                              
-	 */
     uint8 mapsize = 33;
     Tile[33][33] tiles;
     address creator;
@@ -38,8 +28,8 @@ contract Etheria is mortal // todo
     	int8[5][] blocks; //0 = which,1 = blockx,2 = blocky,3 = blockz, 4 = color
     	uint lastfarm;
     	int8[3][] occupado;
-    	string name;
-    	string status;
+//    	string name;
+//    	string status;
     }
     
     BlockDefStorage bds;
@@ -51,7 +41,7 @@ contract Etheria is mortal // todo
     	mer = MapElevationRetriever(0xc35a4e966bf792734a25ea524448ea54de385e4e);
     }
     
-    function getOwners() constant returns(address[33][33])
+    function getOwners() public constant returns(address[33][33])
     {
         address[33][33] memory owners;
         for(uint8 row = 0; row < mapsize; row++)
@@ -64,27 +54,27 @@ contract Etheria is mortal // todo
     	return owners;
     }
     
-    function getName(uint8 col, uint8 row) public constant returns(string)
-    {
-    	return tiles[col][row].name;
-    }
-    function setName(uint8 col, uint8 row, string _n) public
-    {
-    	if(tiles[col][row].owner != msg.sender)
-    		return;
-    	tiles[col][row].name = _n;
-    }
-    
-    function getStatus(uint8 col, uint8 row) public constant returns(string)
-    {
-    	return tiles[col][row].status;
-    }
-    function setStatus(uint8 col, uint8 row, string _s) public
-    {
-    	if(tiles[col][row].owner != msg.sender)
-    		return;
-    	tiles[col][row].status = _s;
-    }
+//    function getName(uint8 col, uint8 row) public constant returns(string)
+//    {
+//    	return tiles[col][row].name;
+//    }
+//    function setName(uint8 col, uint8 row, string _n) public
+//    {
+//    	if(tiles[col][row].owner != msg.sender)
+//    		return;
+//    	tiles[col][row].name = _n;
+//    }
+//    
+//    function getStatus(uint8 col, uint8 row) public constant returns(string)
+//    {
+//    	return tiles[col][row].status;
+//    }
+//    function setStatus(uint8 col, uint8 row, string _s) public
+//    {
+//    	if(tiles[col][row].owner != msg.sender)
+//    		return;
+//    	tiles[col][row].status = _s;
+//    }
     
     /***
      *    ______                     _   _ _                        _ _ _     _     _            _        
@@ -96,7 +86,6 @@ contract Etheria is mortal // todo
      *                                                |/                                                  
      *                                                                                                    
      */
-    // see EtheriaHelper for non-refucktored version of this algorithm.
     function getUint8FromByte32(bytes32 _b32, uint8 byteindex) public constant returns(uint8) {
     	uint numdigits = 64;
     	uint buint = uint(_b32);
@@ -113,14 +102,14 @@ contract Etheria is mortal // todo
     	return uint8(b);
     }
     
-    function farmTile(uint8 col, uint8 row)
+    function farmTile(uint8 col, uint8 row) public 
     {
         if(tiles[col][row].owner != msg.sender)
             return;
         if((block.number - tiles[col][row].lastfarm) < 4320) // a day's worth of blocks hasn't passed yet. can only farm once a day. (Assumes block times of 20 seconds.)
         	return;
         bytes32 lastblockhash = block.blockhash(block.number - 1);
-    	for(uint8 i = 0; i < 20; i++)
+    	for(uint8 i = 0; i < 10; i++)
     	{
             tiles[col][row].blocks.length+=1;
     	    tiles[col][row].blocks[tiles[col][row].blocks.length - 1][0] = int8(getUint8FromByte32(lastblockhash,i) % 32); // which, guaranteed 0-31
@@ -138,6 +127,20 @@ contract Etheria is mortal // todo
     // 3. DO ANY OF THE PROPOSED HEXES FALL OUTSIDE OF THE TILE? 
     // 4. DO ANY OF THE PROPOSED HEXES CONFLICT WITH ENTRIES IN OCCUPADO? 
     // 5. DO ANY OF THE BLOCKS TOUCH ANOTHER?
+    // 6. NONE OF THE OCCUPY BLOCKS TOUCHED THE GROUND. BUT MAYBE THEY TOUCH ANOTHER BLOCK?
+    
+    int8[24] didoccupy;
+    int8[24] wouldoccupy;
+    
+    function getWouldOccupy() public constant returns (int8[24])
+    {
+    	return wouldoccupy;
+    }
+    
+    function getDidOccupy() public constant returns (int8[24])
+    {
+    	return didoccupy;
+    }
     
     function editBlock(uint8 col, uint8 row, uint index, int8[5] _block)  
     {
@@ -154,54 +157,35 @@ contract Etheria is mortal // todo
         
         _block[0] = tiles[col][row].blocks[index][0]; // can't change the which, so set it to whatever it already was
 
-        bool touches;
+        didoccupy = bds.getOccupies(uint8(_block[0]));
+        wouldoccupy = bds.getOccupies(uint8(_block[0]));
+        for(uint8 b = 0; b < 24; b+=3) // always 8 hexes, calculate the didoccupy
+ 		{
+ 			 wouldoccupy[b] = wouldoccupy[b]+_block[1];
+ 			 wouldoccupy[b+1] = wouldoccupy[b+1]+_block[2];
+ 			 if(wouldoccupy[1] % 2 != 0 && wouldoccupy[b+1] % 2 == 0) // if anchor y is odd and this hex y is even, (SW NE beam goes 11,`2`2,23,`3`4,35,`4`6,47,`5`8  ` = x value incremented by 1. Same applies to SW NE beam from 01,12,13,24,25,36,37,48)
+ 				 wouldoccupy[b] = wouldoccupy[b]+1;  			   // then offset x by +1
+ 			 wouldoccupy[b+2] = wouldoccupy[b+2]+_block[3];
+ 			 
+ 			 didoccupy[b] = didoccupy[b]+tiles[col][row].blocks[index][1];
+ 			 didoccupy[b+1] = didoccupy[b+1]+tiles[col][row].blocks[index][2];
+ 			 if(didoccupy[1] % 2 != 0 && didoccupy[b+1] % 2 == 0) // if anchor y and this hex y are both odd,
+ 				 didoccupy[b] = didoccupy[b]+1; 					 // then offset x by +1
+       		didoccupy[b+2] = didoccupy[b+2]+tiles[col][row].blocks[index][3];
+ 		}
         
-        int8[24] memory wouldoccupy = bds.getOccupies(uint8(_block[0]));
-        int8[24] memory didoccupy = bds.getOccupies(uint8(_block[0]));
-//        int8[3][8] memory wouldoccupy = bds.getOccupies(uint8(_block[0])); // start would and did with the base set of 8 occupancies
-//        int8[3][8] memory didoccupy = bds.getOccupies(uint8(_block[0]));
-        
-        for(uint8 b = 0; b < 24; b+=3) // always 8 hexes, calculate the wouldoccupy and the didoccupy
-     	{
-     		wouldoccupy[b] = wouldoccupy[b]+_block[1];
-     		wouldoccupy[b+1] = wouldoccupy[b+1]+_block[2];
-     		if(wouldoccupy[1] % 2 != 0 && wouldoccupy[b+1] % 2 != 0) // if anchor y and this hex y are both odd,
-     			wouldoccupy[b] = wouldoccupy[b]+1;  			   // then offset x by +1
-     		wouldoccupy[b+2] = wouldoccupy[b+2]+_block[3];
-     		
-     		if(!blockHexCoordsValid(wouldoccupy[b], wouldoccupy[b+1])) // 3. DO ANY OF THE PROPOSED HEXES FALL OUTSIDE OF THE TILE? 
-    		{
-    			whathappened = 3;
-    			return;
-    		}
-     		for(uint o = 0; o < tiles[col][row].occupado.length; o++)  // 4. DO ANY OF THE PROPOSED HEXES CONFLICT WITH ENTRIES IN OCCUPADO? 
-        	{
-    			if(wouldoccupy[b] == tiles[col][row].occupado[o][0] && wouldoccupy[b+1] == tiles[col][row].occupado[o][1] && wouldoccupy[b+2] == tiles[col][row].occupado[o][2]) // do the x,y,z entries of each match?
-    			{
-    				whathappened = 4;
-    				return; // this hex conflicts. The proposed block does not avoid overlap. Return false immediately.
-    			}
-        	}
-    		if(touches == false && wouldoccupy[b+2] == 0)  // 5. DO ANY OF THE BLOCKS TOUCH ANOTHER? (GROUND ONLY FOR NOW)
-    		{
-    			touches = true; // once true, always true til the end of this method
-    		}	
-     		
-     		didoccupy[b] = didoccupy[b]+tiles[col][row].blocks[index][1];
-     		didoccupy[b+1] = didoccupy[b+1]+tiles[col][row].blocks[index][2];
-     		if(didoccupy[1] % 2 != 0 && didoccupy[b+1] % 2 != 0) // if anchor y and this hex y are both odd,
-     			didoccupy[b] = didoccupy[b]+1; 					 // then offset x by +1
-     		didoccupy[b+2] = didoccupy[b+2]+tiles[col][row].blocks[index][3];
-     	}
+        if(!isValidLocation(col,row,_block))
+        {
+        	return;
+        }
         
         // EVERYTHING CHECKED OUT, WRITE OR OVERWRITE THE HEXES IN OCCUPADO
- 
+        
       	if(tiles[col][row].blocks[index][3] >= 0) // If the previous z was greater than 0 (i.e. not hidden) ...
      	{
-     		// get the previous 8 hex locations
          	for(uint8 l = 0; l < 24; l+=3) // loop 8 times,find the previous occupado entries and overwrite them
          	{
-         		for(o = 0; o < tiles[col][row].occupado.length; o++)
+         		for(uint o = 0; o < tiles[col][row].occupado.length; o++)
          		{
          			if(didoccupy[l] == tiles[col][row].occupado[o][0] && didoccupy[l+1] == tiles[col][row].occupado[o][1] && didoccupy[l+2] == tiles[col][row].occupado[o][2]) // x,y,z equal?
          			{
@@ -224,13 +208,84 @@ contract Etheria is mortal // todo
      	}
       	
      	tiles[col][row].blocks[index] = _block;
-     	whathappened = 5;
     	return;
     }
-    
-    function getBlocks(uint8 col, uint8 row) constant returns (int8[5][])
+       
+    function getBlocks(uint8 col, uint8 row) public constant returns (int8[5][])
     {
     	return tiles[col][row].blocks;
+    }
+    
+    function getOccupado(uint8 col, uint8 row) public constant returns (int8[3][])
+    {
+     	return tiles[col][row].occupado;
+    }
+    
+    function isValidLocation(uint8 col, uint8 row, int8[5] _block) private constant returns (bool)
+    {
+    	bool touches;
+//        int8[24] memory wouldoccupy = bds.getOccupies(uint8(_block[0]));
+//        int8[24] memory didoccupy = bds.getOccupies(uint8(_block[0]));
+          
+        for(uint8 b = 0; b < 24; b+=3) // always 8 hexes, calculate the wouldoccupy and the didoccupy
+       	{
+//       		wouldoccupy[b] = wouldoccupy[b]+_block[1];
+//       		wouldoccupy[b+1] = wouldoccupy[b+1]+_block[2];
+//       		if(wouldoccupy[1] % 2 != 0 && wouldoccupy[b+1] % 2 != 0) // if anchor y and this hex y are both odd,
+//       			wouldoccupy[b] = wouldoccupy[b]+1;  			   // then offset x by +1
+//       		wouldoccupy[b+2] = wouldoccupy[b+2]+_block[3];
+       		
+       		if(!blockHexCoordsValid(wouldoccupy[b], wouldoccupy[b+1])) // 3. DO ANY OF THE PROPOSED HEXES FALL OUTSIDE OF THE TILE? 
+      		{
+       			whathappened = 3;
+      			return false;
+      		}
+       		for(uint o = 0; o < tiles[col][row].occupado.length; o++)  // 4. DO ANY OF THE PROPOSED HEXES CONFLICT WITH ENTRIES IN OCCUPADO? 
+          	{
+      			if(wouldoccupy[b] == tiles[col][row].occupado[o][0] && wouldoccupy[b+1] == tiles[col][row].occupado[o][1] && wouldoccupy[b+2] == tiles[col][row].occupado[o][2]) // do the x,y,z entries of each match?
+      			{
+      				whathappened = 4;
+      				return false; // this hex conflicts. The proposed block does not avoid overlap. Return false immediately.
+      			}
+          	}
+      		if(touches == false && wouldoccupy[b+2] == 0)  // 5. DO ANY OF THE BLOCKS TOUCH ANOTHER? (GROUND ONLY FOR NOW)
+      		{
+      			touches = true; // once true, always true til the end of this method
+      		}	
+       	}
+          
+        if(touches == false)  // 6. NONE OF THE OCCUPY BLOCKS TOUCHED THE GROUND. BUT MAYBE THEY TOUCH ANOTHER BLOCK?
+  		{
+          	int8[48] memory attachesto = bds.getAttachesto(uint8(_block[0]));
+          	for(uint8 a = 0; a < 48 && !touches; a+=3) // always 8 hexes, calculate the wouldoccupy and the didoccupy
+          	{
+          		if(attachesto[a] == 0 && attachesto[a+1] == 0 && attachesto[a+2] == 0) // there are no more attachestos available, break (0,0,0 signifies end)
+          			break;
+          		attachesto[a] = attachesto[a]+_block[1];
+          		attachesto[a+1] = attachesto[a+1]+_block[2];
+           		if(attachesto[1] % 2 != 0 && attachesto[a+1] % 2 == 0) // if anchor y and this hex y are both odd,  (for attachesto, anchory is the same as for occupies, but the z is different. Nothing to worry about)
+           			attachesto[a] = attachesto[a]+1;  			       // then offset x by +1
+           		attachesto[a+2] = attachesto[a+2]+_block[3];
+           		for(o = 0; o < tiles[col][row].occupado.length && !touches; o++)
+           		{
+           			if(attachesto[a] == tiles[col][row].occupado[o][0] && attachesto[a+1] == tiles[col][row].occupado[o][1] && attachesto[a+2] == tiles[col][row].occupado[o][2]) // a valid attachesto found in occupado?
+           			{
+           				touches = true;
+           			}
+           		}
+          	}
+  		}
+        
+        if(touches == false)
+        {
+        	whathappened = 5; // in bounds, didn't conflict, but also didn't touch.
+        	return false; 
+        }	
+        else
+        {
+        	//whathappened = 6;
+        	return true;
+        }	
     }
     
     // TODO:
@@ -339,7 +394,6 @@ contract Etheria is mortal // todo
     	{
     		if(!(msg.value == 0))
     			msg.sender.send(msg.value); 		// return their money
-    		whathappened = 10;
     		return;
     	}
     	else if(mer.getElevation(col,row) >= 125 && tiles[col][row].owner == address(0) ||  // if unowned and above sea level, accept offer of 1 ETH immediately
@@ -348,7 +402,6 @@ contract Etheria is mortal // todo
     		if(msg.value != 1000000000000000000) // 1 ETH is the starting value. If not enough or too much...
     		{
     			msg.sender.send(msg.value); 	 // return their money
-    			whathappened = 11;
         		return;
     		}	
     		else
@@ -356,7 +409,6 @@ contract Etheria is mortal // todo
     			creator.send(msg.value);     		 // this was a valid offer, send money to contract owner
     			tiles[col][row].owner = msg.sender;  // set tile owner to the buyer
     			farmTile(col,row); 					 // always immediately farm the tile
-    			whathappened = 12;
     			return;		
     		}	
     	}	
@@ -370,7 +422,6 @@ contract Etheria is mortal // todo
     				{
     					msg.sender.send(tiles[col][row].offers[i]); // return their previous money
     					tiles[col][row].offers[i] = msg.value; // set the new offer
-    					whathappened = 13;
     					return;
     				}
     			}	
@@ -379,72 +430,69 @@ contract Etheria is mortal // todo
     			tiles[col][row].offers.length++; // make room for 1 more
     			tiles[col][row].offerers[tiles[col][row].offerers.length - 1] = msg.sender; // record who is making the offer
     			tiles[col][row].offers[tiles[col][row].offers.length - 1] = msg.value; // record the offer
-    			whathappened = 14;
         		return;
     		}	
-    		whathappened = 15;
     		return;
     	}
-    	whathappened = 16;
 		return;
     }
     
-    function retractOffer(uint8 col, uint8 row) // retracts the first offer in the array by this user.
-    {
-        for(uint8 i = 0; i < tiles[col][row].offerers.length; i++)
-    	{
-    		if(tiles[col][row].offerers[i] == msg.sender) // this user has an offer on file. Remove it.
-    			removeOffer(col,row,i);
-    	}	
-    }
-    
-    function rejectOffer(uint8 col, uint8 row, uint8 i) // index 0-10
-    {
-    	if(tiles[col][row].owner != msg.sender) // only the owner can reject offers
-    		return;
-    	removeOffer(col,row,i);
-		return;
-    }
-    
-    function removeOffer(uint8 col, uint8 row, uint8 i) private // index 0-10, can't be odd
-    {
-    	// return the money
-        tiles[col][row].offerers[i].send(tiles[col][row].offers[i]);
-    			
-    	// delete user and offer and reshape the array
-    	delete tiles[col][row].offerers[i];   // zero out user
-    	delete tiles[col][row].offers[i];   // zero out offer
-    	for(uint8 j = i+1; j < tiles[col][row].offerers.length; j++) // close the arrays after the gap
-    	{
-    	    tiles[col][row].offerers[j-1] = tiles[col][row].offerers[j];
-    	    tiles[col][row].offers[j-1] = tiles[col][row].offers[j];
-    	}
-    	tiles[col][row].offerers.length--;
-    	tiles[col][row].offers.length--;
-    	return;
-    }
-    
-    function acceptOffer(uint8 col, uint8 row, uint8 i) // accepts the offer at index (1-10)
-    {
-    	uint offeramount = tiles[col][row].offers[i];
-    	uint housecut = offeramount / 10;
-    	creator.send(housecut);
-    	tiles[col][row].owner.send(offeramount-housecut); // send offer money to oldowner
-    	tiles[col][row].owner = tiles[col][row].offerers[i]; // new owner is the offerer
-    	delete tiles[col][row].offerers; // delete all offerers
-    	delete tiles[col][row].offers; // delete all offers
-    	return;
-    }
-    
-    function getOfferers(uint8 col, uint8 row) constant returns (address[])
-    {
-    	return tiles[col][row].offerers;
-    }
-    
-    function getOffers(uint8 col, uint8 row) constant returns (uint[])
-    {
-    	return tiles[col][row].offers;
-    }
+//    function retractOffer(uint8 col, uint8 row) // retracts the first offer in the array by this user.
+//    {
+//        for(uint8 i = 0; i < tiles[col][row].offerers.length; i++)
+//    	{
+//    		if(tiles[col][row].offerers[i] == msg.sender) // this user has an offer on file. Remove it.
+//    			removeOffer(col,row,i);
+//    	}	
+//    }
+//    
+//    function rejectOffer(uint8 col, uint8 row, uint8 i) // index 0-10
+//    {
+//    	if(tiles[col][row].owner != msg.sender) // only the owner can reject offers
+//    		return;
+//    	removeOffer(col,row,i);
+//		return;
+//    }
+//    
+//    function removeOffer(uint8 col, uint8 row, uint8 i) private // index 0-10, can't be odd
+//    {
+//    	// return the money
+//        tiles[col][row].offerers[i].send(tiles[col][row].offers[i]);
+//    			
+//    	// delete user and offer and reshape the array
+//    	delete tiles[col][row].offerers[i];   // zero out user
+//    	delete tiles[col][row].offers[i];   // zero out offer
+//    	for(uint8 j = i+1; j < tiles[col][row].offerers.length; j++) // close the arrays after the gap
+//    	{
+//    	    tiles[col][row].offerers[j-1] = tiles[col][row].offerers[j];
+//    	    tiles[col][row].offers[j-1] = tiles[col][row].offers[j];
+//    	}
+//    	tiles[col][row].offerers.length--;
+//    	tiles[col][row].offers.length--;
+//    	return;
+//    }
+//    
+//    function acceptOffer(uint8 col, uint8 row, uint8 i) // accepts the offer at index (1-10)
+//    {
+//    	uint offeramount = tiles[col][row].offers[i];
+//    	uint housecut = offeramount / 10;
+//    	creator.send(housecut);
+//    	tiles[col][row].owner.send(offeramount-housecut); // send offer money to oldowner
+//    	tiles[col][row].owner = tiles[col][row].offerers[i]; // new owner is the offerer
+//    	delete tiles[col][row].offerers; // delete all offerers
+//    	delete tiles[col][row].offers; // delete all offers
+//    	return;
+//    }
+//    
+//    function getOfferers(uint8 col, uint8 row) constant returns (address[])
+//    {
+//    	return tiles[col][row].offerers;
+//    }
+//    
+//    function getOffers(uint8 col, uint8 row) constant returns (uint[])
+//    {
+//    	return tiles[col][row].offers;
+//    }
     
 }
-// 0xd95f00d25b226b09e0a387bf35823c027501d750
+// 0x0f8df84b91902100260111b21b02759219358d4f
