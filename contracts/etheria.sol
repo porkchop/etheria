@@ -44,17 +44,9 @@ contract Etheria is mortal
     	mer = MapElevationRetriever(0xc35a4e966bf792734a25ea524448ea54de385e4e);
     }
     
-    function getOwners() public constant returns(address[33][33])
+    function getOwner(uint8 col, uint8 row) public constant returns(address)
     {
-        address[33][33] memory owners;
-        for(uint8 row = 0; row < mapsize; row++)
-        {
-        	for(uint8 col = 0; col < mapsize; col++)
-        	{
-        	    owners[col][row] = tiles[col][row].owner; 
-        	}	
-        }	
-    	return owners;
+    	return tiles[col][row].owner;
     }
     
     function getName(uint8 col, uint8 row) public constant returns(string)
@@ -297,10 +289,11 @@ contract Etheria is mortal
     // DONE angle camera
     // DONE block edit validation coordinate constraints in JS
     // DONE block edit validation must touch, no overlap in JS
-    // block edit validation coordinate constraints in solidity
-    // block edit validation must touch, no overlap in solidity
+    // DONE block edit validation coordinate constraints in solidity
+    // DONE block edit validation must touch, no overlap in solidity
     // DONE block lookup caching 
     // register name for owner
+    // register status for owner
    
     // FULL GAME TODO:
     // Fitness vote
@@ -394,7 +387,7 @@ contract Etheria is mortal
     
     function makeOffer(uint8 col, uint8 row)
     {
-    	if(msg.value < 10000000000000000 || msg.value > 1208925819614629174706175) // .01 ether up to (2^80 - 1) wei is the valid range
+    	if(msg.value < 100000000000000000 || msg.value > 1208925819614629174706175) // .1 ether up to (2^80 - 1) wei is the valid range
     	{
     		if(!(msg.value == 0))
     			msg.sender.send(msg.value); 		// return their money

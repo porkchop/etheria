@@ -8,30 +8,34 @@ Etheria testing
 // rehiding block
 // 
 
-
 // CHECK INITIALIZATION
-etheria.getOwners(); // should be all 0x0000000000000000000000000000000000000000 (40 zeros)
-web3.fromWei(eth.getBalance(eth.accounts[0])); 
-web3.fromWei(eth.getBalance(eth.accounts[1])); 
-etheria.makeOffer.sendTransaction(4,5,{from:eth.accounts[1],gas:2000000,value:web3.toWei(1,'ether')}); // 595224 gas used
-etheria.getOwners(); // should be all 0x0000000000000000000000000000000000000000 except 8,8 which should be 250000000000000000
-web3.fromWei(eth.getBalance(etheria.address)); // should be zero, money is sent to creator
-web3.fromWei(eth.getBalance(eth.accounts[0])); // should be + 1
-web3.fromWei(eth.getBalance(eth.accounts[1])); // should be - 1
-//etheria.farmTile.sendTransaction(3,4,{from:eth.accounts[1],gas:2000000}); // no need for this. Blocks automatically farmed on purchase
-etheria.getBlocks(4,5); // should be a set of blocks automatically farmed on purchase
-etheria.editBlock.sendTransaction(4,5,0,[0,20,20,0,40], {from:eth.accounts[1],gas:2000000}); // moves first block to 20,20,0 // 419000 gas used
-etheria.editBlock.sendTransaction(4,5,0,[0,20,20,1,40], {from:eth.accounts[1],gas:2000000}); // tries to hover the first block // should fail with whathappened = 5;
-etheria.editBlock.sendTransaction(4,5,0,[0,55,55,0,40], {from:eth.accounts[1],gas:2000000}); // should fail out of bounds with whathappened = 3 **************** got whathappened = 
-etheria.editBlock.sendTransaction(4,5,1,[0,20,20,0,40], {from:eth.accounts[1],gas:600000}); // tries to overlap second block with block at 20,20. Should fail with whathappened = 4 (conflicts with occupado) ********* Got whathappened=6 OK // 442000 gas used
-etheria.editBlock.sendTransaction(4,5,1,[0,20,20,8,40], {from:eth.accounts[1],gas:600000}); 
-// BUY A TILE
-etheria.makeOffer.sendTransaction(8,8,{from:eth.accounts[0],value:100000000000000000, gas:2000000}); // should fail. Too low.
-etheria.makeOffer.sendTransaction(0,0,{from:eth.accounts[0],value:1000000000000000000, gas:2000000}); // should fail. Can't buy water tiles
-web3.fromWei(eth.getBalance(eth.accounts[0])); 
-web3.fromWei(eth.getBalance(eth.accounts[1])); 
-etheria.makeOffer.sendTransaction(8,8,{from:eth.accounts[0],value:1000000000000000000, gas:2000000}); // should succeed
-etheria.makeOffer.sendTransaction(3,4,{from:eth.accounts[1],value:1000000000000000000, gas:2000000}); // should succeed
+etheria.getOwners(); 																					// should be all 0x0000000000000000000000000000000000000000 (40 zeros)
+checkAllBalances();																						// check balances
+etheria.makeOffer.sendTransaction(4,5,{from:eth.accounts[1],gas:2000000,value:web3.toWei(1,'ether')}); 	// 595224 gas used
+etheria.getOwners(); 																					// should be all 0x0000000000000000000000000000000000000000 except 8,8 which should be 250000000000000000
+web3.fromWei(eth.getBalance(etheria.address)); 															// should be zero, money is sent to creator
+checkAllBalances();																						// check balances
+//etheria.farmTile.sendTransaction(3,4,{from:eth.accounts[1],gas:2000000}); 							// no need for this now . Blocks automatically farmed on purchase
+etheria.getBlocks(4,5); 																				// should be a set of 10 blocks automatically farmed on purchase
+etheria.editBlock.sendTransaction(4,5,0,[0,20,20,0,40], {from:eth.accounts[1],gas:2000000}); 			// moves first block to 20,20,0 // 419000 gas used
+etheria.editBlock.sendTransaction(4,5,0,[0,20,20,1,40], {from:eth.accounts[1],gas:2000000}); 			// tries to hover the first block // should fail 
+etheria.editBlock.sendTransaction(4,5,0,[0,55,55,0,40], {from:eth.accounts[1],gas:2000000}); 			// tries to put a block out of bounds // should fail 
+etheria.editBlock.sendTransaction(4,5,1,[0,20,20,0,40], {from:eth.accounts[1],gas:600000}); 			// tries to overlap second block with block at 20,20. // Should fail 
+etheria.editBlock.sendTransaction(4,5,1,[0,20,20,1,40], {from:eth.accounts[1],gas:600000}); 			// tries to stack a block // should succeed (Change z to whatever the correct value is depending on the thickness of the block below)
+
+// MAKE SOME INVALID OFFERS
+checkAllBalances();																						// check balances
+etheria.makeOffer.sendTransaction(8,8,{from:eth.accounts[0],value:99999999999900000, gas:100000}); 		// should fail. 0.0999 ether is too low. .1 is the minimum
+etheria.getBlocks(8,8);																					// should be empty array from failed purchase, no farm
+checkAllBalances();																						// check balances. Sending account should be slightly less (~.0015) from gas payment, but not .09999 less. That would mean the contract kept the offer money.
+web3.fromWei(eth.getBalance(etheria.address)); 															// should still be zero, money is sent to creator
+etheria.makeOffer.sendTransaction(0,0,{from:eth.accounts[0],value:1000000000000000000, gas:2000000}); 	// valid amount, but should fail. Can't buy water tiles
+
+// SINGLE OFFER ON A PRE-OWNED TILE
+web3.fromWei(eth.getBalance(eth.accounts[0]));															// check purchaser account balance	
+web3.fromWei(eth.getBalance(eth.accounts[1]));															// check previous owner account balance
+etheria.makeOffer.sendTransaction(8,8,{from:eth.accounts[0],value:1000000000000000000, gas:2000000}); 	// should succeed
+etheria.makeOffer.sendTransaction(3,4,{from:eth.accounts[1],value:1000000000000000000, gas:2000000}); 	// should succeed
 etheria.getOwners(); // should be all 0x0000000000000000000000000000000000000000 except 8,8 which should be 250000000000000000
 web3.fromWei(eth.getBalance(etheria.address)); // should be zero, money is sent to creator
 web3.fromWei(eth.getBalance(eth.accounts[0])); // should be + 1
