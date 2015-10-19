@@ -40,8 +40,6 @@ etheria.editBlock.sendTransaction(4,5,1,[0,20,20,0,40], {from:eth.accounts[1],ga
 etheria.editBlock.sendTransaction(4,5,1,[0,20,20,1,40], {from:eth.accounts[1],gas:600000}); 				// tries to stack a block // should succeed (Change z to whatever the correct value is depending on the thickness of the block below)
 
 // MAKE SOME INVALID OFFERS
-checkAllBalances();																							// check balances
-etheria.getBlocks(8,8);																						// should be empty array from failed purchase, no farm
 checkAllBalances();																							// check balances. Sending account should be slightly less (~.0015) from gas payment, but not .09999 less. That would mean the contract kept the offer money.
 etheria.makeOffer.sendTransaction(-1,5,{from:eth.accounts[1],value:web3.toWei(1,'ether'), gas:2000000}); 	// whathappened = 2, col,row out of bounds 
 etheria.makeOffer.sendTransaction(16,16,{from:eth.accounts[1],gas:2000000});     							// whathappened = 1, value == 0
@@ -67,15 +65,20 @@ etheria.makeOffer(4,5,{from:eth.accounts[3],gas:1000000, value:web3.toWei(.13,"e
 etheria.getOffers(4,5);																						// should show array of length 3 with the three offers above
 etheria.getOfferers(4,5);																					// should show array of length 3 with the three offerERS above
 checkAllBalances(); 																						// balance should be .44 at this moment, each of the offering accounts should be deducted by the appropriate amount
+etheria.retractOffer.sendTransaction(4,55,{from:eth.accounts[0],gas:1000000});								// whathappened = 60, c,r oob
+etheria.retractOffer.sendTransaction(4,5,{from:eth.accounts[1],gas:1000000});								// whathappened = 62, couldn't find offer from that user -- because the user is the owner.
+etheria.retractOffer.sendTransaction(4,5,{from:eth.accounts[3],gas:1000000});								// whathappened = 61, retract success
+etheria.rejectOffer.sendTransaction(-4,5,1,{from:eth.accounts[1],gas:1000000});								// whathappened = 70, c,r oob
+etheria.rejectOffer.sendTransaction(4,5,1,{from:eth.accounts[0],gas:1000000});								// whathappened = 71 , this user does not own the tile.
+etheria.rejectOffer.sendTransaction(4,5,-1,{from:eth.accounts[1],gas:1000000});								// whathappened = 72, index oob
 etheria.rejectOffer.sendTransaction(4,5,1,{from:eth.accounts[1],gas:1000000});								// whathappened = 73, reject the middle offer
 etheria.getOffers(4,5);																						// should show array of length 2 with the middle one gone
 etheria.getOfferers(4,5);																					// should show array of length 2 with the middle one gone
 checkAllBalances();																							// should show contract balance of .33 with .11 returned to accounts[2]
-etheria.rejectOffer.sendTransaction(-4,5,1,{from:eth.accounts[1],gas:1000000});								// whathappened = 70, c,r oob
-etheria.rejectOffer.sendTransaction(4,5,1,{from:eth.accounts[0],gas:1000000});								// whathappened = 71 , this user does not own the tile.
-etheria.rejectOffer.sendTransaction(4,5,-1,{from:eth.accounts[1],gas:1000000});								// whathappened = 72, index oob
 etheria.rejectOffer.sendTransaction(4,5,0,{from:eth.accounts[1],gas:1000000});								// whathappened = 73, reject the first offer in the array
 etheria.rejectOffer.sendTransaction(4,5,0,{from:eth.accounts[1],gas:1000000});								// whathappened = 73, reject the first offer in the array
+
+
 
 // GET OFFERS FOR A TILE
 
