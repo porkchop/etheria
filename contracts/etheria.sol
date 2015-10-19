@@ -68,6 +68,8 @@ contract Etheria is mortal
     		return;
     	}
     	tile.name = _n;
+    	whathappened = 52;
+    	return;
     }
     
     function getStatus(uint8 col, uint8 row) public constant returns(string)
