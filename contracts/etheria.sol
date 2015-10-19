@@ -56,7 +56,7 @@ contract Etheria is mortal
     }
     function setName(uint8 col, uint8 row, string _n) public
     {
-    	if(col < 0 || col > (mapsize-1) || row < 0 || row > (mapsize-1)) // row and/or col was not between 0-mapsize
+    	if(isOOB(col,row)) // row and/or col was not between 0-mapsize
     	{
     		whathappened = 50;
     		return;
@@ -89,7 +89,7 @@ contract Etheria is mortal
     		whathappened = 41;
     		return;
     	}
-    	if(col < 0 || col > (mapsize-1) || row < 0 || row > (mapsize-1)) // row and/or col was not between 0-mapsize
+    	if(isOOB(col,row)) // row and/or col was not between 0-mapsize
     	{
     		msg.sender.send(msg.value); 		// return their money
     		whathappened = 42;
@@ -135,7 +135,7 @@ contract Etheria is mortal
     
     function farmTile(uint8 col, uint8 row) public 
     {
-    	if(col < 0 || col > (mapsize-1) || row < 0 || row > (mapsize-1)) // row and/or col was not between 0-mapsize
+    	if(isOOB(col,row)) // row and/or col was not between 0-mapsize
     	{
     		whathappened = 30;
     		return;
@@ -176,7 +176,7 @@ contract Etheria is mortal
     
     function editBlock(uint8 col, uint8 row, uint index, int8[5] _block)  
     {
-    	if(col < 0 || col > (mapsize-1) || row < 0 || row > (mapsize-1)) // row and/or col was not between 0-mapsize
+    	if(isOOB(col,row)) // row and/or col was not between 0-mapsize
     	{
     		whathappened = 20;
     		return;
@@ -422,7 +422,7 @@ contract Etheria is mortal
     		return;
     	}	// do nothing, just return
     	
-    	if(col < 0 || col > (mapsize-1) || row < 0 || row > (mapsize-1)) // row and/or col was not between 0-mapsize
+    	if(isOOB(col,row)) // row and/or col was not between 0-mapsize
     	{
     		whathappened = 2;
     		msg.sender.send(msg.value); 		// return their money
@@ -479,7 +479,7 @@ contract Etheria is mortal
     
     function retractOffer(uint8 col, uint8 row) // retracts the first offer in the array by this user.
     {
-    	if(col < 0 || col > (mapsize-1) || row < 0 || row > (mapsize-1)) // row and/or col was not between 0-mapsize
+    	if(isOOB(col,row)) // row and/or col was not between 0-mapsize
     	{
     		whathappened = 60;
     		return;
@@ -500,7 +500,7 @@ contract Etheria is mortal
     
     function rejectOffer(uint8 col, uint8 row, uint8 i) // index 0-10
     {
-    	if(col < 0 || col > (mapsize-1) || row < 0 || row > (mapsize-1)) // row and/or col was not between 0-mapsize
+    	if(isOOB(col,row)) // row and/or col was not between 0-mapsize
     	{
     		whathappened = 70;
     		return;
@@ -541,7 +541,7 @@ contract Etheria is mortal
     
     function acceptOffer(uint8 col, uint8 row, uint8 i) // accepts the offer at index (1-10)
     {
-    	if(col < 0 || col > (mapsize-1) || row < 0 || row > (mapsize-1)) // row and/or col was not between 0-mapsize
+    	if(isOOB(col,row)) // row and/or col was not between 0-mapsize
     	{
     		whathappened = 80;
     		return;
@@ -582,5 +582,11 @@ contract Etheria is mortal
     function getOffers(uint8 col, uint8 row) constant returns (uint[])
     {
     	return tiles[col][row].offers; // no harm if col,row are invalid
+    }
+    
+    function isOOB(uint8 col, uint8 row) private constant returns (bool)
+    {
+    	if(col < 0 || col > (mapsize-1) || row < 0 || row > (mapsize-1))
+    		return true; // is out of bounds
     }
 }
