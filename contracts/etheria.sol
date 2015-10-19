@@ -23,7 +23,27 @@ contract Etheria is mortal
     uint8 mapsize = 33;
     Tile[33][33] tiles;
     address creator;
-        
+    
+//    uint creationblocknumber;
+//    uint8 phase;
+//    uint8[2] zombiepos;
+//    uint8[2] stormpos;
+//    uint8[2] animalpos;
+//    uint8[2] dragonpos;
+//    uint8[2] engpos;
+//    
+//    uint lastzombieaction;
+//    uint laststormaction;
+//    uint lastanimalaction;
+//    uint lastdragonaction;
+//    uint lastengaction;
+//    
+//    uint maxzombiedef;
+//    uint maxstormdef;
+//    uint maxherddef;
+//    uint maxdragondef;
+//    uint maxengdef;
+    
     struct Tile 
     {
     	address owner;
@@ -34,6 +54,13 @@ contract Etheria is mortal
     	int8[3][] occupado;
     	string name;
     	string status;
+    	
+//    	uint lastvote;    	
+//    	uint zombiedef;
+//    	uint stormdef;
+//    	uint herddef;
+//    	uint dragondef;
+//    	uint engdef;
     }
     
     BlockDefStorage bds;
@@ -41,14 +68,80 @@ contract Etheria is mortal
     
     function Etheria() {
     	creator = msg.sender;
+//    	creationblocknumber = block.number;
     	bds = BlockDefStorage(0x782bdf7015b71b64f6750796dd087fde32fd6fdc); 
     	mer = MapElevationRetriever(0x68549d7dbb7a956f955ec1263f55494f05972a6b);
     }
+    
+    /**
+     * GAME FEATURES
+     */
+    
+//    function getRandomLandTile() public returns (uint8[2]) //TODO make private
+//    {
+//    	uint8[2] memory randomcolrow; // starts as [0,0]
+//    	uint8 counter = 0;
+//    	bytes32 lastblockhash = block.blockhash(block.number - 1);
+//    	whathappened = 99;
+//    	whathappened2 = 99;
+//    	while(mer.getElevation(randomcolrow[0], randomcolrow[1]) < 125 && counter < 32)
+//    	{
+//    		whathappened = getUint8FromByte32(lastblockhash,counter) % 32;
+//    		whathappened2 = getUint8FromByte32(lastblockhash,counter+1) % 32;
+//    		randomcolrow[counter] = whathappened;										// this only gets 0-32, but it's ok because the top row and right column are just water anyway.
+//    		randomcolrow[counter+1] = whathappened2;	// this only gets 0-32, but it's ok because the top row and right column are just water anyway.
+//    		counter+=2;
+//    	}
+//    	// land tiles make up roughly half the map. The chance of getting water tiles 16 times in row is 1 / 2^16 = 1 in 65,636. If that ever happens, just return the center tile
+//    	if(counter == 32)
+//    	{
+//    		randomcolrow[0] = whathappened = (mapsize - 1) / 2;
+//    		randomcolrow[1] = whathappened2 = (mapsize - 1) / 2;
+//    		return randomcolrow;
+//    	}	
+//    }
+//    
+//    function submitVotes(uint8 col, uint8 row, int8[7][] votes)
+//    {
+//    	if(isOOB(col,row)) // row and/or col was not between 0-mapsize
+//    	{
+//    		whathappened = 90;
+//    		return;
+//    	}
+//    	Tile tile = tiles[col][row];
+//    	if(tile.owner != msg.sender)
+//    	{
+//    		whathappened = 91;
+//    		return;
+//    	}
+//    	if(votes.length <= 0 || votes.length > 100) // min 1 max 100 votes at a time
+//    	{
+//    		whathappened = 92;
+//    		return;
+//    	}	
+//    	int8 runningtotal = 0;
+//    	for(uint x = 0; x < votes.length; x++)
+//    	{
+//    		runningtotal = runningtotal + votes[x][2] + votes[x][3] + votes[x][4] + votes[x][5] + votes[x][6];
+//    	}	
+//    }
+    
     
     function getOwner(uint8 col, uint8 row) public constant returns(address)
     {
     	return tiles[col][row].owner; // no harm if col,row are invalid
     }
+    
+    /***
+     *     _   _   ___  ___  ___ _____            _____ _____ ___ _____ _   _ _____ 
+     *    | \ | | / _ \ |  \/  ||  ___|   ___    /  ___|_   _/ _ \_   _| | | /  ___|
+     *    |  \| |/ /_\ \| .  . || |__    ( _ )   \ `--.  | |/ /_\ \| | | | | \ `--. 
+     *    | . ` ||  _  || |\/| ||  __|   / _ \/\  `--. \ | ||  _  || | | | | |`--. \
+     *    | |\  || | | || |  | || |___  | (_>  < /\__/ / | || | | || | | |_| /\__/ /
+     *    \_| \_/\_| |_/\_|  |_/\____/   \___/\/ \____/  \_/\_| |_/\_/  \___/\____/ 
+     *                                                                              
+     *                                                                              
+     */
     
     function getName(uint8 col, uint8 row) public constant returns(string)
     {
@@ -108,30 +201,14 @@ contract Etheria is mortal
     }
     
     /***
-     *    ______                     _   _ _                        _ _ _     _     _            _        
-     *    |  ___|                   | | (_) |                      | (_) |   | |   | |          | |       
-     *    | |_ __ _ _ __ _ __ ___   | |_ _| | ___  ___      ___  __| |_| |_  | |__ | | ___   ___| | _____ 
-     *    |  _/ _` | '__| '_ ` _ \  | __| | |/ _ \/ __|    / _ \/ _` | | __| | '_ \| |/ _ \ / __| |/ / __|
-     *    | || (_| | |  | | | | | | | |_| | |  __/\__ \_  |  __/ (_| | | |_  | |_) | | (_) | (__|   <\__ \
-     *    \_| \__,_|_|  |_| |_| |_|  \__|_|_|\___||___( )  \___|\__,_|_|\__| |_.__/|_|\___/ \___|_|\_\___/
-     *                                                |/                                                  
-     *                                                                                                    
+     *    ______ ___  _________  ________ _   _ _____            ___________ _____ _____ _____ _   _ _____ 
+     *    |  ___/ _ \ | ___ \  \/  |_   _| \ | |  __ \   ___    |  ___|  _  \_   _|_   _|_   _| \ | |  __ \
+     *    | |_ / /_\ \| |_/ / .  . | | | |  \| | |  \/  ( _ )   | |__ | | | | | |   | |   | | |  \| | |  \/
+     *    |  _||  _  ||    /| |\/| | | | | . ` | | __   / _ \/\ |  __|| | | | | |   | |   | | | . ` | | __ 
+     *    | |  | | | || |\ \| |  | |_| |_| |\  | |_\ \ | (_>  < | |___| |/ / _| |_  | |  _| |_| |\  | |_\ \
+     *    \_|  \_| |_/\_| \_\_|  |_/\___/\_| \_/\____/  \___/\/ \____/|___/  \___/  \_/  \___/\_| \_/\____/
+     *                                                                                                     
      */
-    function getUint8FromByte32(bytes32 _b32, uint8 byteindex) public constant returns(uint8) {
-    	uint numdigits = 64;
-    	uint buint = uint(_b32);
-    	uint upperpowervar = 16 ** (numdigits - (byteindex*2)); 		// @i=0 upperpowervar=16**64 (SEE EXCEPTION BELOW), @i=1 upperpowervar=16**62, @i upperpowervar=16**60
-    	uint lowerpowervar = 16 ** (numdigits - 2 - (byteindex*2));		// @i=0 upperpowervar=16**62, @i=1 upperpowervar=16**60, @i upperpowervar=16**58
-    	uint postheadchop;
-    	if(byteindex == 0)
-    		postheadchop = buint; 								//for byteindex 0, buint is just the input number. 16^64 is out of uint range, so this exception has to be made.
-    	else
-    		postheadchop = buint % upperpowervar; 				// @i=0 _b32=a1b2c3d4... postheadchop=a1b2c3d4, @i=1 postheadchop=b2c3d4, @i=2 postheadchop=c3d4
-    	uint remainder = postheadchop % lowerpowervar; 			// @i=0 remainder=b2c3d4, @i=1 remainder=c3d4, @i=2 remainder=d4
-    	uint evenedout = postheadchop - remainder; 				// @i=0 evenedout=a1000000, @i=1 remainder=b20000, @i=2 remainder=c300
-    	uint b = evenedout / lowerpowervar; 					// @i=0 b=a1 (to uint), @i=1 b=b2, @i=2 b=c3
-    	return uint8(b);
-    }
     
     function farmTile(uint8 col, uint8 row) public 
     {
@@ -165,14 +242,6 @@ contract Etheria is mortal
     	whathappened = 33;
     	return;
     }
-    
-    // SEVERAL CHECKS TO BE PERFORMED
-    // 1. DID THE OWNER SEND THIS MESSAGE?
-    // 2. IS THE Z LOCATION OF THE BLOCK BELOW ZERO? BLOCKS CANNOT BE HIDDEN AFTER SHOWING
-    // 3. DO ANY OF THE PROPOSED HEXES FALL OUTSIDE OF THE TILE? 
-    // 4. DO ANY OF THE PROPOSED HEXES CONFLICT WITH ENTRIES IN OCCUPADO? 
-    // 5. DO ANY OF THE BLOCKS TOUCH ANOTHER?
-    // 6. NONE OF THE OCCUPY BLOCKS TOUCHED THE GROUND. BUT MAYBE THEY TOUCH ANOTHER BLOCK?
     
     function editBlock(uint8 col, uint8 row, uint index, int8[5] _block)  
     {
@@ -257,162 +326,15 @@ contract Etheria is mortal
     	return tiles[col][row].blocks; // no harm if col,row are invalid
     }
    
-    // TODO -- not necessary
-//    function getOccupado(uint8 col, uint8 row) public constant returns (int8[3][])
-//    {
-//     	return tiles[col][row].occupado; // no harm if col,row are invalid
-//    }
-    
-    function isValidLocation(uint8 col, uint8 row, int8[5] _block, int8[24] wouldoccupy) private constant returns (bool)
-    {
-    	bool touches;
-    	Tile tile = tiles[col][row]; // since this is a private method, we don't need to check col,row validity
-    	
-        for(uint8 b = 0; b < 24; b+=3) // always 8 hexes, calculate the wouldoccupy and the didoccupy
-       	{
-       		if(!blockHexCoordsValid(wouldoccupy[b], wouldoccupy[b+1])) // 3. DO ANY OF THE PROPOSED HEXES FALL OUTSIDE OF THE TILE? 
-      		{
-       			whathappened = 10;
-      			return false;
-      		}
-       		for(uint o = 0; o < tile.occupado.length; o++)  // 4. DO ANY OF THE PROPOSED HEXES CONFLICT WITH ENTRIES IN OCCUPADO? 
-          	{
-      			if(wouldoccupy[b] == tile.occupado[o][0] && wouldoccupy[b+1] == tile.occupado[o][1] && wouldoccupy[b+2] == tile.occupado[o][2]) // do the x,y,z entries of each match?
-      			{
-      				whathappened = 11;
-      				return false; // this hex conflicts. The proposed block does not avoid overlap. Return false immediately.
-      			}
-          	}
-      		if(touches == false && wouldoccupy[b+2] == 0)  // 5. DO ANY OF THE BLOCKS TOUCH ANOTHER? (GROUND ONLY FOR NOW)
-      		{
-      			touches = true; // once true, always true til the end of this method. We must keep looping to check all the hexes for conflicts and tile boundaries, though, so we can't return true here.
-      		}	
-       	}
-        
-        // now if we're out of the loop and here, there were no conflicts and the block was found to be in the tile boundary.
-        // touches may be true or false, so we need to check 
-          
-        if(touches == false)  // 6. NONE OF THE OCCUPY BLOCKS TOUCHED THE GROUND. BUT MAYBE THEY TOUCH ANOTHER BLOCK?
-  		{
-          	int8[48] memory attachesto = bds.getAttachesto(uint8(_block[0]));
-          	for(uint8 a = 0; a < 48 && !touches; a+=3) // always 8 hexes, calculate the wouldoccupy and the didoccupy
-          	{
-          		if(attachesto[a] == 0 && attachesto[a+1] == 0 && attachesto[a+2] == 0) // there are no more attachestos available, break (0,0,0 signifies end)
-          			break;
-          		attachesto[a] = attachesto[a]+_block[1];
-          		attachesto[a+1] = attachesto[a+1]+_block[2];
-           		if(attachesto[1] % 2 != 0 && attachesto[a+1] % 2 == 0) // if anchor y and this hex y are both odd,  (for attachesto, anchory is the same as for occupies, but the z is different. Nothing to worry about)
-           			attachesto[a] = attachesto[a]+1;  			       // then offset x by +1
-           		attachesto[a+2] = attachesto[a+2]+_block[3];
-           		for(o = 0; o < tile.occupado.length && !touches; o++)
-           		{
-           			if(attachesto[a] == tile.occupado[o][0] && attachesto[a+1] == tile.occupado[o][1] && attachesto[a+2] == tile.occupado[o][2]) // a valid attachesto found in occupado?
-           			{
-           				whathappened = 12;
-           				return true; // in bounds, didn't conflict and now touches is true. All good. Return.
-           			}
-           		}
-          	}
-          	whathappened = 13;
-          	return false; 
-  		}
-        else // touches was true by virtue of a z = 0 above (touching the ground). Return true;
-        {
-        	whathappened = 14;
-        	return true;
-        }	
-    }   
-   
-    // FULL GAME TODO:
-    // Fitness vote
-    // Cast threat
-    // chat
-    // messaging
-    // block trading
-    // reclamation
-    // price modifier
-    
-    // this logic COULD be reduced a little, but the gain is minimal and readability suffers
-    function blockHexCoordsValid(int8 x, int8 y) private constant returns (bool)
-    {
-    	if(-33 <= y && y <= 33)
-    	{
-    		if(y % 2 != 0 ) // odd
-    		{
-    			if(-50 <= x && x <= 49)
-    				return true;
-    			
-    		}
-    		else // even
-    		{
-    			if(-49 <= x && x <= 49)
-    				return true;
-    			
-    		}	
-    	}	
-    	else
-    	{	
-    		uint8 absx;
-			uint8 absy;
-			if(x < 0)
-				absx = uint8(x*-1);
-			else
-				absx = uint8(x);
-			if(y < 0)
-				absy = uint8(y*-1);
-			else
-				absy = uint8(y);
-    		if((y >= 0 && x >= 0) || (y < 0 && x > 0)) // first or 4th quadrants
-    		{
-    			if(y % 2 != 0 ) // odd
-    			{
-    				if (((absx*2) + (absy*3)) <= 198)
-    					return true;
-    				
-    			}	
-    			else	// even
-    			{
-    				if ((((absx+1)*2) + ((absy-1)*3)) <= 198)
-    					return true;
-    				
-    			}
-    		}
-    		else
-    		{	
-    			if(y % 2 == 0 ) // even
-    			{
-    				if (((absx*2) + (absy*3)) <= 198)
-    					return true;
-    				
-    			}	
-    			else	// odd
-    			{
-    				if ((((absx+1)*2) + ((absy-1)*3)) <= 198)
-    					return true;
-    				
-    			}
-    		}
-    	}
-    	return false;
-    }
-    
     /***
-     *     _____  __  __              
-     *    |  _  |/ _|/ _|             
-     *    | | | | |_| |_ ___ _ __ ___ 
-     *    | | | |  _|  _/ _ \ '__/ __|
-     *    \ \_/ / | | ||  __/ |  \__ \
-     *     \___/|_| |_| \___|_|  |___/
-     *                                
-     *                                
+     *     _________________ ___________  _____ 
+     *    |  _  |  ___|  ___|  ___| ___ \/  ___|
+     *    | | | | |_  | |_  | |__ | |_/ /\ `--. 
+     *    | | | |  _| |  _| |  __||    /  `--. \
+     *    \ \_/ / |   | |   | |___| |\ \ /\__/ /
+     *     \___/\_|   \_|   \____/\_| \_|\____/ 
+     *                                          
      */
-    
-    uint8 whathappened;
-    
-    function getWhatHappened() public constant returns (uint8)
-    {
-    	return whathappened;
-    }
     
     function makeOffer(uint8 col, uint8 row)
     {
@@ -589,4 +511,169 @@ contract Etheria is mortal
     	if(col < 0 || col > (mapsize-1) || row < 0 || row > (mapsize-1))
     		return true; // is out of bounds
     }
+    
+    /***
+     *     _   _ _____ _____ _     _____ _______   __
+     *    | | | |_   _|_   _| |   |_   _|_   _\ \ / /
+     *    | | | | | |   | | | |     | |   | |  \ V / 
+     *    | | | | | |   | | | |     | |   | |   \ /  
+     *    | |_| | | |  _| |_| |_____| |_  | |   | |  
+     *     \___/  \_/  \___/\_____/\___/  \_/   \_/  
+     *                                               
+     */
+    
+    // this logic COULD be reduced a little, but the gain is minimal and readability suffers
+    function blockHexCoordsValid(int8 x, int8 y) private constant returns (bool)
+    {
+    	if(-33 <= y && y <= 33)
+    	{
+    		if(y % 2 != 0 ) // odd
+    		{
+    			if(-50 <= x && x <= 49)
+    				return true;
+    		}
+    		else // even
+    		{
+    			if(-49 <= x && x <= 49)
+    				return true;
+    		}	
+    	}	
+    	else
+    	{	
+    		uint8 absx;
+			uint8 absy;
+			if(x < 0)
+				absx = uint8(x*-1);
+			else
+				absx = uint8(x);
+			if(y < 0)
+				absy = uint8(y*-1);
+			else
+				absy = uint8(y);
+    		if((y >= 0 && x >= 0) || (y < 0 && x > 0)) // first or 4th quadrants
+    		{
+    			if(y % 2 != 0 ) // odd
+    			{
+    				if (((absx*2) + (absy*3)) <= 198)
+    					return true;
+    			}	
+    			else	// even
+    			{
+    				if ((((absx+1)*2) + ((absy-1)*3)) <= 198)
+    					return true;
+    			}
+    		}
+    		else
+    		{	
+    			if(y % 2 == 0 ) // even
+    			{
+    				if (((absx*2) + (absy*3)) <= 198)
+    					return true;
+    			}	
+    			else	// odd
+    			{
+    				if ((((absx+1)*2) + ((absy-1)*3)) <= 198)
+    					return true;
+    			}
+    		}
+    	}
+    	return false;
+    }
+    
+    // SEVERAL CHECKS TO BE PERFORMED
+    // 1. DID THE OWNER SEND THIS MESSAGE?		(SEE editBlock)
+    // 2. IS THE Z LOCATION OF THE BLOCK BELOW ZERO? BLOCKS CANNOT BE HIDDEN AFTER SHOWING	   (SEE editBlock)
+    // 3. DO ANY OF THE PROPOSED HEXES FALL OUTSIDE OF THE TILE? 
+    // 4. DO ANY OF THE PROPOSED HEXES CONFLICT WITH ENTRIES IN OCCUPADO? 
+    // 5. DO ANY OF THE BLOCKS TOUCH ANOTHER?
+    // 6. NONE OF THE OCCUPY BLOCKS TOUCHED THE GROUND. BUT MAYBE THEY TOUCH ANOTHER BLOCK?
+    
+    function isValidLocation(uint8 col, uint8 row, int8[5] _block, int8[24] wouldoccupy) private constant returns (bool)
+    {
+    	bool touches;
+    	Tile tile = tiles[col][row]; // since this is a private method, we don't need to check col,row validity
+    	
+        for(uint8 b = 0; b < 24; b+=3) // always 8 hexes, calculate the wouldoccupy and the didoccupy
+       	{
+       		if(!blockHexCoordsValid(wouldoccupy[b], wouldoccupy[b+1])) // 3. DO ANY OF THE PROPOSED HEXES FALL OUTSIDE OF THE TILE? 
+      		{
+       			whathappened = 10;
+      			return false;
+      		}
+       		for(uint o = 0; o < tile.occupado.length; o++)  // 4. DO ANY OF THE PROPOSED HEXES CONFLICT WITH ENTRIES IN OCCUPADO? 
+          	{
+      			if(wouldoccupy[b] == tile.occupado[o][0] && wouldoccupy[b+1] == tile.occupado[o][1] && wouldoccupy[b+2] == tile.occupado[o][2]) // do the x,y,z entries of each match?
+      			{
+      				whathappened = 11;
+      				return false; // this hex conflicts. The proposed block does not avoid overlap. Return false immediately.
+      			}
+          	}
+      		if(touches == false && wouldoccupy[b+2] == 0)  // 5. DO ANY OF THE BLOCKS TOUCH ANOTHER? (GROUND ONLY FOR NOW)
+      		{
+      			touches = true; // once true, always true til the end of this method. We must keep looping to check all the hexes for conflicts and tile boundaries, though, so we can't return true here.
+      		}	
+       	}
+        
+        // now if we're out of the loop and here, there were no conflicts and the block was found to be in the tile boundary.
+        // touches may be true or false, so we need to check 
+          
+        if(touches == false)  // 6. NONE OF THE OCCUPY BLOCKS TOUCHED THE GROUND. BUT MAYBE THEY TOUCH ANOTHER BLOCK?
+  		{
+          	int8[48] memory attachesto = bds.getAttachesto(uint8(_block[0]));
+          	for(uint8 a = 0; a < 48 && !touches; a+=3) // always 8 hexes, calculate the wouldoccupy and the didoccupy
+          	{
+          		if(attachesto[a] == 0 && attachesto[a+1] == 0 && attachesto[a+2] == 0) // there are no more attachestos available, break (0,0,0 signifies end)
+          			break;
+          		attachesto[a] = attachesto[a]+_block[1];
+          		attachesto[a+1] = attachesto[a+1]+_block[2];
+           		if(attachesto[1] % 2 != 0 && attachesto[a+1] % 2 == 0) // if anchor y and this hex y are both odd,  (for attachesto, anchory is the same as for occupies, but the z is different. Nothing to worry about)
+           			attachesto[a] = attachesto[a]+1;  			       // then offset x by +1
+           		attachesto[a+2] = attachesto[a+2]+_block[3];
+           		for(o = 0; o < tile.occupado.length && !touches; o++)
+           		{
+           			if(attachesto[a] == tile.occupado[o][0] && attachesto[a+1] == tile.occupado[o][1] && attachesto[a+2] == tile.occupado[o][2]) // a valid attachesto found in occupado?
+           			{
+           				whathappened = 12;
+           				return true; // in bounds, didn't conflict and now touches is true. All good. Return.
+           			}
+           		}
+          	}
+          	whathappened = 13;
+          	return false; 
+  		}
+        else // touches was true by virtue of a z = 0 above (touching the ground). Return true;
+        {
+        	whathappened = 14;
+        	return true;
+        }	
+    }  
+
+    // This function is handy for getting random numbers from 0-255 without getting a new hash every time. 
+    // With one bytes32, there are 32 of these available, depending on the index
+    function getUint8FromByte32(bytes32 _b32, uint8 byteindex) public constant returns(uint8) {
+    	uint numdigits = 64;
+    	uint buint = uint(_b32);
+    	uint upperpowervar = 16 ** (numdigits - (byteindex*2)); 		// @i=0 upperpowervar=16**64 (SEE EXCEPTION BELOW), @i=1 upperpowervar=16**62, @i upperpowervar=16**60
+    	uint lowerpowervar = 16 ** (numdigits - 2 - (byteindex*2));		// @i=0 upperpowervar=16**62, @i=1 upperpowervar=16**60, @i upperpowervar=16**58
+    	uint postheadchop;
+    	if(byteindex == 0)
+    		postheadchop = buint; 								//for byteindex 0, buint is just the input number. 16^64 is out of uint range, so this exception has to be made.
+    	else
+    		postheadchop = buint % upperpowervar; 				// @i=0 _b32=a1b2c3d4... postheadchop=a1b2c3d4, @i=1 postheadchop=b2c3d4, @i=2 postheadchop=c3d4
+    	uint remainder = postheadchop % lowerpowervar; 			// @i=0 remainder=b2c3d4, @i=1 remainder=c3d4, @i=2 remainder=d4
+    	uint evenedout = postheadchop - remainder; 				// @i=0 evenedout=a1000000, @i=1 remainder=b20000, @i=2 remainder=c300
+    	uint b = evenedout / lowerpowervar; 					// @i=0 b=a1 (to uint), @i=1 b=b2, @i=2 b=c3
+    	return uint8(b);
+    }
+    
+  uint8 whathappened;
+  function getWhatHappened() public constant returns (uint8)
+  {
+  	return whathappened;
+  }
+//  uint8 whathappened2;
+//  function getWhatHappened2() public constant returns (uint8)
+//  {
+//  	return whathappened2;
+//  }
 }
