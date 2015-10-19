@@ -1,8 +1,7 @@
 /* 
-var abi = [{"constant":true,"inputs":[],"name":"getWhatHappened","outputs":[{"name":"","type":"uint8"}],"type":"function"},{"constant":false,"inputs":[],"name":"kill","outputs":[],"type":"function"},{"constant":true,"inputs":[{"name":"_b32","type":"bytes32"},{"name":"byteindex","type":"uint8"}],"name":"getUint8FromByte32","outputs":[{"name":"","type":"uint8"}],"type":"function"},{"constant":false,"inputs":[{"name":"col","type":"uint8"},{"name":"row","type":"uint8"},{"name":"_s","type":"string"}],"name":"setStatus","outputs":[],"type":"function"},{"constant":false,"inputs":[{"name":"col","type":"uint8"},{"name":"row","type":"uint8"}],"name":"makeOffer","outputs":[],"type":"function"},{"constant":true,"inputs":[{"name":"col","type":"uint8"},{"name":"row","type":"uint8"}],"name":"getOfferers","outputs":[{"name":"","type":"address[]"}],"type":"function"},{"constant":false,"inputs":[{"name":"col","type":"uint8"},{"name":"row","type":"uint8"},{"name":"index","type":"uint256"},{"name":"_block","type":"int8[5]"}],"name":"editBlock","outputs":[],"type":"function"},{"constant":false,"inputs":[{"name":"col","type":"uint8"},{"name":"row","type":"uint8"},{"name":"_n","type":"string"}],"name":"setName","outputs":[],"type":"function"},{"constant":false,"inputs":[{"name":"col","type":"uint8"},{"name":"row","type":"uint8"}],"name":"farmTile","outputs":[],"type":"function"},{"constant":true,"inputs":[{"name":"col","type":"uint8"},{"name":"row","type":"uint8"}],"name":"getName","outputs":[{"name":"","type":"string"}],"type":"function"},{"constant":false,"inputs":[{"name":"col","type":"uint8"},{"name":"row","type":"uint8"},{"name":"i","type":"uint8"}],"name":"acceptOffer","outputs":[],"type":"function"},{"constant":false,"inputs":[{"name":"col","type":"uint8"},{"name":"row","type":"uint8"},{"name":"i","type":"uint8"}],"name":"rejectOffer","outputs":[],"type":"function"},{"constant":true,"inputs":[{"name":"col","type":"uint8"},{"name":"row","type":"uint8"}],"name":"getOffers","outputs":[{"name":"","type":"uint256[]"}],"type":"function"},{"constant":true,"inputs":[{"name":"col","type":"uint8"},{"name":"row","type":"uint8"}],"name":"getStatus","outputs":[{"name":"","type":"string"}],"type":"function"},{"constant":true,"inputs":[{"name":"col","type":"uint8"},{"name":"row","type":"uint8"}],"name":"getOwner","outputs":[{"name":"","type":"address"}],"type":"function"},{"constant":false,"inputs":[{"name":"col","type":"uint8"},{"name":"row","type":"uint8"}],"name":"retractOffer","outputs":[],"type":"function"},{"constant":true,"inputs":[{"name":"col","type":"uint8"},{"name":"row","type":"uint8"}],"name":"getBlocks","outputs":[{"name":"","type":"int8[5][]"}],"type":"function"},{"inputs":[],"type":"constructor"}];
-var etheria = web3.eth.contract(abi).at('0x96b93e5d82cb6546468d3ee1012896b3ce5dc3fe');
+var abi = ;
+var etheria = web3.eth.contract(abi).at('');
 */
-import 'mortal';
 
 contract BlockDefStorage 
 {
@@ -18,31 +17,11 @@ contract MapElevationRetriever
 	{}
 }
 
-contract Etheria is mortal
+contract Etheria //is mortal
 {
     uint8 mapsize = 33;
     Tile[33][33] tiles;
     address creator;
-    
-//    uint creationblocknumber;
-//    uint8 phase;
-//    uint8[2] zombiepos;
-//    uint8[2] stormpos;
-//    uint8[2] animalpos;
-//    uint8[2] dragonpos;
-//    uint8[2] engpos;
-//    
-//    uint lastzombieaction;
-//    uint laststormaction;
-//    uint lastanimalaction;
-//    uint lastdragonaction;
-//    uint lastengaction;
-//    
-//    uint maxzombiedef;
-//    uint maxstormdef;
-//    uint maxherddef;
-//    uint maxdragondef;
-//    uint maxengdef;
     
     struct Tile 
     {
@@ -54,13 +33,6 @@ contract Etheria is mortal
     	int8[3][] occupado;
     	string name;
     	string status;
-    	
-//    	uint lastvote;    	
-//    	uint zombiedef;
-//    	uint stormdef;
-//    	uint herddef;
-//    	uint dragondef;
-//    	uint engdef;
     }
     
     BlockDefStorage bds;
@@ -68,64 +40,9 @@ contract Etheria is mortal
     
     function Etheria() {
     	creator = msg.sender;
-//    	creationblocknumber = block.number;
     	bds = BlockDefStorage(0x782bdf7015b71b64f6750796dd087fde32fd6fdc); 
     	mer = MapElevationRetriever(0x68549d7dbb7a956f955ec1263f55494f05972a6b);
     }
-    
-    /**
-     * GAME FEATURES
-     */
-    
-//    function getRandomLandTile() public returns (uint8[2]) //TODO make private
-//    {
-//    	uint8[2] memory randomcolrow; // starts as [0,0]
-//    	uint8 counter = 0;
-//    	bytes32 lastblockhash = block.blockhash(block.number - 1);
-//    	whathappened = 99;
-//    	whathappened2 = 99;
-//    	while(mer.getElevation(randomcolrow[0], randomcolrow[1]) < 125 && counter < 32)
-//    	{
-//    		whathappened = getUint8FromByte32(lastblockhash,counter) % 32;
-//    		whathappened2 = getUint8FromByte32(lastblockhash,counter+1) % 32;
-//    		randomcolrow[counter] = whathappened;										// this only gets 0-32, but it's ok because the top row and right column are just water anyway.
-//    		randomcolrow[counter+1] = whathappened2;	// this only gets 0-32, but it's ok because the top row and right column are just water anyway.
-//    		counter+=2;
-//    	}
-//    	// land tiles make up roughly half the map. The chance of getting water tiles 16 times in row is 1 / 2^16 = 1 in 65,636. If that ever happens, just return the center tile
-//    	if(counter == 32)
-//    	{
-//    		randomcolrow[0] = whathappened = (mapsize - 1) / 2;
-//    		randomcolrow[1] = whathappened2 = (mapsize - 1) / 2;
-//    		return randomcolrow;
-//    	}	
-//    }
-//    
-//    function submitVotes(uint8 col, uint8 row, int8[7][] votes)
-//    {
-//    	if(isOOB(col,row)) // row and/or col was not between 0-mapsize
-//    	{
-//    		whathappened = 90;
-//    		return;
-//    	}
-//    	Tile tile = tiles[col][row];
-//    	if(tile.owner != msg.sender)
-//    	{
-//    		whathappened = 91;
-//    		return;
-//    	}
-//    	if(votes.length <= 0 || votes.length > 100) // min 1 max 100 votes at a time
-//    	{
-//    		whathappened = 92;
-//    		return;
-//    	}	
-//    	int8 runningtotal = 0;
-//    	for(uint x = 0; x < votes.length; x++)
-//    	{
-//    		runningtotal = runningtotal + votes[x][2] + votes[x][3] + votes[x][4] + votes[x][5] + votes[x][6];
-//    	}	
-//    }
-    
     
     function getOwner(uint8 col, uint8 row) public constant returns(address)
     {
@@ -151,7 +68,7 @@ contract Etheria is mortal
     {
     	if(isOOB(col,row)) // row and/or col was not between 0-mapsize
     	{
-    		whathappened = 50;
+    		whathappened = 50;  
     		return;
     	}
     	Tile tile = tiles[col][row];
@@ -304,7 +221,6 @@ contract Etheria is mortal
          			}
          		}
          	}
-         	//whathappened = 23;
      	}
      	else // previous block was hidden
      	{
@@ -315,7 +231,6 @@ contract Etheria is mortal
      			tile.occupado[tile.occupado.length-1][1] = wouldoccupy[ll+1];
      			tile.occupado[tile.occupado.length-1][2] = wouldoccupy[ll+2];
          	}
-     		//whathappened = 24;
      	}
      	tile.blocks[index] = _block;
     	return;
@@ -671,9 +586,4 @@ contract Etheria is mortal
   {
   	return whathappened;
   }
-//  uint8 whathappened2;
-//  function getWhatHappened2() public constant returns (uint8)
-//  {
-//  	return whathappened2;
-//  }
 }
