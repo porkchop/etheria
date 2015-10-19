@@ -50,7 +50,7 @@ etheria.makeOffer.sendTransaction(16,16,{from:eth.accounts[1],value:web3.toWei(.
 etheria.makeOffer.sendTransaction(35,5,{from:eth.accounts[1],value:web3.toWei(1,'ether'), gas:2000000}); 	// whathappened = 2, col,row out of bounds 
 etheria.makeOffer.sendTransaction(0,0,{from:eth.accounts[1],value:web3.toWei(1,'ether'), gas:2000000}); 	// whathappened = 3 (part 2), valid amount, but can't buy water tiles // 22,000 gas used
 etheria.makeOffer.sendTransaction(5,33,{from:eth.accounts[1],value:web3.toWei(1,'ether'), gas:2000000}); 	// whathappened = 2, col,row out of bounds 
-etheria.makeOffer.sendTransaction(4,5,{from:eth.accounts[1],value:web3.toWei(.5,'ether'), gas:2000000});	// whathappened = 5 (part 1), can't make offers on self owned tiles.
+etheria.makeOffer.sendTransaction(4,5,{from:eth.accounts[1],value:web3.toWei(.5,'ether'), gas:2000000});	// whathappened = 5 (part 1), can't make offers on self-owned tiles.
 etheria.makeOffer.sendTransaction(4,5,{from:eth.accounts[0],value:web3.toWei(.5,'ether'), gas:2000000});	// whathappened = 7 new offer successfully placed
 etheria.makeOffer.sendTransaction(4,5,{from:eth.accounts[2],value:web3.toWei(.00999,'ether'), gas:2000000});// whathappened = 5 (part 2), offer to low. .001 ETH is the lowest
 etheria.makeOffer.sendTransaction(4,5,{from:eth.accounts[0],value:web3.toWei(1000001,'ether'), gas:2000000});// whathappened = 5 (part 3), offer to low. 1 mil ETH is the highest
@@ -59,54 +59,23 @@ etheria.makeOffer.sendTransaction(4,5,{from:eth.accounts[0],value:web3.toWei(.25
 
 checkAllBalances();																							// check balances. should be slightly less from gas payments.
 
-// SINGLE OFFER ON A PRE-OWNED TILE
-web3.fromWei(eth.getBalance(eth.accounts[0]));															// check purchaser account balance	
-web3.fromWei(eth.getBalance(eth.accounts[1]));															// check previous owner account balance
-etheria.makeOffer.sendTransaction(8,8,{from:eth.accounts[0],value:web3.toWei(1,'ether'), gas:2000000}); 	// should succeed
-etheria.makeOffer.sendTransaction(3,4,{from:eth.accounts[1],value:web3.toWei(1,'ether'), gas:2000000}); 	// should succeed
-etheria.getOwners(); // should be all 0x0000000000000000000000000000000000000000 except 8,8 which should be 250000000000000000
-web3.fromWei(eth.getBalance(etheria.address)); // should be zero, money is sent to creator
-web3.fromWei(eth.getBalance(eth.accounts[0])); // should be + 1
-web3.fromWei(eth.getBalance(eth.accounts[1])); // should be - 1
-
-// FARM A TILE
-etheria.getBlocks(8,8); // should be empty array
-etheria.farmTile.sendTransaction(8,8,{from:eth.coinbase,gas:2000000}); // should generate some random blocks
-etheria.getBlocks(8,8); // should be an array of length 7 * 10 = 70
-etheria.farmTile.sendTransaction(8,8,{from:eth.coinbase,gas:2000000}); // should fail if it's been less than X blocks.
-etheria.getBlocks(8,8); // should be an array of length 7 * 10 = 70
-
-// EDIT blocks
-etheria.editBlock.sendTransaction(8,8,0,[0,1,2,3,40], {from:eth.coinbase,gas:2900000});
-etheria.getBlocks(8,8); // should show the edited block
-
-// MAKE A VALID OFFER ON AN OWNED TILE
-etheria.makeOffer.sendTransaction(8,8, {from:eth.accounts[1],gas:250000,value:10000000000000000});
-etheria.getOfferers(8,8);
-etheria.getOffers(8,8);
-etheria.makeOffer.sendTransaction(8,8, {from:eth.accounts[1],gas:250000,value:20000000000000000}); // second offer should update the offer value
-
-// RETRACT OFFER
-etheria.retractOffer.sendTransaction(8,8, {from:eth.accounts[1],gas:250000});
-
-// REJECT OFFER
-etheria.rejectOffer.sendTransaction(8,8,0, {from:eth.coinbase,gas:250000});
-
-// ACCEPT OFFER
-etheria.acceptOffer.sendTransaction(8,8,0, {from:eth.accounts[0],gas:250000});
-
-// MAKE SOME INVALID OFFERS
-etheria.makeOffer.sendTransaction(8,8, {from:eth.accounts[1],gas:250000,value:250000}); // too low 
-etheria.makeOffer.sendTransaction(8,8, {from:eth.accounts[1],gas:250000,value:12089258196146291747061750}); // too high 
-
-// GET OFFERS FOR THAT TILE
-etheria.getOffers(8,8);
-
-// MAKE AN OFFER ON AN UNOWNED TILE (SHOULD FAIL AND RETURN MONEY)
-etheria.makeOffer.sendTransaction(2,2, 200000000000000000, {from:eth.coinbase,gas:250000});
-
-//GET OFFERS FOR THAT TILE
-etheria.getOffers(2,2);
+// make, reject and retract offers
+etheria.makeOffer(4,5,{from:eth.accounts[0],gas:1000000, value:web3.toWei(.1,"ether")});                    // whathappened = 7
+etheria.makeOffer(4,5,{from:eth.accounts[1],gas:1000000, value:web3.toWei(.1,"ether")});					// whathappened = 5 (part 1), can't make offers on self-owned tiles.
+etheria.makeOffer(4,5,{from:eth.accounts[2],gas:1000000, value:web3.toWei(.11,"ether")});					// whathappened = 7
+etheria.makeOffer(4,5,{from:eth.accounts[3],gas:1000000, value:web3.toWei(.13,"ether")});					// whathappened = 7
+etheria.getOffers(4,5);																						// should show array of length 3 with the three offers above
+etheria.getOfferers(4,5);																					// should show array of length 3 with the three offerERS above
+checkAllBalances(); 																						// balance should be .44 at this moment, each of the offering accounts should be deducted by the appropriate amount
+etheria.rejectOffer.sendTransaction(4,5,1,{from:eth.accounts[1],gas:1000000});								// whathappened = 73, reject the middle offer
+etheria.getOffers(4,5);																						// should show array of length 2 with the middle one gone
+etheria.getOfferers(4,5);																					// should show array of length 2 with the middle one gone
+checkAllBalances();																							// should show contract balance of .33 with .11 returned to accounts[2]
+etheria.rejectOffer.sendTransaction(-4,5,1,{from:eth.accounts[1],gas:1000000});								// whathappened = 70, c,r oob
+etheria.rejectOffer.sendTransaction(4,5,1,{from:eth.accounts[0],gas:1000000});								// whathappened = 71 , this user does not own the tile.
+etheria.rejectOffer.sendTransaction(4,5,-1,{from:eth.accounts[1],gas:1000000});								// whathappened = 72, index oob
+etheria.rejectOffer.sendTransaction(4,5,0,{from:eth.accounts[1],gas:1000000});								// whathappened = 73, reject the first offer in the array
+etheria.rejectOffer.sendTransaction(4,5,0,{from:eth.accounts[1],gas:1000000});								// whathappened = 73, reject the first offer in the array
 
 // GET OFFERS FOR A TILE
 

@@ -488,9 +488,13 @@ contract Etheria is mortal
         for(uint8 i = 0; i < tile.offerers.length; i++)
     	{
     		if(tile.offerers[i] == msg.sender) // this user has an offer on file. Remove it.
+    		{
+    			whathappened = 61;
     			removeOffer(col,row,i);
+    			return;
+    		}
     	}	
-        whathappened = 61; // no offer found for msg.sender
+        whathappened = 62; // no offer found for msg.sender
         return;
     }
     
@@ -501,21 +505,26 @@ contract Etheria is mortal
     		whathappened = 70;
     		return;
     	}
-    	if(tiles[col][row].owner != msg.sender) // only the owner can reject offers
+    	Tile tile = tiles[col][row];
+    	if(tile.owner != msg.sender) // only the owner can reject offers
     	{
     		whathappened = 71;
     		return;
     	}
+    	if(i < 0 || i > (tile.offers.length - 1)) // index oob
+    	{
+    		whathappened = 72;
+    		return;
+    	}	
     	removeOffer(col,row,i);
-    	whathappened = 72;
+    	whathappened = 73;
 		return;
     }
     
     function removeOffer(uint8 col, uint8 row, uint8 i) private // index 0-10, can't be odd
     {
     	Tile tile = tiles[col][row]; // private method. No need to check col,row validity
-    	// return the money
-        tile.offerers[i].send(tile.offers[i]);
+        tile.offerers[i].send(tile.offers[i]); // return the money
     			
     	// delete user and offer and reshape the array
     	delete tile.offerers[i];   // zero out user
@@ -539,6 +548,16 @@ contract Etheria is mortal
     	}
     	
     	Tile tile = tiles[col][row];
+    	if(tile.owner != msg.sender) // only the owner can reject offers
+    	{
+    		whathappened = 81;
+    		return;
+    	}
+    	if(i < 0 || i > (tile.offers.length - 1)) // index oob
+    	{
+    		whathappened = 82;
+    		return;
+    	}	
     	uint offeramount = tile.offers[i];
     	uint housecut = offeramount / 10;
     	creator.send(housecut);
@@ -551,7 +570,7 @@ contract Etheria is mortal
     	}
     	delete tile.offerers; // delete all offerers
     	delete tile.offers; // delete all offers
-    	whathappened = 81;
+    	whathappened = 83;
     	return;
     }
     
