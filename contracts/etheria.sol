@@ -26,6 +26,12 @@ contract MapElevationRetriever
 
 contract Etheria //is mortal
 {
+	event BlocksChanged(uint8 col, uint8 row, int8[5][] blocks); //
+	event OwnerChanged(uint8 col, uint8 row, address newowner); //
+	event OffersChanged(uint8 col, uint8 row, address[] offerers, uint[] offers);
+	event NameChanged(uint8 col, uint8 row, string name); //
+	event StatusChanged(uint8 col, uint8 row, string status); //
+	
     uint8 mapsize = 33;
     Tile[33][33] tiles;
     address creator;
@@ -86,6 +92,7 @@ contract Etheria //is mortal
     	}
     	tile.name = _n;
     	whathappened = 52;
+    	NameChanged(col, row, _n);
     	return;
     }
     
@@ -121,6 +128,7 @@ contract Etheria //is mortal
     	}
     	tile.status = _s;
     	whathappened = 44;
+    	StatusChanged(col, row, _s);
     	return;
     }
     
@@ -240,6 +248,7 @@ contract Etheria //is mortal
          	}
      	}
      	tile.blocks[index] = _block;
+     	BlocksChanged(col, row, tile.blocks);
     	return;
     }
        
@@ -311,11 +320,10 @@ contract Etheria //is mortal
     				}
     			}	
     			// the user has not yet made an offer
-    			tile.offerers.length++; // make room for 1 more
-    			tile.offers.length++; // make room for 1 more
-    			tile.offerers[tile.offerers.length - 1] = msg.sender; // record who is making the offer
-    			tile.offers[tile.offers.length - 1] = msg.value; // record the offer
+    			tile.offerers.push(msg.sender); // make room for 1 more
+    			tile.offers.push(msg.value); // make room for 1 more
     			whathappened = 7;
+    			OffersChanged(col, row, tile.offerers, tile.offers);
     			return;
     		}
     	}
@@ -339,6 +347,7 @@ contract Etheria //is mortal
     		}
     	}	
         whathappened = 62; // no offer found for msg.sender
+        OffersChanged(col, row, tile.offerers, tile.offers);
         return;
     }
     
@@ -362,6 +371,7 @@ contract Etheria //is mortal
     	}	
     	removeOffer(col,row,i);
     	whathappened = 73;
+    	OffersChanged(col, row, tile.offerers, tile.offers);
 		return;
     }
     
@@ -407,6 +417,7 @@ contract Etheria //is mortal
     	creator.send(housecut);
     	tile.owner.send(offeramount-housecut); // send offer money to oldowner
     	tile.owner = tile.offerers[i]; // new owner is the offerer
+    	OwnerChanged(col,row, tile.offerers[i]);
     	for(uint8 j = 0; j < tile.offerers.length; j++) // return all the other offerers' offer money
     	{
     		if(j != i) // don't return money for the purchaser
@@ -415,6 +426,7 @@ contract Etheria //is mortal
     	delete tile.offerers; // delete all offerers
     	delete tile.offers; // delete all offers
     	whathappened = 83;
+    	OffersChanged(col, row, tile.offerers, tile.offers);
     	return;
     }
     
