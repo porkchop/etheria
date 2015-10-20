@@ -9,6 +9,7 @@ bytecode (optimized):
 var abi = [{"constant":true,"inputs":[],"name":"getWhatHappened","outputs":[{"name":"","type":"uint8"}],"type":"function"},{"constant":true,"inputs":[{"name":"_b32","type":"bytes32"},{"name":"byteindex","type":"uint8"}],"name":"getUint8FromByte32","outputs":[{"name":"","type":"uint8"}],"type":"function"},{"constant":false,"inputs":[{"name":"col","type":"uint8"},{"name":"row","type":"uint8"},{"name":"_s","type":"string"}],"name":"setStatus","outputs":[],"type":"function"},{"constant":false,"inputs":[{"name":"col","type":"uint8"},{"name":"row","type":"uint8"}],"name":"makeOffer","outputs":[],"type":"function"},{"constant":true,"inputs":[{"name":"col","type":"uint8"},{"name":"row","type":"uint8"}],"name":"getOfferers","outputs":[{"name":"","type":"address[]"}],"type":"function"},{"constant":false,"inputs":[{"name":"col","type":"uint8"},{"name":"row","type":"uint8"},{"name":"index","type":"uint256"},{"name":"_block","type":"int8[5]"}],"name":"editBlock","outputs":[],"type":"function"},{"constant":false,"inputs":[{"name":"col","type":"uint8"},{"name":"row","type":"uint8"},{"name":"_n","type":"string"}],"name":"setName","outputs":[],"type":"function"},{"constant":false,"inputs":[{"name":"col","type":"uint8"},{"name":"row","type":"uint8"}],"name":"farmTile","outputs":[],"type":"function"},{"constant":true,"inputs":[{"name":"col","type":"uint8"},{"name":"row","type":"uint8"}],"name":"getName","outputs":[{"name":"","type":"string"}],"type":"function"},{"constant":false,"inputs":[{"name":"col","type":"uint8"},{"name":"row","type":"uint8"},{"name":"i","type":"uint8"}],"name":"acceptOffer","outputs":[],"type":"function"},{"constant":false,"inputs":[{"name":"col","type":"uint8"},{"name":"row","type":"uint8"},{"name":"i","type":"uint8"}],"name":"rejectOffer","outputs":[],"type":"function"},{"constant":true,"inputs":[{"name":"col","type":"uint8"},{"name":"row","type":"uint8"}],"name":"getOffers","outputs":[{"name":"","type":"uint256[]"}],"type":"function"},{"constant":true,"inputs":[{"name":"col","type":"uint8"},{"name":"row","type":"uint8"}],"name":"getStatus","outputs":[{"name":"","type":"string"}],"type":"function"},{"constant":true,"inputs":[{"name":"col","type":"uint8"},{"name":"row","type":"uint8"}],"name":"getOwner","outputs":[{"name":"","type":"address"}],"type":"function"},{"constant":false,"inputs":[{"name":"col","type":"uint8"},{"name":"row","type":"uint8"}],"name":"retractOffer","outputs":[],"type":"function"},{"constant":true,"inputs":[{"name":"col","type":"uint8"},{"name":"row","type":"uint8"}],"name":"getBlocks","outputs":[{"name":"","type":"int8[5][]"}],"type":"function"},{"inputs":[],"type":"constructor"}];
 var etheria = web3.eth.contract(abi).at('0xe468d26721b703d224d05563cb64746a7a40e1f4');
 */
+import 'mortal';
 
 contract BlockDefStorage 
 {
@@ -24,7 +25,7 @@ contract MapElevationRetriever
 	{}
 }
 
-contract Etheria //is mortal
+contract Etheria is mortal
 {
 	event BlocksChanged(uint8 col, uint8 row, int8[5][] blocks); //
 	event OwnerChanged(uint8 col, uint8 row, address newowner); //
@@ -81,17 +82,17 @@ contract Etheria //is mortal
     {
     	if(isOOB(col,row)) // row and/or col was not between 0-mapsize
     	{
-    		whathappened = 50;  
+    		//whathappened = 50;  
     		return;
     	}
     	Tile tile = tiles[col][row];
     	if(tile.owner != msg.sender)
     	{
-    		whathappened = 51;
+    		//whathappened = 51;
     		return;
     	}
     	tile.name = _n;
-    	whathappened = 52;
+    	//whathappened = 52;
     	NameChanged(col, row, _n);
     	return;
     }
@@ -104,30 +105,30 @@ contract Etheria //is mortal
     {
     	if(msg.value == 0)	// the only situation where we don't refund money.
     	{
-    		whathappened = 40;
+    		//whathappened = 40;
     		return;
     	}
     	if(msg.value != 100000000000000000) // the only situation
     	{
     		msg.sender.send(msg.value); 		// return their money
-    		whathappened = 41;
+    		//whathappened = 41;
     		return;
     	}
     	if(isOOB(col,row)) // row and/or col was not between 0-mapsize
     	{
     		msg.sender.send(msg.value); 		// return their money
-    		whathappened = 42;
+    		//whathappened = 42;
     		return;
     	}
     	Tile tile = tiles[col][row];
     	if(tile.owner != msg.sender)
     	{
     		msg.sender.send(msg.value); 		// return their money
-    		whathappened = 43;
+    		//whathappened = 43;
     		return;
     	}
     	tile.status = _s;
-    	whathappened = 44;
+    	//whathappened = 44;
     	StatusChanged(col, row, _s);
     	return;
     }
@@ -146,18 +147,18 @@ contract Etheria //is mortal
     {
     	if(isOOB(col,row)) // row and/or col was not between 0-mapsize
     	{
-    		whathappened = 30;
+    		//whathappened = 30;
     		return;
     	}
     	Tile tile = tiles[col][row];
         if(tile.owner != msg.sender)
         {
-        	whathappened = 31;
+        	//whathappened = 31;
         	return;
         }
         if((block.number - tile.lastfarm) < 4320) // a day's worth of blocks hasn't passed yet. can only farm once a day. (Assumes block times of 20 seconds.)
         {
-        	whathappened = 32;
+        	//whathappened = 32;
         	return;
         }
         bytes32 lastblockhash = block.blockhash(block.number - 1);
@@ -171,7 +172,7 @@ contract Etheria //is mortal
     	    tile.blocks[tile.blocks.length - 1][4] = 0; // color
     	}
     	tile.lastfarm = block.number;
-    	whathappened = 33;
+    	//whathappened = 33;
     	return;
     }
     
@@ -179,19 +180,19 @@ contract Etheria //is mortal
     {
     	if(isOOB(col,row)) // row and/or col was not between 0-mapsize
     	{
-    		whathappened = 20;
+    		//whathappened = 20;
     		return;
     	}
     	
     	Tile tile = tiles[col][row];
         if(tile.owner != msg.sender) // 1. DID THE OWNER SEND THIS MESSAGE?
         {
-        	whathappened = 21;
+        	//whathappened = 21;
         	return;
         }
         if(_block[3] < 0) // 2. IS THE Z LOCATION OF THE BLOCK BELOW ZERO? BLOCKS CANNOT BE HIDDEN
         {
-        	whathappened = 22;
+        	//whathappened = 22;
         	return;
         }
         
@@ -271,13 +272,13 @@ contract Etheria //is mortal
     {
     	if(msg.value == 0) // checking this first means that we will ALWAYS need to return money on any other failure
     	{
-    		whathappened = 1;
+    		//whathappened = 1;
     		return;
     	}	// do nothing, just return
     	
     	if(isOOB(col,row)) // row and/or col was not between 0-mapsize
     	{
-    		whathappened = 2;
+    		//whathappened = 2;
     		msg.sender.send(msg.value); 		// return their money
     		return;
     	}
@@ -288,14 +289,14 @@ contract Etheria //is mortal
     		if(msg.value != 1000000000000000000 || mer.getElevation(col,row) < 125)	// 1 ETH is the starting value. If not return; // Also, if below sea level, return. 
     		{
     			msg.sender.send(msg.value); 	 									// return their money
-    			whathappened = 3;
+    			//whathappened = 3;
     			return;
     		}
     		else
     		{	
     			creator.send(msg.value);     		 								// this was a valid offer, send money to contract creator
     			tile.owner = msg.sender;  								// set tile owner to the buyer
-    			whathappened = 4;
+    			//whathappened = 4;
     			return;
     		}
     	}	
@@ -304,7 +305,7 @@ contract Etheria //is mortal
     		if(tile.owner == msg.sender || msg.value < 10000000000000000 || msg.value > 1000000000000000000000000 || tile.offerers.length >= 10 ) // trying to make an offer on their own tile. or the offer list is full (10 max) or the value is out of range (.01 ETH - 1 mil ETH is range)
     		{
     			msg.sender.send(msg.value); 	 									// return the money
-    			whathappened = 5;
+    			//whathappened = 5;
     			return;
     		}
     		else
@@ -315,14 +316,14 @@ contract Etheria //is mortal
     				{
     					msg.sender.send(tile.offers[i]); 					// return their previous money
     					tile.offers[i] = msg.value; 							// set the new offer
-    					whathappened = 6;
+    					//whathappened = 6;
     					return;
     				}
     			}	
     			// the user has not yet made an offer
     			tile.offerers.push(msg.sender); // make room for 1 more
     			tile.offers.push(msg.value); // make room for 1 more
-    			whathappened = 7;
+    			//whathappened = 7;
     			OffersChanged(col, row, tile.offerers, tile.offers);
     			return;
     		}
@@ -333,7 +334,7 @@ contract Etheria //is mortal
     {
     	if(isOOB(col,row)) // row and/or col was not between 0-mapsize
     	{
-    		whathappened = 60;
+    		//whathappened = 60;
     		return;
     	}
     	Tile tile = tiles[col][row];
@@ -341,12 +342,12 @@ contract Etheria //is mortal
     	{
     		if(tile.offerers[i] == msg.sender) // this user has an offer on file. Remove it.
     		{
-    			whathappened = 61;
+    			//whathappened = 61;
     			removeOffer(col,row,i);
     			return;
     		}
     	}	
-        whathappened = 62; // no offer found for msg.sender
+        //whathappened = 62; // no offer found for msg.sender
         OffersChanged(col, row, tile.offerers, tile.offers);
         return;
     }
@@ -355,22 +356,22 @@ contract Etheria //is mortal
     {
     	if(isOOB(col,row)) // row and/or col was not between 0-mapsize
     	{
-    		whathappened = 70;
+    		//whathappened = 70;
     		return;
     	}
     	Tile tile = tiles[col][row];
     	if(tile.owner != msg.sender) // only the owner can reject offers
     	{
-    		whathappened = 71;
+    		//whathappened = 71;
     		return;
     	}
     	if(i < 0 || i > (tile.offers.length - 1)) // index oob
     	{
-    		whathappened = 72;
+    		//whathappened = 72;
     		return;
     	}	
     	removeOffer(col,row,i);
-    	whathappened = 73;
+    	//whathappened = 73;
     	OffersChanged(col, row, tile.offerers, tile.offers);
 		return;
     }
@@ -397,19 +398,19 @@ contract Etheria //is mortal
     {
     	if(isOOB(col,row)) // row and/or col was not between 0-mapsize
     	{
-    		whathappened = 80;
+    		//whathappened = 80;
     		return;
     	}
     	
     	Tile tile = tiles[col][row];
     	if(tile.owner != msg.sender) // only the owner can reject offers
     	{
-    		whathappened = 81;
+    		//whathappened = 81;
     		return;
     	}
     	if(i < 0 || i > (tile.offers.length - 1)) // index oob
     	{
-    		whathappened = 82;
+    		//whathappened = 82;
     		return;
     	}	
     	uint offeramount = tile.offers[i];
@@ -425,7 +426,7 @@ contract Etheria //is mortal
     	}
     	delete tile.offerers; // delete all offerers
     	delete tile.offers; // delete all offers
-    	whathappened = 83;
+    	//whathappened = 83;
     	OffersChanged(col, row, tile.offerers, tile.offers);
     	return;
     }
@@ -531,14 +532,14 @@ contract Etheria //is mortal
        	{
        		if(!blockHexCoordsValid(wouldoccupy[b], wouldoccupy[b+1])) // 3. DO ANY OF THE PROPOSED HEXES FALL OUTSIDE OF THE TILE? 
       		{
-       			whathappened = 10;
+       			//whathappened = 10;
       			return false;
       		}
        		for(uint o = 0; o < tile.occupado.length; o++)  // 4. DO ANY OF THE PROPOSED HEXES CONFLICT WITH ENTRIES IN OCCUPADO? 
           	{
       			if(wouldoccupy[b] == tile.occupado[o][0] && wouldoccupy[b+1] == tile.occupado[o][1] && wouldoccupy[b+2] == tile.occupado[o][2]) // do the x,y,z entries of each match?
       			{
-      				whathappened = 11;
+      				//whathappened = 11;
       				return false; // this hex conflicts. The proposed block does not avoid overlap. Return false immediately.
       			}
           	}
@@ -567,17 +568,17 @@ contract Etheria //is mortal
            		{
            			if(attachesto[a] == tile.occupado[o][0] && attachesto[a+1] == tile.occupado[o][1] && attachesto[a+2] == tile.occupado[o][2]) // a valid attachesto found in occupado?
            			{
-           				whathappened = 12;
+           				//whathappened = 12;
            				return true; // in bounds, didn't conflict and now touches is true. All good. Return.
            			}
            		}
           	}
-          	whathappened = 13;
+          	//whathappened = 13;
           	return false; 
   		}
         else // touches was true by virtue of a z = 0 above (touching the ground). Return true;
         {
-        	whathappened = 14;
+        	//whathappened = 14;
         	return true;
         }	
     }  
@@ -600,9 +601,9 @@ contract Etheria //is mortal
     	return uint8(b);
     }
     
-  uint8 whathappened;
-  function getWhatHappened() public constant returns (uint8)
-  {
-  	return whathappened;
-  }
+//  uint8 whathappened;
+//  function getWhatHappened() public constant returns (uint8)
+//  {
+//  	return whathappened;
+//  }
 }
