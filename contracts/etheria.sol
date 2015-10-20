@@ -9,7 +9,9 @@ bytecode (optimized):
 var abi = [{"constant":true,"inputs":[],"name":"getWhatHappened","outputs":[{"name":"","type":"uint8"}],"type":"function"},{"constant":true,"inputs":[{"name":"_b32","type":"bytes32"},{"name":"byteindex","type":"uint8"}],"name":"getUint8FromByte32","outputs":[{"name":"","type":"uint8"}],"type":"function"},{"constant":false,"inputs":[{"name":"col","type":"uint8"},{"name":"row","type":"uint8"},{"name":"_s","type":"string"}],"name":"setStatus","outputs":[],"type":"function"},{"constant":false,"inputs":[{"name":"col","type":"uint8"},{"name":"row","type":"uint8"}],"name":"makeOffer","outputs":[],"type":"function"},{"constant":true,"inputs":[{"name":"col","type":"uint8"},{"name":"row","type":"uint8"}],"name":"getOfferers","outputs":[{"name":"","type":"address[]"}],"type":"function"},{"constant":false,"inputs":[{"name":"col","type":"uint8"},{"name":"row","type":"uint8"},{"name":"index","type":"uint256"},{"name":"_block","type":"int8[5]"}],"name":"editBlock","outputs":[],"type":"function"},{"constant":false,"inputs":[{"name":"col","type":"uint8"},{"name":"row","type":"uint8"},{"name":"_n","type":"string"}],"name":"setName","outputs":[],"type":"function"},{"constant":false,"inputs":[{"name":"col","type":"uint8"},{"name":"row","type":"uint8"}],"name":"farmTile","outputs":[],"type":"function"},{"constant":true,"inputs":[{"name":"col","type":"uint8"},{"name":"row","type":"uint8"}],"name":"getName","outputs":[{"name":"","type":"string"}],"type":"function"},{"constant":false,"inputs":[{"name":"col","type":"uint8"},{"name":"row","type":"uint8"},{"name":"i","type":"uint8"}],"name":"acceptOffer","outputs":[],"type":"function"},{"constant":false,"inputs":[{"name":"col","type":"uint8"},{"name":"row","type":"uint8"},{"name":"i","type":"uint8"}],"name":"rejectOffer","outputs":[],"type":"function"},{"constant":true,"inputs":[{"name":"col","type":"uint8"},{"name":"row","type":"uint8"}],"name":"getOffers","outputs":[{"name":"","type":"uint256[]"}],"type":"function"},{"constant":true,"inputs":[{"name":"col","type":"uint8"},{"name":"row","type":"uint8"}],"name":"getStatus","outputs":[{"name":"","type":"string"}],"type":"function"},{"constant":true,"inputs":[{"name":"col","type":"uint8"},{"name":"row","type":"uint8"}],"name":"getOwner","outputs":[{"name":"","type":"address"}],"type":"function"},{"constant":false,"inputs":[{"name":"col","type":"uint8"},{"name":"row","type":"uint8"}],"name":"retractOffer","outputs":[],"type":"function"},{"constant":true,"inputs":[{"name":"col","type":"uint8"},{"name":"row","type":"uint8"}],"name":"getBlocks","outputs":[{"name":"","type":"int8[5][]"}],"type":"function"},{"inputs":[],"type":"constructor"}];
 var etheria = web3.eth.contract(abi).at('0xe468d26721b703d224d05563cb64746a7a40e1f4');
 */
-import 'mortal';
+/*
+Contract mined! address: 0x99aab0ce5232d3fbb84f7ecfae2f9700f042a034 transactionHash: 0x176ea8cecdabd0e39a2e31413a0942581cfc3d04f4ade039af5710871a17823e
+ */
 
 contract BlockDefStorage 
 {
@@ -25,13 +27,14 @@ contract MapElevationRetriever
 	{}
 }
 
-contract Etheria is mortal
+contract Etheria 
 {
-	event BlocksChanged(uint8 col, uint8 row, int8[5][] blocks); //
-	event OwnerChanged(uint8 col, uint8 row, address newowner); //
-	event OffersChanged(uint8 col, uint8 row, address[] offerers, uint[] offers);
-	event NameChanged(uint8 col, uint8 row, string name); //
-	event StatusChanged(uint8 col, uint8 row, string status); //
+	event TileChanged(uint8 col, uint8 row);//, address owner, string name, string status, uint lastfarm, address[] offerers, uint[] offers, int8[5][] blocks);
+//	event BlocksChanged(uint8 col, uint8 row, int8[5][] blocks); //
+//	event OwnerChanged(uint8 col, uint8 row, address newowner); //
+//	event OffersChanged(uint8 col, uint8 row, address[] offerers, uint[] offers);
+//	event NameChanged(uint8 col, uint8 row, string name); //
+//	event StatusChanged(uint8 col, uint8 row, string status); //
 	
     uint8 mapsize = 33;
     Tile[33][33] tiles;
@@ -40,13 +43,14 @@ contract Etheria is mortal
     struct Tile 
     {
     	address owner;
+    	string name;
+    	string status;
     	address[] offerers;
     	uint[] offers;
     	int8[5][] blocks; //0 = which,1 = blockx,2 = blocky,3 = blockz, 4 = color
     	uint lastfarm;
-    	int8[3][] occupado;
-    	string name;
-    	string status;
+    	
+    	int8[3][] occupado; // the only one not reported in the //TileChanged event
     }
     
     BlockDefStorage bds;
@@ -82,18 +86,18 @@ contract Etheria is mortal
     {
     	if(isOOB(col,row)) // row and/or col was not between 0-mapsize
     	{
-    		//whathappened = 50;  
+    		whathappened = 50;  
     		return;
     	}
     	Tile tile = tiles[col][row];
     	if(tile.owner != msg.sender)
     	{
-    		//whathappened = 51;
+    		whathappened = 51;
     		return;
     	}
     	tile.name = _n;
-    	//whathappened = 52;
-    	NameChanged(col, row, _n);
+    	TileChanged(col,row);
+    	whathappened = 52;
     	return;
     }
     
@@ -105,31 +109,31 @@ contract Etheria is mortal
     {
     	if(msg.value == 0)	// the only situation where we don't refund money.
     	{
-    		//whathappened = 40;
+    		whathappened = 40;
     		return;
     	}
     	if(msg.value != 100000000000000000) // the only situation
     	{
     		msg.sender.send(msg.value); 		// return their money
-    		//whathappened = 41;
+    		whathappened = 41;
     		return;
     	}
     	if(isOOB(col,row)) // row and/or col was not between 0-mapsize
     	{
     		msg.sender.send(msg.value); 		// return their money
-    		//whathappened = 42;
+    		whathappened = 42;
     		return;
     	}
     	Tile tile = tiles[col][row];
     	if(tile.owner != msg.sender)
     	{
     		msg.sender.send(msg.value); 		// return their money
-    		//whathappened = 43;
+    		whathappened = 43;
     		return;
     	}
     	tile.status = _s;
-    	//whathappened = 44;
-    	StatusChanged(col, row, _s);
+    	TileChanged(col,row);
+    	whathappened = 44;
     	return;
     }
     
@@ -147,18 +151,18 @@ contract Etheria is mortal
     {
     	if(isOOB(col,row)) // row and/or col was not between 0-mapsize
     	{
-    		//whathappened = 30;
+    		whathappened = 30;
     		return;
     	}
     	Tile tile = tiles[col][row];
         if(tile.owner != msg.sender)
         {
-        	//whathappened = 31;
+        	whathappened = 31;
         	return;
         }
         if((block.number - tile.lastfarm) < 4320) // a day's worth of blocks hasn't passed yet. can only farm once a day. (Assumes block times of 20 seconds.)
         {
-        	//whathappened = 32;
+        	whathappened = 32;
         	return;
         }
         bytes32 lastblockhash = block.blockhash(block.number - 1);
@@ -172,7 +176,8 @@ contract Etheria is mortal
     	    tile.blocks[tile.blocks.length - 1][4] = 0; // color
     	}
     	tile.lastfarm = block.number;
-    	//whathappened = 33;
+    	TileChanged(col,row);
+    	whathappened = 33;
     	return;
     }
     
@@ -180,19 +185,19 @@ contract Etheria is mortal
     {
     	if(isOOB(col,row)) // row and/or col was not between 0-mapsize
     	{
-    		//whathappened = 20;
+    		whathappened = 20;
     		return;
     	}
     	
     	Tile tile = tiles[col][row];
         if(tile.owner != msg.sender) // 1. DID THE OWNER SEND THIS MESSAGE?
         {
-        	//whathappened = 21;
+        	whathappened = 21;
         	return;
         }
         if(_block[3] < 0) // 2. IS THE Z LOCATION OF THE BLOCK BELOW ZERO? BLOCKS CANNOT BE HIDDEN
         {
-        	//whathappened = 22;
+        	whathappened = 22;
         	return;
         }
         
@@ -249,7 +254,7 @@ contract Etheria is mortal
          	}
      	}
      	tile.blocks[index] = _block;
-     	BlocksChanged(col, row, tile.blocks);
+     	TileChanged(col,row);
     	return;
     }
        
@@ -267,18 +272,21 @@ contract Etheria is mortal
      *     \___/\_|   \_|   \____/\_| \_|\____/ 
      *                                          
      */
-    
+    // three success conditions:
+    // 1. Valid offer on unowned tile. (whathap = 4)
+    // 2. Valid offer on owned tile where offerer did not previously have an offer on file (whathap = 7)
+    // 3. Valid offer on owned tile where offerer DID have a previous offer on file (whathap = 6)
     function makeOffer(uint8 col, uint8 row)
     {
     	if(msg.value == 0) // checking this first means that we will ALWAYS need to return money on any other failure
     	{
-    		//whathappened = 1;
+    		whathappened = 1;
     		return;
     	}	// do nothing, just return
     	
     	if(isOOB(col,row)) // row and/or col was not between 0-mapsize
     	{
-    		//whathappened = 2;
+    		whathappened = 2;
     		msg.sender.send(msg.value); 		// return their money
     		return;
     	}
@@ -289,14 +297,15 @@ contract Etheria is mortal
     		if(msg.value != 1000000000000000000 || mer.getElevation(col,row) < 125)	// 1 ETH is the starting value. If not return; // Also, if below sea level, return. 
     		{
     			msg.sender.send(msg.value); 	 									// return their money
-    			//whathappened = 3;
+    			whathappened = 3;
     			return;
     		}
     		else
     		{	
     			creator.send(msg.value);     		 								// this was a valid offer, send money to contract creator
     			tile.owner = msg.sender;  								// set tile owner to the buyer
-    			//whathappened = 4;
+    			TileChanged(col,row);
+    			whathappened = 4;
     			return;
     		}
     	}	
@@ -305,7 +314,7 @@ contract Etheria is mortal
     		if(tile.owner == msg.sender || msg.value < 10000000000000000 || msg.value > 1000000000000000000000000 || tile.offerers.length >= 10 ) // trying to make an offer on their own tile. or the offer list is full (10 max) or the value is out of range (.01 ETH - 1 mil ETH is range)
     		{
     			msg.sender.send(msg.value); 	 									// return the money
-    			//whathappened = 5;
+    			whathappened = 5;
     			return;
     		}
     		else
@@ -316,69 +325,59 @@ contract Etheria is mortal
     				{
     					msg.sender.send(tile.offers[i]); 					// return their previous money
     					tile.offers[i] = msg.value; 							// set the new offer
-    					//whathappened = 6;
+    					TileChanged(col,row);
+    					whathappened = 6;
     					return;
     				}
     			}	
     			// the user has not yet made an offer
     			tile.offerers.push(msg.sender); // make room for 1 more
     			tile.offers.push(msg.value); // make room for 1 more
-    			//whathappened = 7;
-    			OffersChanged(col, row, tile.offerers, tile.offers);
+    			TileChanged(col,row);
+    			whathappened = 7;
     			return;
     		}
     	}
     }
     
-    function retractOffer(uint8 col, uint8 row) // retracts the first offer in the array by this user.
+    // NOTE: tile owner OR offerer can use this
+    // thought: What if the offerer and owner try to delete at the same time?
+    function deleteOffer(uint8 col, uint8 row, uint8 i, uint amt) // index 0-10
     {
     	if(isOOB(col,row)) // row and/or col was not between 0-mapsize
     	{
-    		//whathappened = 60;
+    		whathappened = 70;
     		return;
     	}
     	Tile tile = tiles[col][row];
-        for(uint8 i = 0; i < tile.offerers.length; i++)
-    	{
-    		if(tile.offerers[i] == msg.sender) // this user has an offer on file. Remove it.
-    		{
-    			//whathappened = 61;
-    			removeOffer(col,row,i);
-    			return;
-    		}
-    	}	
-        //whathappened = 62; // no offer found for msg.sender
-        OffersChanged(col, row, tile.offerers, tile.offers);
-        return;
-    }
-    
-    function rejectOffer(uint8 col, uint8 row, uint8 i) // index 0-10
-    {
-    	if(isOOB(col,row)) // row and/or col was not between 0-mapsize
-    	{
-    		//whathappened = 70;
-    		return;
-    	}
-    	Tile tile = tiles[col][row];
-    	if(tile.owner != msg.sender) // only the owner can reject offers
-    	{
-    		//whathappened = 71;
-    		return;
-    	}
     	if(i < 0 || i > (tile.offers.length - 1)) // index oob
     	{
-    		//whathappened = 72;
+    		whathappened = 72;
     		return;
     	}	
-    	removeOffer(col,row,i);
-    	//whathappened = 73;
-    	OffersChanged(col, row, tile.offerers, tile.offers);
-		return;
+    	if(tile.owner == msg.sender || tile.offerers[i] == msg.sender) // If this is the tile owner OR the offerer of the offer at index i, they can delete the request.
+    	{	
+    		if(amt != tile.offers[i]) // to prevent conflicts of offers and deletions by multiple parties, amt must be specified and match
+    		{
+    			whathappened = 74;
+    			return;
+    		}
+    		removeOffer(col,row,i);
+    		TileChanged(col,row);
+        	whathappened = 73;
+    		return;
+    	}
+    	else // permission to delete denied
+    	{
+    		whathappened = 71;
+    		return;
+    	}
+    	
     }
     
     function removeOffer(uint8 col, uint8 row, uint8 i) private // index 0-10, can't be odd
     {
-    	Tile tile = tiles[col][row]; // private method. No need to check col,row validity
+    	Tile tile = tiles[col][row]; // private method. No need to check col,row validity, msg.sender or index validity
         tile.offerers[i].send(tile.offers[i]); // return the money
     			
     	// delete user and offer and reshape the array
@@ -394,31 +393,36 @@ contract Etheria is mortal
     	return;
     }
     
-    function acceptOffer(uint8 col, uint8 row, uint8 i) // accepts the offer at index (1-10)
+    // thought: What abt a deletion and offer at the same time?
+    function acceptOffer(uint8 col, uint8 row, uint8 i, uint amt) // accepts the offer at index (1-10)
     {
     	if(isOOB(col,row)) // row and/or col was not between 0-mapsize
     	{
-    		//whathappened = 80;
+    		whathappened = 80;
     		return;
     	}
     	
     	Tile tile = tiles[col][row];
     	if(tile.owner != msg.sender) // only the owner can reject offers
     	{
-    		//whathappened = 81;
+    		whathappened = 81;
     		return;
     	}
     	if(i < 0 || i > (tile.offers.length - 1)) // index oob
     	{
-    		//whathappened = 82;
+    		whathappened = 82;
     		return;
     	}	
     	uint offeramount = tile.offers[i];
+    	if(amt != offeramount) // to prevent conflicts of offers and deletions by multiple parties, amt must be specified and match
+		{
+			whathappened = 84;
+			return;
+		}
     	uint housecut = offeramount / 10;
     	creator.send(housecut);
     	tile.owner.send(offeramount-housecut); // send offer money to oldowner
     	tile.owner = tile.offerers[i]; // new owner is the offerer
-    	OwnerChanged(col,row, tile.offerers[i]);
     	for(uint8 j = 0; j < tile.offerers.length; j++) // return all the other offerers' offer money
     	{
     		if(j != i) // don't return money for the purchaser
@@ -426,8 +430,8 @@ contract Etheria is mortal
     	}
     	delete tile.offerers; // delete all offerers
     	delete tile.offers; // delete all offers
-    	//whathappened = 83;
-    	OffersChanged(col, row, tile.offerers, tile.offers);
+    	TileChanged(col,row);
+    	whathappened = 83;
     	return;
     }
     
@@ -460,7 +464,18 @@ contract Etheria is mortal
     // this logic COULD be reduced a little, but the gain is minimal and readability suffers
     function blockHexCoordsValid(int8 x, int8 y) private constant returns (bool)
     {
-    	if(-33 <= y && y <= 33)
+    	uint8 absx;
+		uint8 absy;
+		if(x < 0)
+			absx = uint8(x*-1);
+		else
+			absx = uint8(x);
+		if(y < 0)
+			absy = uint8(y*-1);
+		else
+			absy = uint8(y);
+    	
+    	if(absy <= 33) // middle rectangle
     	{
     		if(y % 2 != 0 ) // odd
     		{
@@ -469,22 +484,12 @@ contract Etheria is mortal
     		}
     		else // even
     		{
-    			if(-49 <= x && x <= 49)
+    			if(absx <= 49)
     				return true;
     		}	
     	}	
     	else
     	{	
-    		uint8 absx;
-			uint8 absy;
-			if(x < 0)
-				absx = uint8(x*-1);
-			else
-				absx = uint8(x);
-			if(y < 0)
-				absy = uint8(y*-1);
-			else
-				absy = uint8(y);
     		if((y >= 0 && x >= 0) || (y < 0 && x > 0)) // first or 4th quadrants
     		{
     			if(y % 2 != 0 ) // odd
@@ -532,14 +537,14 @@ contract Etheria is mortal
        	{
        		if(!blockHexCoordsValid(wouldoccupy[b], wouldoccupy[b+1])) // 3. DO ANY OF THE PROPOSED HEXES FALL OUTSIDE OF THE TILE? 
       		{
-       			//whathappened = 10;
+       			whathappened = 10;
       			return false;
       		}
        		for(uint o = 0; o < tile.occupado.length; o++)  // 4. DO ANY OF THE PROPOSED HEXES CONFLICT WITH ENTRIES IN OCCUPADO? 
           	{
       			if(wouldoccupy[b] == tile.occupado[o][0] && wouldoccupy[b+1] == tile.occupado[o][1] && wouldoccupy[b+2] == tile.occupado[o][2]) // do the x,y,z entries of each match?
       			{
-      				//whathappened = 11;
+      				whathappened = 11;
       				return false; // this hex conflicts. The proposed block does not avoid overlap. Return false immediately.
       			}
           	}
@@ -559,26 +564,26 @@ contract Etheria is mortal
           	{
           		if(attachesto[a] == 0 && attachesto[a+1] == 0 && attachesto[a+2] == 0) // there are no more attachestos available, break (0,0,0 signifies end)
           			break;
-          		attachesto[a] = attachesto[a]+_block[1];
+          		//attachesto[a] = attachesto[a]+_block[1];
           		attachesto[a+1] = attachesto[a+1]+_block[2];
            		if(attachesto[1] % 2 != 0 && attachesto[a+1] % 2 == 0) // if anchor y and this hex y are both odd,  (for attachesto, anchory is the same as for occupies, but the z is different. Nothing to worry about)
            			attachesto[a] = attachesto[a]+1;  			       // then offset x by +1
-           		attachesto[a+2] = attachesto[a+2]+_block[3];
+           		//attachesto[a+2] = attachesto[a+2]+_block[3];
            		for(o = 0; o < tile.occupado.length && !touches; o++)
            		{
-           			if(attachesto[a] == tile.occupado[o][0] && attachesto[a+1] == tile.occupado[o][1] && attachesto[a+2] == tile.occupado[o][2]) // a valid attachesto found in occupado?
+           			if((attachesto[a]+_block[1]) == tile.occupado[o][0] && attachesto[a+1] == tile.occupado[o][1] && (attachesto[a+2]+_block[3]) == tile.occupado[o][2]) // a valid attachesto found in occupado?
            			{
-           				//whathappened = 12;
+           				whathappened = 12;
            				return true; // in bounds, didn't conflict and now touches is true. All good. Return.
            			}
            		}
           	}
-          	//whathappened = 13;
+          	whathappened = 13;
           	return false; 
   		}
         else // touches was true by virtue of a z = 0 above (touching the ground). Return true;
         {
-        	//whathappened = 14;
+        	whathappened = 14;
         	return true;
         }	
     }  
@@ -587,23 +592,41 @@ contract Etheria is mortal
     // With one bytes32, there are 32 of these available, depending on the index
     function getUint8FromByte32(bytes32 _b32, uint8 byteindex) public constant returns(uint8) {
     	uint numdigits = 64;
+    	uint base = 16;
+    	uint digitsperbyte = 2;
     	uint buint = uint(_b32);
-    	uint upperpowervar = 16 ** (numdigits - (byteindex*2)); 		// @i=0 upperpowervar=16**64 (SEE EXCEPTION BELOW), @i=1 upperpowervar=16**62, @i upperpowervar=16**60
-    	uint lowerpowervar = 16 ** (numdigits - 2 - (byteindex*2));		// @i=0 upperpowervar=16**62, @i=1 upperpowervar=16**60, @i upperpowervar=16**58
+    	//uint upperpowervar = 16 ** (numdigits - (byteindex*2)); 		// @i=0 upperpowervar=16**64 (SEE EXCEPTION BELOW), @i=1 upperpowervar=16**62, @i upperpowervar=16**60
+    	uint lowerpowervar = base ** (numdigits - digitsperbyte - (byteindex*digitsperbyte));		// @i=0 upperpowervar=16**62, @i=1 upperpowervar=16**60, @i upperpowervar=16**58
     	uint postheadchop;
     	if(byteindex == 0)
-    		postheadchop = buint; 								//for byteindex 0, buint is just the input number. 16^64 is out of uint range, so this exception has to be made.
+    		postheadchop = buint; 										//for byteindex 0, buint is just the input number. 16^64 is out of uint range, so this exception has to be made.
     	else
-    		postheadchop = buint % upperpowervar; 				// @i=0 _b32=a1b2c3d4... postheadchop=a1b2c3d4, @i=1 postheadchop=b2c3d4, @i=2 postheadchop=c3d4
-    	uint remainder = postheadchop % lowerpowervar; 			// @i=0 remainder=b2c3d4, @i=1 remainder=c3d4, @i=2 remainder=d4
-    	uint evenedout = postheadchop - remainder; 				// @i=0 evenedout=a1000000, @i=1 remainder=b20000, @i=2 remainder=c300
-    	uint b = evenedout / lowerpowervar; 					// @i=0 b=a1 (to uint), @i=1 b=b2, @i=2 b=c3
-    	return uint8(b);
+    		postheadchop = buint % (base ** (numdigits - (byteindex*digitsperbyte))); // @i=0 _b32=a1b2c3d4... postheadchop=a1b2c3d4, @i=1 postheadchop=b2c3d4, @i=2 postheadchop=c3d4
+    	return uint8((postheadchop - (postheadchop % lowerpowervar)) / lowerpowervar);
     }
     
-//  uint8 whathappened;
-//  function getWhatHappened() public constant returns (uint8)
-//  {
-//  	return whathappened;
-//  }
+    uint8 whathappened;
+    function getWhatHappened() public constant returns (uint8)
+    {
+    	return whathappened;
+    }
+    
+   /**********
+   Standard lock-kill methods 
+   **********/
+   bool locked;
+   function lock()
+   {
+	   if (msg.sender == creator)
+		   locked = true;
+   }
+   function isLocked() public constant returns (bool)
+   {
+	   return locked;
+   }
+   function kill()
+   { 
+       if (!locked && msg.sender == creator)
+           suicide(creator);  // kills this contract and sends remaining funds back to creator
+   }
 }
