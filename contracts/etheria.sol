@@ -362,7 +362,20 @@ contract Etheria
     			whathappened = 74;
     			return;
     		}
-    		removeOffer(col,row,i);
+    		
+    		//removeOffer(col,row,i);
+    		tile.offerers[i].send(tile.offers[i]); 				// return the money
+    		delete tile.offerers[i];   							// zero out user
+    		delete tile.offers[i];   							// zero out offer
+    		for(uint8 j = i+1; j < tile.offerers.length; j++) 	// reshape arrays after deletion
+    		{
+    			tile.offerers[j-1] = tile.offerers[j];
+    			tile.offers[j-1] = tile.offers[j];
+    		}
+    		tile.offerers.length--;
+    		tile.offers.length--;
+    		// end removeOffer
+    		
     		TileChanged(col,row);
         	whathappened = 73;
     		return;
@@ -375,23 +388,23 @@ contract Etheria
     	
     }
     
-    function removeOffer(uint8 col, uint8 row, uint8 i) private // index 0-10, can't be odd
-    {
-    	Tile tile = tiles[col][row]; // private method. No need to check col,row validity, msg.sender or index validity
-        tile.offerers[i].send(tile.offers[i]); // return the money
-    			
-    	// delete user and offer and reshape the array
-    	delete tile.offerers[i];   // zero out user
-    	delete tile.offers[i];   // zero out offer
-    	for(uint8 j = i+1; j < tile.offerers.length; j++) // close the arrays after the gap
-    	{
-    	    tile.offerers[j-1] = tile.offerers[j];
-    	    tile.offers[j-1] = tile.offers[j];
-    	}
-    	tile.offerers.length--;
-    	tile.offers.length--;
-    	return;
-    }
+//    function removeOffer(uint8 col, uint8 row, uint8 i) private // index 0-10, can't be odd
+//    {
+//    	Tile tile = tiles[col][row]; // private method. No need to check col,row validity, msg.sender or index validity
+//        tile.offerers[i].send(tile.offers[i]); // return the money
+//    			
+//    	// delete user and offer and reshape the array
+//    	delete tile.offerers[i];   // zero out user
+//    	delete tile.offers[i];   // zero out offer
+//    	for(uint8 j = i+1; j < tile.offerers.length; j++) // close the arrays after the gap
+//    	{
+//    	    tile.offerers[j-1] = tile.offerers[j];
+//    	    tile.offers[j-1] = tile.offers[j];
+//    	}
+//    	tile.offerers.length--;
+//    	tile.offers.length--;
+//    	return;
+//    }
     
     // thought: What abt a deletion and offer at the same time?
     function acceptOffer(uint8 col, uint8 row, uint8 i, uint amt) // accepts the offer at index (1-10)
