@@ -10,6 +10,7 @@ var abi = [{"constant":true,"inputs":[],"name":"getWhatHappened","outputs":[{"na
 var etheria = web3.eth.contract(abi).at('0x429e434f0de48b2a75b7147105582d61bb4ea8ec');
 
 transactionHash: 0xb59769779f6b7df3aa75846bf4def2c11328cbbc676f49315ce120adce2cbb61
+
 */
 
 contract BlockDefStorage 
@@ -29,11 +30,6 @@ contract MapElevationRetriever
 contract Etheria 
 {
 	event TileChanged(uint8 col, uint8 row);//, address owner, string name, string status, uint lastfarm, address[] offerers, uint[] offers, int8[5][] blocks);
-//	event BlocksChanged(uint8 col, uint8 row, int8[5][] blocks); //
-//	event OwnerChanged(uint8 col, uint8 row, address newowner); //
-//	event OffersChanged(uint8 col, uint8 row, address[] offerers, uint[] offers);
-//	event NameChanged(uint8 col, uint8 row, string name); //
-//	event StatusChanged(uint8 col, uint8 row, string status); //
 	
     uint8 mapsize = 33;
     Tile[33][33] tiles;
@@ -391,24 +387,6 @@ contract Etheria
     	}
     	
     }
-    
-//    function removeOffer(uint8 col, uint8 row, uint8 i) private // index 0-10, can't be odd
-//    {
-//    	Tile tile = tiles[col][row]; // private method. No need to check col,row validity, msg.sender or index validity
-//        tile.offerers[i].send(tile.offers[i]); // return the money
-//    			
-//    	// delete user and offer and reshape the array
-//    	delete tile.offerers[i];   // zero out user
-//    	delete tile.offers[i];   // zero out offer
-//    	for(uint8 j = i+1; j < tile.offerers.length; j++) // close the arrays after the gap
-//    	{
-//    	    tile.offerers[j-1] = tile.offerers[j];
-//    	    tile.offers[j-1] = tile.offers[j];
-//    	}
-//    	tile.offerers.length--;
-//    	tile.offers.length--;
-//    	return;
-//    }
     
     // thought: What abt a deletion and offer at the same time?
     function acceptOffer(uint8 col, uint8 row, uint8 i, uint amt) // accepts the offer at index (1-10)
