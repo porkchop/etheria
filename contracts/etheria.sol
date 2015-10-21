@@ -53,8 +53,8 @@ contract Etheria
     
     function Etheria() {
     	creator = msg.sender;
-    	bds = BlockDefStorage(0x782bdf7015b71b64f6750796dd087fde32fd6fdc); 
-    	mer = MapElevationRetriever(0x68549d7dbb7a956f955ec1263f55494f05972a6b);
+    	bds = BlockDefStorage(0x4d7b3b23cc46a0deb992259d39ec6ddf5b4fa7d8); //0x782bdf7015b71b64f6750796dd087fde32fd6fdc); 
+    	mer = MapElevationRetriever(0x7b9e09c8769133e098783fe0b6b7afd705717ab2);//0x68549d7dbb7a956f955ec1263f55494f05972a6b);
     }
     
     function getOwner(uint8 col, uint8 row) public constant returns(address)
@@ -630,12 +630,11 @@ contract Etheria
    Standard lock-kill methods 
    **********/
    bool locked;
-   function lock()
+   function setLocked()
    {
-	   if (msg.sender == creator)
-		   locked = true;
+	   locked = true;
    }
-   function isLocked() public constant returns (bool)
+   function getLocked() public constant returns (bool)
    {
 	   return locked;
    }

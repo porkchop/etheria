@@ -1,12 +1,17 @@
 contract BlockDefStorage
 {
-	bool locked;
 	
     Block[32] blocks;
     struct Block
     {
     	int8[24] occupies; // [x0,y0,z0,x1,y1,z1...,x7,y7,z7] 
     	int8[48] attachesto; // [x0,y0,z0,x1,y1,z1...,x15,y15,z15] // first one that is 0,0,0 is the end
+    }
+    
+    address creator;
+    function BlockDefStorage()
+    {
+    	creator = msg.sender;
     }
     
     function getOccupies(uint8 which) public constant returns (int8[24])
@@ -18,17 +23,7 @@ contract BlockDefStorage
     {
     	return blocks[which].attachesto;
     }
-    
-    function getLocked() public constant returns (bool)
-    {
-    	return locked;
-    }
-    
-    function setLocked() 
-    {
-    	locked = true; // once set, there is no way to undo this, which prevents reinitialization of Occupies and Attachesto
-    }
-    
+
     function initOccupies(uint8 which, int8[3][8] occupies) public 
     {
     	if(locked) // lockout
@@ -57,6 +52,24 @@ contract BlockDefStorage
     			counter++;
         	}
     	}	
+    }
+    
+    /**********
+    Standard lock-kill methods 
+    **********/
+    bool locked;
+    function setLocked()
+    {
+ 	   locked = true;
+    }
+    function getLocked() public constant returns (bool)
+    {
+ 	   return locked;
+    }
+    function kill()
+    { 
+        if (!locked && msg.sender == creator)
+            suicide(creator);  // kills this contract and sends remaining funds back to creator
     }
 }
 
