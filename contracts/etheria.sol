@@ -127,6 +127,7 @@ contract Etheria
     		return;
     	}
     	tile.status = _s;
+    	creator.send(msg.value);
     	TileChanged(col,row);
     	whathappened = 44;
     	return;
@@ -162,11 +163,27 @@ contract Etheria
         }
         if((block.number - tile.lastfarm) < 2500) // ~12 hours of blocks
         {
-        	whathappened = 32;
-        	return;
+        	if(msg.value == 0)
+        	{
+        		whathappened = 32;
+        		return;
+        	}	
+        	else if(msg.value != 1000000000000000000)
+        	{	
+        		msg.sender.send(msg.value); // return their money
+        		whathappened = 34;
+        		return;
+        	}
+        	else // they paid 1 ETH
+        	{
+        		creator.send(msg.value);
+        	}	
+        	// If they haven't waited long enough, but they've paid 1 eth, let them farm again.
         }
+        
+        // by this point, they've either waited 2500 blocks or paid 1 ETH
         bytes32 lastblockhash = block.blockhash(block.number - 1);
-    	for(uint8 i = 0; i < 10; i++)
+    	for(uint8 i = 0; i < 20; i++)
     	{
             tile.blocks.length+=1;
             if(tile.blocks.length == 1) // The VERY FIRST block, ever for this tile
