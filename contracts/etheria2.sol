@@ -13,18 +13,22 @@ transactionHash:
 
 */
 
-contract BlockDefStorage 
+contract EtheriaHelper 
 {
-	function getOccupies(uint8 which) public returns (int8[24])
-	{}
-	function getAttachesto(uint8 which) public returns (int8[48])
-    {}
-}
-
-contract MapElevationRetriever 
-{
-	function getElevation(uint8 col, uint8 row) public constant returns (uint8)
-	{}
+//	 function getElevations() public constant returns (uint8[1089])
+//	 {}
+	 function getElevation(uint8 col, uint8 row) public constant returns (uint8)
+	 {}
+	 function getOccupies(uint8 which) public constant returns (int8[24])
+	 {}
+	 function getAttachesto(uint8 which) public constant returns (int8[48])
+	 {}
+	 function getRandomLandTile() public constant returns (uint8[2]) //TODO make private
+	 {}
+	 function blockHexCoordsValid(int8 x, int8 y) public constant returns (bool)
+	 {}
+	 function getUint8FromByte32(bytes32 _b32, uint8 byteindex) public constant returns(uint8) 
+	 {}
 }
 
 contract Etheria 
@@ -48,13 +52,11 @@ contract Etheria
     	int8[3][] occupado; // the only one not reported in the //TileChanged event
     }
     
-    BlockDefStorage bds;
-    MapElevationRetriever mer;
+    EtheriaHelper eh;
     
     function Etheria() {
     	creator = msg.sender;
-    	bds = BlockDefStorage(0x782bdf7015b71b64f6750796dd087fde32fd6fdc); 
-    	mer = MapElevationRetriever(0x68549d7dbb7a956f955ec1263f55494f05972a6b);
+    	eh = EtheriaHelper(0x106219295e9120ef793101998d96be5792df3f6c);//0x782bdf7015b71b64f6750796dd087fde32fd6fdc); 
     }
     
     function getOwner(uint8 col, uint8 row) public constant returns(address)
@@ -196,7 +198,7 @@ contract Etheria
             if(tile.blocks.length == 1) // The VERY FIRST block, ever for this tile
             	tile.blocks[tile.blocks.length - 1][0] = 0; // make it a column for easy testing and tutorial
             else
-            	tile.blocks[tile.blocks.length - 1][0] = int8(getUint8FromByte32(lastblockhash,i) % 32); // which, guaranteed 0-31
+            	tile.blocks[tile.blocks.length - 1][0] = int8(eh.getUint8FromByte32(lastblockhash,i) % 32); // which, guaranteed 0-31
     	    tile.blocks[tile.blocks.length - 1][1] = 0; // x
     	    tile.blocks[tile.blocks.length - 1][2] = 0; // y
     	    tile.blocks[tile.blocks.length - 1][3] = -1; // z
@@ -230,8 +232,8 @@ contract Etheria
         
         _block[0] = tile.blocks[index][0]; // can't change the which, so set it to whatever it already was
 
-        int8[24] memory didoccupy = bds.getOccupies(uint8(_block[0]));
-        int8[24] memory wouldoccupy = bds.getOccupies(uint8(_block[0]));
+        int8[24] memory didoccupy = eh.getOccupies(uint8(_block[0]));
+        int8[24] memory wouldoccupy = eh.getOccupies(uint8(_block[0]));
         
         for(uint8 b = 0; b < 24; b+=3) // always 8 hexes, calculate the didoccupy
  		{
@@ -284,6 +286,74 @@ contract Etheria
      	TileChanged(col,row);
     	return;
     }
+    
+ // SEVERAL CHECKS TO BE PERFORMED
+    // 1. DID THE OWNER SEND THIS MESSAGE?		(SEE editBlock)
+    // 2. IS THE Z LOCATION OF THE BLOCK BELOW ZERO? BLOCKS CANNOT BE HIDDEN AFTER SHOWING	   (SEE editBlock)
+    // 3. DO ANY OF THE PROPOSED HEXES FALL OUTSIDE OF THE TILE? 
+    // 4. DO ANY OF THE PROPOSED HEXES CONFLICT WITH ENTRIES IN OCCUPADO? 
+    // 5. DO ANY OF THE BLOCKS TOUCH ANOTHER?
+    // 6. NONE OF THE OCCUPY BLOCKS TOUCHED THE GROUND. BUT MAYBE THEY TOUCH ANOTHER BLOCK?
+    
+    function isValidLocation(uint8 col, uint8 row, int8[5] _block, int8[24] wouldoccupy) private constant returns (bool)
+    {
+    	bool touches;
+    	Tile tile = tiles[col][row]; // since this is a private method, we don't need to check col,row validity
+    	
+        for(uint8 b = 0; b < 24; b+=3) // always 8 hexes, calculate the wouldoccupy and the didoccupy
+       	{
+       		if(!eh.blockHexCoordsValid(wouldoccupy[b], wouldoccupy[b+1])) // 3. DO ANY OF THE PROPOSED HEXES FALL OUTSIDE OF THE TILE? 
+      		{
+       			whathappened = 10;
+      			return false;
+      		}
+       		for(uint o = 0; o < tile.occupado.length; o++)  // 4. DO ANY OF THE PROPOSED HEXES CONFLICT WITH ENTRIES IN OCCUPADO? 
+          	{
+      			if(wouldoccupy[b] == tile.occupado[o][0] && wouldoccupy[b+1] == tile.occupado[o][1] && wouldoccupy[b+2] == tile.occupado[o][2]) // do the x,y,z entries of each match?
+      			{
+      				whathappened = 11;
+      				return false; // this hex conflicts. The proposed block does not avoid overlap. Return false immediately.
+      			}
+          	}
+      		if(touches == false && wouldoccupy[b+2] == 0)  // 5. DO ANY OF THE BLOCKS TOUCH ANOTHER? (GROUND ONLY FOR NOW)
+      		{
+      			touches = true; // once true, always true til the end of this method. We must keep looping to check all the hexes for conflicts and tile boundaries, though, so we can't return true here.
+      		}	
+       	}
+        
+        // now if we're out of the loop and here, there were no conflicts and the block was found to be in the tile boundary.
+        // touches may be true or false, so we need to check 
+          
+        if(touches == false)  // 6. NONE OF THE OCCUPY BLOCKS TOUCHED THE GROUND. BUT MAYBE THEY TOUCH ANOTHER BLOCK?
+  		{
+          	int8[48] memory attachesto = eh.getAttachesto(uint8(_block[0]));
+          	for(uint8 a = 0; a < 48 && !touches; a+=3) // always 8 hexes, calculate the wouldoccupy and the didoccupy
+          	{
+          		if(attachesto[a] == 0 && attachesto[a+1] == 0 && attachesto[a+2] == 0) // there are no more attachestos available, break (0,0,0 signifies end)
+          			break;
+          		//attachesto[a] = attachesto[a]+_block[1];
+          		attachesto[a+1] = attachesto[a+1]+_block[2];
+           		if(attachesto[1] % 2 != 0 && attachesto[a+1] % 2 == 0) // (for attachesto, anchory is the same as for occupies, but the z is different. Nothing to worry about)
+           			attachesto[a] = attachesto[a]+1;  			       // then offset x by +1
+           		//attachesto[a+2] = attachesto[a+2]+_block[3];
+           		for(o = 0; o < tile.occupado.length && !touches; o++)
+           		{
+           			if((attachesto[a]+_block[1]) == tile.occupado[o][0] && attachesto[a+1] == tile.occupado[o][1] && (attachesto[a+2]+_block[3]) == tile.occupado[o][2]) // a valid attachesto found in occupado?
+           			{
+           				whathappened = 12;
+           				return true; // in bounds, didn't conflict and now touches is true. All good. Return.
+           			}
+           		}
+          	}
+          	whathappened = 13;
+          	return false; 
+  		}
+        else // touches was true by virtue of a z = 0 above (touching the ground). Return true;
+        {
+        	whathappened = 14;
+        	return true;
+        }	
+    }  
        
     function getBlocks(uint8 col, uint8 row) public constant returns (int8[5][])
     {
@@ -321,7 +391,7 @@ contract Etheria
     	Tile tile = tiles[col][row];
     	if(tile.owner == address(0x0000000000000000000000000000000000000000))			// if UNOWNED
     	{	  
-    		if(msg.value != 1000000000000000000 || mer.getElevation(col,row) < 125)	// 1 ETH is the starting value. If not return; // Also, if below sea level, return. 
+    		if(msg.value != 1000000000000000000 || eh.getElevation(col,row) < 125)	// 1 ETH is the starting value. If not return; // Also, if below sea level, return. 
     		{
     			msg.sender.send(msg.value); 	 									// return their money
     			whathappened = 3;
@@ -482,150 +552,6 @@ contract Etheria
      *     \___/  \_/  \___/\_____/\___/  \_/   \_/  
      *                                               
      */
-    
-    // this logic COULD be reduced a little, but the gain is minimal and readability suffers
-    function blockHexCoordsValid(int8 x, int8 y) private constant returns (bool)
-    {
-    	uint8 absx;
-		uint8 absy;
-		if(x < 0)
-			absx = uint8(x*-1);
-		else
-			absx = uint8(x);
-		if(y < 0)
-			absy = uint8(y*-1);
-		else
-			absy = uint8(y);
-    	
-    	if(absy <= 33) // middle rectangle
-    	{
-    		if(y % 2 != 0 ) // odd
-    		{
-    			if(-50 <= x && x <= 49)
-    				return true;
-    		}
-    		else // even
-    		{
-    			if(absx <= 49)
-    				return true;
-    		}	
-    	}	
-    	else
-    	{	
-    		if((y >= 0 && x >= 0) || (y < 0 && x > 0)) // first or 4th quadrants
-    		{
-    			if(y % 2 != 0 ) // odd
-    			{
-    				if (((absx*2) + (absy*3)) <= 198)
-    					return true;
-    			}	
-    			else	// even
-    			{
-    				if ((((absx+1)*2) + ((absy-1)*3)) <= 198)
-    					return true;
-    			}
-    		}
-    		else
-    		{	
-    			if(y % 2 == 0 ) // even
-    			{
-    				if (((absx*2) + (absy*3)) <= 198)
-    					return true;
-    			}	
-    			else	// odd
-    			{
-    				if ((((absx+1)*2) + ((absy-1)*3)) <= 198)
-    					return true;
-    			}
-    		}
-    	}
-    	return false;
-    }
-    
-    // SEVERAL CHECKS TO BE PERFORMED
-    // 1. DID THE OWNER SEND THIS MESSAGE?		(SEE editBlock)
-    // 2. IS THE Z LOCATION OF THE BLOCK BELOW ZERO? BLOCKS CANNOT BE HIDDEN AFTER SHOWING	   (SEE editBlock)
-    // 3. DO ANY OF THE PROPOSED HEXES FALL OUTSIDE OF THE TILE? 
-    // 4. DO ANY OF THE PROPOSED HEXES CONFLICT WITH ENTRIES IN OCCUPADO? 
-    // 5. DO ANY OF THE BLOCKS TOUCH ANOTHER?
-    // 6. NONE OF THE OCCUPY BLOCKS TOUCHED THE GROUND. BUT MAYBE THEY TOUCH ANOTHER BLOCK?
-    
-    function isValidLocation(uint8 col, uint8 row, int8[5] _block, int8[24] wouldoccupy) private constant returns (bool)
-    {
-    	bool touches;
-    	Tile tile = tiles[col][row]; // since this is a private method, we don't need to check col,row validity
-    	
-        for(uint8 b = 0; b < 24; b+=3) // always 8 hexes, calculate the wouldoccupy and the didoccupy
-       	{
-       		if(!blockHexCoordsValid(wouldoccupy[b], wouldoccupy[b+1])) // 3. DO ANY OF THE PROPOSED HEXES FALL OUTSIDE OF THE TILE? 
-      		{
-       			whathappened = 10;
-      			return false;
-      		}
-       		for(uint o = 0; o < tile.occupado.length; o++)  // 4. DO ANY OF THE PROPOSED HEXES CONFLICT WITH ENTRIES IN OCCUPADO? 
-          	{
-      			if(wouldoccupy[b] == tile.occupado[o][0] && wouldoccupy[b+1] == tile.occupado[o][1] && wouldoccupy[b+2] == tile.occupado[o][2]) // do the x,y,z entries of each match?
-      			{
-      				whathappened = 11;
-      				return false; // this hex conflicts. The proposed block does not avoid overlap. Return false immediately.
-      			}
-          	}
-      		if(touches == false && wouldoccupy[b+2] == 0)  // 5. DO ANY OF THE BLOCKS TOUCH ANOTHER? (GROUND ONLY FOR NOW)
-      		{
-      			touches = true; // once true, always true til the end of this method. We must keep looping to check all the hexes for conflicts and tile boundaries, though, so we can't return true here.
-      		}	
-       	}
-        
-        // now if we're out of the loop and here, there were no conflicts and the block was found to be in the tile boundary.
-        // touches may be true or false, so we need to check 
-          
-        if(touches == false)  // 6. NONE OF THE OCCUPY BLOCKS TOUCHED THE GROUND. BUT MAYBE THEY TOUCH ANOTHER BLOCK?
-  		{
-          	int8[48] memory attachesto = bds.getAttachesto(uint8(_block[0]));
-          	for(uint8 a = 0; a < 48 && !touches; a+=3) // always 8 hexes, calculate the wouldoccupy and the didoccupy
-          	{
-          		if(attachesto[a] == 0 && attachesto[a+1] == 0 && attachesto[a+2] == 0) // there are no more attachestos available, break (0,0,0 signifies end)
-          			break;
-          		//attachesto[a] = attachesto[a]+_block[1];
-          		attachesto[a+1] = attachesto[a+1]+_block[2];
-           		if(attachesto[1] % 2 != 0 && attachesto[a+1] % 2 == 0) // (for attachesto, anchory is the same as for occupies, but the z is different. Nothing to worry about)
-           			attachesto[a] = attachesto[a]+1;  			       // then offset x by +1
-           		//attachesto[a+2] = attachesto[a+2]+_block[3];
-           		for(o = 0; o < tile.occupado.length && !touches; o++)
-           		{
-           			if((attachesto[a]+_block[1]) == tile.occupado[o][0] && attachesto[a+1] == tile.occupado[o][1] && (attachesto[a+2]+_block[3]) == tile.occupado[o][2]) // a valid attachesto found in occupado?
-           			{
-           				whathappened = 12;
-           				return true; // in bounds, didn't conflict and now touches is true. All good. Return.
-           			}
-           		}
-          	}
-          	whathappened = 13;
-          	return false; 
-  		}
-        else // touches was true by virtue of a z = 0 above (touching the ground). Return true;
-        {
-        	whathappened = 14;
-        	return true;
-        }	
-    }  
-
-    // This function is handy for getting random numbers from 0-255 without getting a new hash every time. 
-    // With one bytes32, there are 32 of these available, depending on the index
-    function getUint8FromByte32(bytes32 _b32, uint8 byteindex) public constant returns(uint8) {
-    	uint numdigits = 64;
-    	uint base = 16;
-    	uint digitsperbyte = 2;
-    	uint buint = uint(_b32);
-    	//uint upperpowervar = 16 ** (numdigits - (byteindex*2)); 		// @i=0 upperpowervar=16**64 (SEE EXCEPTION BELOW), @i=1 upperpowervar=16**62, @i upperpowervar=16**60
-    	uint lowerpowervar = base ** (numdigits - digitsperbyte - (byteindex*digitsperbyte));		// @i=0 upperpowervar=16**62, @i=1 upperpowervar=16**60, @i upperpowervar=16**58
-    	uint postheadchop;
-    	if(byteindex == 0)
-    		postheadchop = buint; 										//for byteindex 0, buint is just the input number. 16^64 is out of uint range, so this exception has to be made.
-    	else
-    		postheadchop = buint % (base ** (numdigits - (byteindex*digitsperbyte))); // @i=0 _b32=a1b2c3d4... postheadchop=a1b2c3d4, @i=1 postheadchop=b2c3d4, @i=2 postheadchop=c3d4
-    	return uint8((postheadchop - (postheadchop % lowerpowervar)) / lowerpowervar);
-    }
     
     uint8 whathappened;
     function getWhatHappened() public constant returns (uint8)
