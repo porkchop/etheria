@@ -24,33 +24,23 @@ contract BlockDefStorage
     	return blocks[which].attachesto;
     }
 
-    function initOccupies(uint8 which, int8[3][8] occupies) public 
+    function initOccupies(uint8 which, int8[24] occupies) public 
     {
     	if(locked) // lockout
     		return;
-    	uint counter = 0;
-    	for(uint8 index = 0; index < 8; index++)
+    	for(uint8 index = 0; index < 24; index++)
     	{
-    		for(uint8 subindex = 0; subindex < 3; subindex++)
-        	{
-    			blocks[which].occupies[counter] = occupies[index][subindex];
-    			counter++;
-        	}
+    		blocks[which].occupies[index] = occupies[index];
     	}	
     }
     
-    function initAttachesto(uint8 which, int8[3][16] attachesto) public
+    function initAttachesto(uint8 which, int8[48] attachesto) public
     {
     	if(locked) // lockout
     		return;
-    	uint counter = 0;
-    	for(uint8 index = 0; index <  16; index++)
+    	for(uint8 index = 0; index <  48; index++)
     	{
-    		for(uint8 subindex = 0; subindex < 3; subindex++)
-        	{
-    			blocks[which].attachesto[counter] = attachesto[index][subindex];
-    			counter++;
-        	}
+    		blocks[which].attachesto[index] = attachesto[index];
     	}	
     }
     
