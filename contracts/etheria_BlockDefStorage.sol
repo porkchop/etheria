@@ -1,7 +1,7 @@
 contract BlockDefStorage
 {
 	
-    Block[32] blocks;
+    Block[18] blocks;
     struct Block
     {
     	int8[24] occupies; // [x0,y0,z0,x1,y1,z1...,x7,y7,z7] 
@@ -73,23 +73,43 @@ contract BlockDefStorage
     }
 }
 
-// Solidity version: 0.1.6-d41f8b7c/.-Emscripten/clang/int linked to libethereum-
+// ETHERIA 1.1
 
-// 6060604052610408806100126000396000f3606060405236156100565760e060020a60003504630878bc51811461005857806310c1952f146100ce5780631256c698146100e05780631bcf57581461013e5780632d49ffcd146101d1578063d7f3b73b146101e9575b005b610247600435610600604051908101604052806030905b600081526020019060019003908161006f5750600190508260208110156100025760408051610600810191829052600392909202600201805460000b8352919260309190839060208601808411610196579050505050505090506101cc565b6100566000805460ff19166001179055565b60408051610100810190915261005690600480359161032490602460086000835b8282101561026157604080516060818101909252908381028601906003908390839080828437820191505050505081526020019060010190610101565b610281600435610300604051908101604052806018905b600081526020019060019003908161015557506001905082602081101561000257604080516103008101918290529260039290920290910190601890826000855b825461010083900a900460000b815260206001928301818104948501949093039092029101808411610196579050505050505090505b919050565b60005460ff1660408051918252519081900360200190f35b60408051610200810190915261005690600480359161062490602460106000835b8282101561029b5760408051606081810190925290838102860190600390839083908082843782019150505050508152602001906001019061020a565b60405180826106008083818460006004609ff15093505050f35b5092945050505050600080548190819060ff16156102b8575b5050505050565b604051808261030080838184600060046057f15093505050f35b5092945050505050600080548190819060ff161561035e5761027a565b60009250600091505b60088260ff16101561027a575060005b60038160ff16101561035257838260088110156100025760200201518160038110156100025790906020020151600160005086602081101561000257600302018460188110156100025760208082049092019190066101000a81548160ff021916908360f860020a90810204021790555082806001019350506001016102d1565b600191909101906102c1565b60009250600091505b60108260ff16101561027a575060005b60038160ff1610156103fc5783826010811015610002576020020151816003811015610002579090602002015160016000508660208110156100025760030260020190508460308110156100025760208082049092019190066101000a81548160ff021916908360f860020a9081020402179055508280600101935050600101610377565b6001919091019061036756
 
-// [{"constant":true,"inputs":[{"name":"which","type":"uint8"}],"name":"getAttachesto","outputs":[{"name":"","type":"int8[48]"}],"type":"function"},{"constant":false,"inputs":[],"name":"setLocked","outputs":[],"type":"function"},{"constant":false,"inputs":[{"name":"which","type":"uint8"},{"name":"occupies","type":"int8[3][8]"}],"name":"initOccupies","outputs":[],"type":"function"},{"constant":true,"inputs":[{"name":"which","type":"uint8"}],"name":"getOccupies","outputs":[{"name":"","type":"int8[24]"}],"type":"function"},{"constant":true,"inputs":[],"name":"getLocked","outputs":[{"name":"","type":"bool"}],"type":"function"},{"constant":false,"inputs":[{"name":"which","type":"uint8"},{"name":"attachesto","type":"int8[3][16]"}],"name":"initAttachesto","outputs":[],"type":"function"}]
-
-// var blockdefstorageContract = web3.eth.contract([{"constant":true,"inputs":[{"name":"which","type":"uint8"}],"name":"getAttachesto","outputs":[{"name":"","type":"int8[48]"}],"type":"function"},{"constant":false,"inputs":[],"name":"setLocked","outputs":[],"type":"function"},{"constant":false,"inputs":[{"name":"which","type":"uint8"},{"name":"occupies","type":"int8[3][8]"}],"name":"initOccupies","outputs":[],"type":"function"},{"constant":true,"inputs":[{"name":"which","type":"uint8"}],"name":"getOccupies","outputs":[{"name":"","type":"int8[24]"}],"type":"function"},{"constant":true,"inputs":[],"name":"getLocked","outputs":[{"name":"","type":"bool"}],"type":"function"},{"constant":false,"inputs":[{"name":"which","type":"uint8"},{"name":"attachesto","type":"int8[3][16]"}],"name":"initAttachesto","outputs":[],"type":"function"}]);
-// var blockdefstorage = blockdefstorageContract.new(
-//		   {
-//		     from: web3.eth.accounts[0], 
-//		     data: '6060604052610408806100126000396000f3606060405236156100565760e060020a60003504630878bc51811461005857806310c1952f146100ce5780631256c698146100e05780631bcf57581461013e5780632d49ffcd146101d1578063d7f3b73b146101e9575b005b610247600435610600604051908101604052806030905b600081526020019060019003908161006f5750600190508260208110156100025760408051610600810191829052600392909202600201805460000b8352919260309190839060208601808411610196579050505050505090506101cc565b6100566000805460ff19166001179055565b60408051610100810190915261005690600480359161032490602460086000835b8282101561026157604080516060818101909252908381028601906003908390839080828437820191505050505081526020019060010190610101565b610281600435610300604051908101604052806018905b600081526020019060019003908161015557506001905082602081101561000257604080516103008101918290529260039290920290910190601890826000855b825461010083900a900460000b815260206001928301818104948501949093039092029101808411610196579050505050505090505b919050565b60005460ff1660408051918252519081900360200190f35b60408051610200810190915261005690600480359161062490602460106000835b8282101561029b5760408051606081810190925290838102860190600390839083908082843782019150505050508152602001906001019061020a565b60405180826106008083818460006004609ff15093505050f35b5092945050505050600080548190819060ff16156102b8575b5050505050565b604051808261030080838184600060046057f15093505050f35b5092945050505050600080548190819060ff161561035e5761027a565b60009250600091505b60088260ff16101561027a575060005b60038160ff16101561035257838260088110156100025760200201518160038110156100025790906020020151600160005086602081101561000257600302018460188110156100025760208082049092019190066101000a81548160ff021916908360f860020a90810204021790555082806001019350506001016102d1565b600191909101906102c1565b60009250600091505b60108260ff16101561027a575060005b60038160ff1610156103fc5783826010811015610002576020020151816003811015610002579090602002015160016000508660208110156100025760030260020190508460308110156100025760208082049092019190066101000a81548160ff021916908360f860020a9081020402179055508280600101935050600101610377565b6001919091019061036756', 
-//		     gas: 3000000
-//		   }, function(e, contract){
-//		    if (typeof contract.address != 'undefined') {
-//		         console.log(e, contract);
-//		         console.log('Contract mined! address: ' + contract.address + ' transactionHash: ' + contract.transactionHash);
-//		    }
-//		 })
-
-// Contract mined! address: 0x782bdf7015b71b64f6750796dd087fde32fd6fdc transactionHash: 0x018ca5a3b948df4013b8c5552d281e4895d5ffefc1d244b2769ed12aea720f4e
+//blockdefstorage.initOccupies.sendTransaction(0, [0,0,0,0,0,1,0,0,2,0,0,3,0,0,4,0,0,5,0,0,6,0,0,7],{from:eth.coinbase, gas:500000});
+//blockdefstorage.initOccupies.sendTransaction(1, [0,0,0,1,0,0,2,0,0,3,0,0,4,0,0,5,0,0,6,0,0,7,0,0],{from:eth.coinbase, gas:500000});
+//blockdefstorage.initOccupies.sendTransaction(2, [0,0,0,1,0,0,1,1,0,2,1,0,3,2,0,4,2,0,4,3,0,5,3,0],{from:eth.coinbase, gas:500000});
+//blockdefstorage.initOccupies.sendTransaction(3, [0,0,0,-1,0,0,-2,1,0,-3,1,0,-3,2,0,-4,2,0,-5,3,0,-6,3,0],{from:eth.coinbase, gas:500000});
+//blockdefstorage.initOccupies.sendTransaction(4, [0,0,0,1,0,0,0,0,1,1,0,1,0,0,2,1,0,2,0,0,3,1,0,3],{from:eth.coinbase, gas:500000});
+//blockdefstorage.initOccupies.sendTransaction(5, [0,0,0,0,1,0,0,0,1,0,1,1,0,0,2,0,1,2,0,0,3,0,1,3],{from:eth.coinbase, gas:500000});
+//blockdefstorage.initOccupies.sendTransaction(6, [0,0,0,-1,1,0,0,0,1,-1,1,1,0,0,2,-1,1,2,0,0,3,-1,1,3],{from:eth.coinbase, gas:500000});
+//blockdefstorage.initOccupies.sendTransaction(7, [0,0,0,1,0,0,2,0,0,3,0,0,0,0,1,1,0,1,2,0,1,3,0,1],{from:eth.coinbase, gas:500000});
+//blockdefstorage.initOccupies.sendTransaction(8, [0,0,0,1,0,0,1,1,0,2,1,0,0,0,1,1,0,1,1,1,1,2,1,1],{from:eth.coinbase, gas:500000});
+//blockdefstorage.initOccupies.sendTransaction(9, [0,0,0,-1,0,0,-2,1,0,-3,1,0,0,0,1,-1,0,1,-2,1,1,-3,1,1],{from:eth.coinbase, gas:500000});
+//blockdefstorage.initOccupies.sendTransaction(10, [0,0,0,0,1,0,0,2,0,0,3,0,0,4,0,0,5,0,0,6,0,0,7,0],{from:eth.coinbase, gas:500000});
+//blockdefstorage.initOccupies.sendTransaction(11, [0,0,0,-1,1,0,0,2,0,-1,3,0,0,4,0,-1,5,0,0,6,0,-1,7,0],{from:eth.coinbase, gas:500000});
+//blockdefstorage.initOccupies.sendTransaction(12, [0,0,0,0,1,0,0,2,0,0,3,0,0,0,1,0,1,1,0,2,1,0,3,1],{from:eth.coinbase, gas:500000});
+//blockdefstorage.initOccupies.sendTransaction(13, [0,0,0,-1,1,0,0,2,0,-1,3,0,0,0,1,-1,1,1,0,2,1,-1,3,1],{from:eth.coinbase, gas:500000});
+//blockdefstorage.initOccupies.sendTransaction(14, [0,0,0,1,0,0,1,0,1,2,0,1,2,0,2,3,0,2,3,0,3,4,0,3],{from:eth.coinbase, gas:500000});
+//blockdefstorage.initOccupies.sendTransaction(15, [0,0,0,-1,0,0,-1,0,1,-2,0,1,-2,0,2,-3,0,2,-3,0,3,-4,0,3],{from:eth.coinbase, gas:500000});
+//blockdefstorage.initOccupies.sendTransaction(16, [0,0,0,0,-1,0,0,-1,1,0,-2,1,0,-2,2,0,-3,2,0,-3,3,0,-4,3],{from:eth.coinbase, gas:500000});
+//blockdefstorage.initOccupies.sendTransaction(17, [0,0,0,0,1,0,0,1,1,0,2,1,0,2,2,0,3,2,0,3,3,0,4,3],{from:eth.coinbase, gas:500000});
+//
+//blockdefstorage.initAttachesto.sendTransaction(0, [0,0,-1,0,0,8,0,0,0,0,0,0,0,0,0,0],{from:eth.coinbase, gas:500000});
+//blockdefstorage.initAttachesto.sendTransaction(1, [0,0,-1,1,0,-1,2,0,-1,3,0,-1,4,0,-1,5],{from:eth.coinbase, gas:500000});
+//blockdefstorage.initAttachesto.sendTransaction(2, [0,0,-1,1,0,-1,1,1,-1,2,1,-1,3,2,-1,4],{from:eth.coinbase, gas:500000});
+//blockdefstorage.initAttachesto.sendTransaction(3, [0,0,-1,-1,0,-1,-2,1,-1,-3,1,-1,-3,2,-1,-4],{from:eth.coinbase, gas:500000});
+//blockdefstorage.initAttachesto.sendTransaction(4, [0,0,-1,1,0,-1,0,0,4,1,0,4,0,0,0,0],{from:eth.coinbase, gas:500000});
+//blockdefstorage.initAttachesto.sendTransaction(5, [0,0,-1,0,1,-1,0,0,4,0,1,4,0,0,0,0],{from:eth.coinbase, gas:500000});
+//blockdefstorage.initAttachesto.sendTransaction(6, [0,0,-1,-1,1,-1,0,0,4,-1,1,4,0,0,0,0],{from:eth.coinbase, gas:500000});
+//blockdefstorage.initAttachesto.sendTransaction(7, [0,0,-1,1,0,-1,2,0,-1,3,0,-1,0,0,2,1],{from:eth.coinbase, gas:500000});
+//blockdefstorage.initAttachesto.sendTransaction(8, [0,0,-1,1,0,-1,1,1,-1,2,1,-1,0,0,2,1],{from:eth.coinbase, gas:500000});
+//blockdefstorage.initAttachesto.sendTransaction(9, [0,0,-1,-1,0,-1,-2,1,-1,-3,1,-1,0,0,2,-1],{from:eth.coinbase, gas:500000});
+//blockdefstorage.initAttachesto.sendTransaction(10, [0,0,-1,0,1,-1,0,2,-1,0,3,-1,0,4,-1,0],{from:eth.coinbase, gas:500000});
+//blockdefstorage.initAttachesto.sendTransaction(11, [0,0,-1,-1,1,-1,0,2,-1,-1,3,-1,0,4,-1,-1],{from:eth.coinbase, gas:500000});
+//blockdefstorage.initAttachesto.sendTransaction(12, [0,0,-1,0,1,-1,0,2,-1,0,3,-1,0,0,2,0],{from:eth.coinbase, gas:500000});
+//blockdefstorage.initAttachesto.sendTransaction(13, [0,0,-1,-1,1,-1,0,2,-1,-1,3,-1,0,0,2,-1],{from:eth.coinbase, gas:500000});
+//blockdefstorage.initAttachesto.sendTransaction(14, [0,0,-1,1,0,-1,2,0,0,3,0,1,4,0,2,0],{from:eth.coinbase, gas:500000});
+//blockdefstorage.initAttachesto.sendTransaction(15, [0,0,-1,-1,0,-1,-2,0,0,-3,0,1,-4,0,2,0],{from:eth.coinbase, gas:500000});
+//blockdefstorage.initAttachesto.sendTransaction(16, [0,0,-1,0,-1,-1,0,-2,0,0,-3,1,0,-4,2,0],{from:eth.coinbase, gas:500000});
+//blockdefstorage.initAttachesto.sendTransaction(17, [0,0,-1,0,1,-1,0,2,0,0,3,1,0,4,2,0],{from:eth.coinbase, gas:500000});
