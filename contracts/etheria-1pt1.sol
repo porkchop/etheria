@@ -555,9 +555,9 @@ for (i = 0; i < mapsize; i++) {
 
 for (var col = 0; col < (mapsize - 1); col++) {
     for (var row = 0; row < (mapsize - 1); row++) {
-      owners[col][row] = etheria_old.getOwner(col, row);
-      names[col][row] = etheria_old.getName(col,row);
-      statuses[col][row] = etheria_old.getStatus(col,row);
+      owners[col][row] = etheria.getOwner(col, row);
+      names[col][row] = etheria.getName(col,row);
+      statuses[col][row] = etheria.getStatus(col,row);
       if(owners[col][row] != 0x0000000000000000000000000000000000000000)
               console.log(col + "," + row + " " + owners[col][row] + " name=" + names[col][row] + " status=" + statuses[col][row]);
     }
